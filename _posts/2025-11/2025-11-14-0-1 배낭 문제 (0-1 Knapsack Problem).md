@@ -1,0 +1,987 @@
+---
+title: "[알고리즘] 0-1 배낭 문제 (0-1 Knapsack Problem)"
+date: 2025-11-14
+categories: [Algorithm]
+tags: [다이나믹 프로그래밍, 배낭 문제]
+toc: true
+math: true
+image: /assets/posts/2025-11/0-1%20배낭%20문제%20(0-1%20Knapsack%20Problem)/image.png
+---
+
+## 0-1 배낭 문제
+
+배낭 문제(Knapsack Problem)는 조합 최적화의 유명한 문제로 간단하게 말하면, 한 여행가가 가지고 가는 배낭에 담을 수 있는 무게의 최댓값이 정해져 있고, 일정 가치와 무게가 있는 짐들을 배낭에 넣을 때, 가치의 합이 최대가 되도록 짐을 고르는 방법을 찾는 문제이다.
+
+이 중 0-1 배낭 문제는 짐을 쪼갤 수 없는 경우의 배낭 문제를 말한다. 물건의 개수가 적을 때는 완전 탐색을 통해 해결할 수도 있지만 물건의 개수가 많아질 경우 연산량이 기하급수적으로 많아지는데($O(2^N)$) 0-1 배낭 문제의 경우 다이나믹 프로그래밍을 활용하면 효율적으로 해결할 수 있다.
+
+---
+
+## 2차원 배열을 활용한 0-1 배낭 문제
+
+2차원 배열을 활용한 다이나믹 프로그래밍으로 0-1 배낭 문제를 간단하게 해결할 수 있다. 배낭에 담을 수 있는 무게의 최댓값이 $K$ 이고 물건의 개수가 $N$개, 각 물건의 무게와 가치를 $w_i$, $v_i$라고 하자.
+
+2차원 배열의 행($i$)은 $i$번 물건까지 고려했다는 의미이고, 열($j$)는 배낭에 담을 수 있는 무게의 최댓값이 $j$라는 의미이다. 2차원 배열에서 $(i, j)$의 값은 첫 번째 물건부터 $i$번째 물건까지 고려했을 때, 담을 수 있는 무게의 최댓값이 $j$인 경우 가치의 최댓값으로 $(N, K)$를 구하면 원하는 답을 얻을 수 있다.
+
+예를 들어 $N = 4$, $K = 7$, 각 물건의 무게와 가치가 $(6, 13)$, $(4, 8)$, $(3, 6)$, $(5, 12)$ 인 경우 아래와 같은 과정으로 정답을 구할 수 있다.
+
+먼저 초기 2차원 배열(= dp 테이블)의 상태는 아래와 같다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+첫 번째 물건의 무게는 $6$, 가치는 $13$이므로 dp 테이블은 아래와 같이 된다. 첫 번째 물건만 고려했을 때, 배낭에 담을 수 있는 무게의 최댓값이 $6$ 미만일 때는 첫 번째 물건을 담을 수 없고, $6$부터는 첫 번째 물건을 담을 수 있다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+두 번째 물건의 무게는 $4$, 가치는 $8$이다. 두 번째 물건까지 고려했을 때, 배낭의 크기가 $4$미만이라면 두 번째 물건을 담을 수 없다. 이때 각 칸에 대해 이전 행은 담을 수 있는 최대 무게는 동일하면서 고려한 물건의 번호만 하나 적은 상황일 때 가치의 최댓값을 가지고 있다. 현재 담을 수 있는 최대 무게가 $0$ ~ $3$까지는 첫 번째 물건도 못 담았으므로 아래와 같이 된다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">0</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+배낭에 담을 수 있는 무게의 최댓값이 $4$일 경우 이제 두 번째 물건을 담을 수 있다. 이러면 두 번째 물건을 담는 것이 이득인지 안 담는 것이 이득인지 판단해야 한다. 두 번째 물건을 담을 수 있을 때 가치의 최댓값은 첫 번째 물건까지만 고려한 배낭에 여유 공간이 두 번째 물건의 무게만큼 있는 상황에서 두 번째 물건을 담는 경우고, 두 번째 물건을 안 담았을 때 가치의 최댓값은 담을 수 있는 무게의 최댓값은 같으면서 첫 번째 물건까지만 고려한 배낭에서 얻을 수 있다. 둘 중 큰 값이 두 번째 물건을 담느냐 안 담느냐를 결정한다. 현재 첫 번째 물건까지만 고려한 상황 중 배낭의 무게가 $0$인 경우에서 두 번째 물건을 담는게 더 이득이므로 두 번째 물건을 담는다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+배낭에 담을 수 있는 무게의 최댓값이 $5$인 경우도 마찬가지로 두 번째 물건을 담는다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+배낭에 담을 수 있는 무게의 최댓값이 $6$인 경우에는 첫 번째 물건까지만 고려한 상황에서 배낭의 여유 공간이 $4$일 때 두 번째 물건을 담는 것 보다 첫 번째 물건까지만 고려한 상황에서 배낭의 무게의 최댓값이 $6$인 경우 두 번째 물건을 안 담는게 더 이득이므로 두 번째 물건을 담지 않는다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+배낭에 담을 수 있는 무게의 최댓값이 $7$인 경우도 마찬가지로 두 번째 물건을 담지 않는다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#fb923c;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+세 번째 물건도 동일한 원리로 담으면 아래와 같이 된다. 세 번째 물건까지 고려했을 때 배낭에 담을 수 있는 최대 무게가 $7$인 경우 두 번째 물건까지 고려했을 때 배낭의 여유 공간이 $3$인 상황에서 세 번째 물건을 담는게, 두 번째 물건까지만 고려했을 때 배낭의 무게의 최댓값이 $7$인 경우보다 이득이므로 세 번째 물건을 담는다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#fb923c;">13</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">14</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+네 번째 물건도 동일한 원리로 담으면 아래와 같이 된다. 현재 물건을 담을 수 없는 경우 현재 물건 이전까지를 고려했을 때 담을 수 있었는지를 판단해줘야 한다.(이전 물건의 무게가 내림차순으로 주어져서 그렇지 마찬가지다.)
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">col \ row</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+        <tr>
+            <td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">12</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+dp 테이블은 이렇게 완성됐고 이를 통해 $N$개의 물건에 대해 배낭에 담을 수 있는 무게의 최댓값이 $0$ ~ $K$까지 모든 경우에 대해 가치의 최댓값을 구할 수 있다. 현재 물건을 담을 수 있으면 이전 물건까지 고려한 상황 중 여유 공간이 있을 때 담아보는 경우랑 이전 물건까지 고려한 상황에서 담아 보지 않는 것 중 최댓값을 비교하며 갱신하는 것이 핵심이고 이전 물건 때도 그 이전 물건을 통해 구한 값이라 모든 물건에 대한 비교가 된다.
+
+현재 물건의 무게를 $w$, 가치를 $v$라고 했을 때 이를 점화식으로 나타내면 아래와 같다.
+
+$$
+dp[i][j] =
+\begin{cases}
+dp[i-1][j], & j < w \\[6pt]
+\max \big(dp[i-1][j - w] + v,\ dp[i-1][j] \big), & j \ge w
+\end{cases}
+$$
+
+$(dp[i-1][j - w] + v)$ 이게 현재 물건을 담는 경우의 가치이고, $(dp[i-1][j])$ 이게 현재 물건을 담지 않는 경우 가치이다.
+
+2차원 배열을 활용한 0-1 배낭 문제의 해결 과정을 통해 물건의 개수가 $N$, 배낭에 담을 수 있는 무게의 최댓값이 $K$일 때, 시간 복잡도는 $O(NK)$, 공간 복잡도는 $O(NK)$ 이다.
+
+---
+
+## 1차원 배열을 활용한 0-1 배낭 문제
+
+기존 2차원 배열을 활용한 0-1 배낭 문제의 해결 과정을 보면 dp 테이블 갱신에 이전 행의 정보만 필요한 것을 볼 수 있다. 이 경우 임시 배열에 값을 갱신하고 이를 원본에 반영하는 과정을 반복하는 토글링 기법으로 공간 복잡도를 $O(2 * K)$로 줄일 수 있는데 조금 더 우아하게 임시 배열없이 1차원 배열만으로 0-1 배낭 문제를 해결할 수 있다.
+
+핵심은 역순 조회를 통한 dp 배열 갱신으로 정방향으로 갱신을 할 경우 담았던 물건을 또 담는 논리 오류가 발생할 수 있다.
+
+첫 번째 물건은 담은 dp 배열은 아래와 같은 상태로 2차원 배열을 활용한 방식과 아직은 별 차이가 없다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+	</table>
+</div>
+
+이제 두 번째 물건을 담는 경우 아래와 같은 과정으로 갱신이 발생한다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">13</td>
+		</tr>
+	</table>
+</div>
+
+세 번째 물건을 담는 경우 아래와 같은 과정으로 갱신이 발생한다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+네 번째 물건을 담는 경우 아래와 같은 과정으로 갱신이 발생한다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">index</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black; background-color:#fb923c;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">0</td>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black; background-color:#60a5fa;">12</td>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">14</td>
+		</tr>
+	</table>
+</div>
+
+마찬가지로 $N$개의 물건에 대해 배낭에 담을 수 있는 무게의 최댓값이 $0$ ~ $K$까지 모든 경우에 대해 가치의 최댓값을 구할 수 있다. 만약 역순으로 조회하지 않으면 이전에 담는 것으로 갱신한 배낭을 다시 비교에 사용하게 돼서 주의해야 한다.
+
+현재 물건의 무게를 $w$, 가치를 $v$라고 했을 때 1차원 배열을 활용한 0-1 배낭 문제의 점화식은 아래와 같이 된다.
+
+$$
+dp[i]
+=
+\max \big( dp[i - w] + v,\ dp[i] \big)
+$$
+
+1차원 배열을 활용한 0-1 배낭 문제의 해결 과정을 통해 물건의 개수가 $N$, 배낭에 담을 수 있는 무게의 최댓값이 $K$일 때, 시간 복잡도는 $O(NK)$, 공간 복잡도는 $O(K)$ 이다. 실행 시간의 경우도 실제로 담지 못하는 무게에 대한 탐색을 하지 않아도 돼서 약간 더 줄어든다.
+
+---
+
+## Ref
+
+- [wikipedia - 배낭 문제](https://ko.wikipedia.org/wiki/%EB%B0%B0%EB%82%AD_%EB%AC%B8%EC%A0%9C)
+- [백준 12865번 - 평범한 배낭](https://www.acmicpc.net/problem/12865)
+
+---

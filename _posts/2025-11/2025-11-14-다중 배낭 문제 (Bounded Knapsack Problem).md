@@ -1,0 +1,228 @@
+---
+title: "[알고리즘] 다중 배낭 문제 (Bounded Knapsack Problem)"
+date: 2025-11-14
+categories: [Algorithm]
+tags: [다이나믹 프로그래밍, 배낭 문제]
+toc: true
+math: true
+image: /assets/posts/2025-11/다중%20배낭%20문제%20(Bounded%20Knapsack%20Problem)/image.png
+---
+
+## 다중 배낭 문제
+
+[0-1 배낭 문제]({% post_url 2025-11/2025-11-14-0-1 배낭 문제 (0-1 Knapsack Problem) %}) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 다중 배낭 문제는 각 물건이 1개 이상 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다. 이때 각 물건이 무한히 있지는 않다.
+
+다중 배낭 문제는 이를 0-1 배낭 문제로 변형하여 해결할 수 있다.
+
+---
+
+## 단순 변형
+
+가장 간단한 방법은 각 물건 1개마다 0-1 배낭 문제를 적용하는 것이다. 물건의 무게와 가치가 $(6, 13)$인 물건이 2개, $(4, 8)$인 물건이 3개일 경우 총 5개의 물건에 대해 $N = 5$인 0-1 배낭 문제로 해결하는 것이다. 간단한 방법이지만 총 물건의 수가 많을 경우 탐색량이 많다는 단점이 있다.
+
+---
+
+## 이진 분할 (Binary Splitting)
+
+특정 물건이 $K$개 있을 경우 이를 $K$개로 분할해 0-1 배낭 문제를 적용하는 것을 좀 더 효율화한 것으로 보다 적은 그룹으로 분할하여 탐색량을 줄이는 기법이다.
+
+핵심은 모든 자연수를 서로 다른 2의 거듭제곱의 합으로 표현할 수 있다는 것과 등비급수의 합으로 $1 + 2 + 4 + \ldots + 2^{k-1} = 2^k - 1$ 이면서 $$\{1, 2, 4, \ldots, 2^{k-1}\}$$의 부분집합의 합으로 $2^k$보다 작은 모든 자연수를 표현할 수 있다는 것이다. 이를 통해 $K$을 2의 거듭 제곱 그룹과 나머지($r < 2^k$)로 분리할 수 있고 그룹의 수는 $k + 1$개로 훨씬 줄일 수 있다.
+
+이렇게 분리하면 $K = 2^k - 1 + r$이 된다.
+
+이제 $1 \sim 2^k - 1$까지는 2의 거듭 제곱 그룹의 조합으로 얻을 수 있고, 여기에 나머지를 더할 경우 $r \sim 2^k - 1 + r$까지 얻을 수 있다. 이때 $r < 2^k$이며 $2^k - 1 + r = K$이므로 $2^k \sim K$까지 얻을 수 있어 $1 \sim K$사이의 모든 자연수를 2의 거듭 제곱 그룹과 나머지의 조합으로 얻을 수 있다.
+
+예를 들면 22의 경우 $1 + 2 + 4 + 8 + 7$로 나눌 수 있다. 1부터 22까지 $$\{1, 2, 4, 8, 7\}$$의 조합으로 모든 수를 얻을 수 있는 것을 볼 수 있다. 기존 22개로 나눌 것을 5개로 나누어 효율적으로 탐색할 수 있다.
+
+<div>
+	<table style="border-collapse:collapse; width:100%; text-align:center; table-layout:fixed;">
+		<tr>
+            <td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">7</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">1</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">2</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+        <tr>
+			<td style="border:1px solid black;">3</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">4</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">5</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">6</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">7</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">8</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">9</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">10</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">11</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">12</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">13</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">14</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">15</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">16</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">17</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">18</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">19</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">20</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">21</td>
+			<td style="border:1px solid black;">&nbsp;</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+		<tr>
+			<td style="border:1px solid black;">22</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+			<td style="border:1px solid black;">O</td>
+		</tr>
+	</table>
+</div>
+
+위 과정에서 볼 수 있는 이진 분할을 통해 $N = 22$인 0-1 배낭 문제를 $N = 5$인 0-1 배낭 문제로 해결할 수 있다. 물건의 종류의 수가 $N$, 배낭에 담을 수 있는 무게의 최댓값이 $M$, 각 물건의 평균 개수를 $K$일 때 단순 변형의 경우 시간 복잡도가 $O(NMK)$ 정도인데 이진 분할을 적용했을 경우 시간 복잡도가 $O(NMlogK)$ 정도로 감소하게 된다.
+
+---

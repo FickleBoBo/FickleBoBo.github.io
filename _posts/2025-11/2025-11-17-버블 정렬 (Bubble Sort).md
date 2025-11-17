@@ -212,7 +212,7 @@ $N$개의 수 중에서 $N-1$개를 정렬했다. 남은 수는 주어진 수 �
 
 ### 버블 정렬 [Java]
 
-$100,000$개의 임의의 수들에 대한 정렬에서 약 5초정도 소요됐다.(Macbook M3 Air, JDK 21)
+$100,000$개의 임의의 수들에 대한 정렬에서 약 5.5초정도 소요됐다.(Macbook M3 Air, JDK 21)
 
 ```java
 public static void bubbleSort(int[] arr) {
@@ -234,7 +234,7 @@ public static void bubbleSort(int[] arr) {
 
 ### 스왑 체크로 최적화 [Java]
 
-$100,000$개의 임의의 수들에 대한 정렬에서 약 5초정도 소요됐다.(Macbook M3 Air, JDK 21)
+$100,000$개의 임의의 수들에 대한 정렬에서 약 5.4초정도 소요됐다.(Macbook M3 Air, JDK 21)
 
 거의 정렬된 상태로 주어지는게 아니면 오히려 체크 로직의 오버헤드가 큰 것 같다.
 

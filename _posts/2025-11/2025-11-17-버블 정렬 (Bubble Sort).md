@@ -153,13 +153,9 @@ $N$개의 원소에 대한 버블 정렬은 기본적으로 2중 반복문을 �
 다시 처음 두 수부터 다음 정렬은 아래와 같이 이어진다.
 
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo30.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo31.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo32.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo33.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo34.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo35.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo36.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo37.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo38.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo39.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo40.drawio.svg>)
@@ -167,11 +163,8 @@ $N$개의 원소에 대한 버블 정렬은 기본적으로 2중 반복문을 �
 다시 처음 두 수부터 다음 정렬은 아래와 같이 이어진다.
 
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo41.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo42.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo43.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo44.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo45.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo46.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo47.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo48.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo49.drawio.svg>)
@@ -179,25 +172,19 @@ $N$개의 원소에 대한 버블 정렬은 기본적으로 2중 반복문을 �
 다시 처음 두 수부터 다음 정렬은 아래와 같이 이어진다.
 
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo50.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo51.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo52.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo53.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo54.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo55.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo56.drawio.svg>)
 
 다시 처음 두 수부터 다음 정렬은 아래와 같이 이어진다.
 
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo57.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo58.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo59.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo60.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo61.drawio.svg>)
 
 다시 처음 두 수부터 다음 정렬은 아래와 같이 이어진다.
 
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo62.drawio.svg>)
-![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo63.drawio.svg>)
 ![](</assets/posts/2025-11/버블%20정렬%20(Bubble%20Sort)/photo64.drawio.svg>)
 
 $N$개의 수 중에서 $N-1$개를 정렬했다. 남은 수는 주어진 수 중에서 가장 작은 수면서 이미 가장 앞에 위치하게 되므로 버블 정렬을 종료한다. 이렇게 버블 정렬을 통해 주어진 수들을 오름차순으로 정렬하는데 성공했다.

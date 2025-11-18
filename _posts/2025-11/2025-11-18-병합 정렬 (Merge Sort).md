@@ -1,6 +1,6 @@
 ---
 title: "[알고리즘] 병합 정렬 (Merge Sort)"
-date: 2025-11-17
+date: 2025-11-18
 categories: [Algorithm, Sort]
 tags: [정렬, 분할 정복]
 toc: true

@@ -1,0 +1,23 @@
+package dict;
+
+import java.util.List;
+import java.util.Set;
+
+public class EnglishDictionary implements Lexicon {
+
+    private final static Set<String> dictionary = Set.of("apple", "app", "audio", "bird");
+
+    @Override
+    public boolean isValid(String word) {
+        return dictionary.contains(word);
+    }
+
+    @Override
+    public List<String> getSuggestions(String typo) {
+        if (isValid(typo)) return List.of();
+
+        return dictionary.stream()
+                .filter(word -> word.startsWith(String.valueOf(typo.charAt(0))))
+                .toList();
+    }
+}

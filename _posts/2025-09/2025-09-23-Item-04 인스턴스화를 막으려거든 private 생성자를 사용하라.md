@@ -1,7 +1,7 @@
 ---
 title: "[Item-04] 인스턴스화를 막으려거든 private 생성자를 사용하라"
 date: 2025-09-23
-categories: [Book, Effective Java 3/E]
+categories: [Java, Effective Java 3/E]
 tags: [Effective Java 3/E]
 toc: true
 math: true

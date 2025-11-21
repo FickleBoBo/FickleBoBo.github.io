@@ -1,7 +1,7 @@
 ---
 title: "[Item-35] ordinal 메서드 대신 인스턴스 필드를 사용하라"
 date: 2025-10-24
-categories: [Book, Effective Java 3/E]
+categories: [Java, Effective Java 3/E]
 tags: [Effective Java 3/E]
 toc: true
 math: true

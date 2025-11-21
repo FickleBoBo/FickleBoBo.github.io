@@ -1,7 +1,7 @@
 ---
 title: "[Item-09] try-finally보다는 try-with-resources를 사용하라"
 date: 2025-09-26
-categories: [Book, Effective Java 3/E]
+categories: [Java, Effective Java 3/E]
 tags: [Effective Java 3/E]
 toc: true
 math: true

@@ -1,11 +1,11 @@
 ---
 title: "[알고리즘] 무한 배낭 문제 (Unbounded Knapsack Problem)"
 date: 2025-11-15
-categories: [Algorithm]
+categories: [Algorithm, DP]
 tags: [다이나믹 프로그래밍, 배낭 문제]
 toc: true
 math: true
-image: /assets/posts/2025-11/무한%20배낭%20문제%20(Unbounded%20Knapsack%20Problem)/image.png
+image: /assets/posts/2025-11/무한%20배낭%20문제%20(Unbounded%20Knapsack%20Problem)/thumbnail.png
 ---
 
 ## 무한 배낭 문제

@@ -1,7 +1,7 @@
 ---
 title: "[Item-60] 정확한 답이 필요하다면 float와 double은 피하라"
 date: 2025-11-20
-categories: [Book, Effective Java 3/E]
+categories: [Java, Effective Java 3/E]
 tags: [Effective Java 3/E]
 toc: true
 math: true

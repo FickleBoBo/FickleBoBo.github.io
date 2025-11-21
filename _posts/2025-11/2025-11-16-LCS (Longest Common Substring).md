@@ -1,11 +1,11 @@
 ---
 title: "[알고리즘] LCS (Longest Common Substring)"
 date: 2025-11-16
-categories: [Algorithm]
+categories: [Algorithm, DP]
 tags: [다이나믹 프로그래밍, LCS]
 toc: true
 math: true
-image: /assets/posts/2025-11/LCS%20(Longest%20Common%20Substring)/image.png
+image: /assets/posts/2025-11/LCS%20(Longest%20Common%20Substring)/thumbnail.drawio.svg
 ---
 
 ## LCS

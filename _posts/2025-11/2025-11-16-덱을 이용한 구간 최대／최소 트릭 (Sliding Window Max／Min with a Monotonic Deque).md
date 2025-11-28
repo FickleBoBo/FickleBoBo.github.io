@@ -1,11 +1,11 @@
 ---
-title: "[알고리즘] 덱을 이용한 구간 최대/최소 트릭 (Sliding Window Maximum/Minimum with a Monotonic Deque)"
+title: "[알고리즘] 덱을 이용한 구간 최대／최소 트릭 (Sliding Window Max／Min with a Monotonic Deque)"
 date: 2025-11-16
 categories: [Algorithm, Range]
 tags: [슬라이딩 윈도우, 덱, 덱을 이용한 구간 최대/최소 트릭]
 toc: true
 math: true
-image: /assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/thumbnail.drawio.svg
+image: /assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/thumbnail.drawio.svg
 ---
 
 ## 덱을 이용한 구간 최대/최소 트릭
@@ -16,7 +16,7 @@ $N$개의 수 $A_1$, $A_2$, ..., $A_N$이 주어지고 자연수 $L$이 주어�
 
 주어진 수열이 $$\{1, 5, 2, 3, 6, 2, 3, 7, 3, 5, 2, 6\}$$이고 $L$이 $3$이며 모든 $i$에 대한 구간 $A_{i-L+1}$ ~ $A_i$의 최솟값을 구하는 경우 정답은 $$\{1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 2, 2\}$$이 된다. 이는 아래 표를 통해 확인할 수 있다.
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo01.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo01.drawio.svg>)
 
 슬라이딩 윈도우를 활용하면 될 것 같은데 윈도우 내 구간의 최솟값을 알 수 있으면서 윈도우에서 빠져나가는 수를 어떻게 찾을 수 있을까? 단조 덱을 활용하면 이 문제를 깔끔하게 해결할 수 있다.
 
@@ -34,11 +34,11 @@ $N$개의 수 $A_1$, $A_2$, ..., $A_N$이 주어지고 자연수 $L$이 주어�
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo02.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo02.drawio.svg>)
 
 단조 덱 (인덱스 $0$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo03.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo03.drawio.svg>)
 
 $A_2$의 인덱스는 $1$, 값은 $5$이다. 구간은 $A_0$ ~ $A_2$인데 구간을 벗어나는 경우는 무시한다고 하자. 그러면 실제 구간은 $A_1$ ~ $A_2$이 된다.
 
@@ -46,19 +46,19 @@ $A_2$의 인덱스는 $1$, 값은 $5$이다. 구간은 $A_0$ ~ $A_2$인데 구�
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo04.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo04.drawio.svg>)
 
 단조 덱 (인덱스 $0$은 구간을 벗어나지 않음)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo05.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo05.drawio.svg>)
 
 단조 덱 (인덱스 $0$의 값 $1$이 인덱스 $1$의 값 $5$보다 작아서 삭제하지 않음)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo06.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo06.drawio.svg>)
 
 단조 덱 (인덱스 $1$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo07.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo07.drawio.svg>)
 
 $A_3$의 인덱스는 $2$, 값은 $2$이다. 구간은 $A_1$ ~ $A_3$이 된다.
 
@@ -66,23 +66,23 @@ $A_3$의 인덱스는 $2$, 값은 $2$이다. 구간은 $A_1$ ~ $A_3$이 된다.
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo08.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo08.drawio.svg>)
 
 단조 덱 (인덱스 $0$은 구간을 벗어나지 않음)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo09.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo09.drawio.svg>)
 
 단조 덱 (인덱스 $1$의 값 $5$가 인덱스 $2$의 값 $2$보다 크므로 삭제)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo10.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo10.drawio.svg>)
 
 단조 덱 (인덱스 $0$의 값 $1$이 인덱스 $2$의 값 $2$보다 작아서 삭제하지 않음)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo11.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo11.drawio.svg>)
 
 단조 덱 (인덱스 $2$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo12.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo12.drawio.svg>)
 
 $A_4$의 인덱스는 $3$, 값은 $3$이다. 구간은 $A_2$ ~ $A_4$가 된다.
 
@@ -90,29 +90,29 @@ $A_4$의 인덱스는 $3$, 값은 $3$이다. 구간은 $A_2$ ~ $A_4$가 된다.
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo13.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo13.drawio.svg>)
 
 단조 덱 (인덱스 $0$은 구간을 벗어났으므로 삭제)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo14.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo14.drawio.svg>)
 
 단조 덱 (인덱스 $2$의 값 $2$가 인덱스 $3$의 값 $3$보다 작아서 삭제하지 않음)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo15.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo15.drawio.svg>)
 
 단조 덱 (인덱스 $3$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo16.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo16.drawio.svg>)
 
 마찬가지로 $A_5$에 대해서는 아래와 같이 되고 구간은 $A_3$ ~ $A_5$의 최솟값은 $2$가 된다.
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo17.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo17.drawio.svg>)
 
 단조 덱 (인덱스 $4$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo18.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo18.drawio.svg>)
 
 $A_6$의 인덱스는 $5$, 값은 $2$이다. 구간은 $A_4$ ~ $A_6$이 된다.
 
@@ -120,23 +120,23 @@ $A_6$의 인덱스는 $5$, 값은 $2$이다. 구간은 $A_4$ ~ $A_6$이 된다.
 
 수열
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo19.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo19.drawio.svg>)
 
 단조 덱 (인덱스 $2$은 구간을 벗어났으므로 삭제)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo20.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo20.drawio.svg>)
 
 단조 덱 (인덱스 $4$의 값 $6$이 인덱스 $5$의 값 $2$보다 크므로 삭제)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo21.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo21.drawio.svg>)
 
 단조 덱 (인덱스 $3$의 값 $3$이 인덱스 $5$의 값 $2$보다 크므로 삭제)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo22.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo22.drawio.svg>)
 
 단조 덱 (인덱스 $5$ 삽입)
 
-![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Maximum／Minimum%20with%20a%20Monotonic%20Deque)/photo23.drawio.svg>)
+![](</assets/posts/2025-11/덱을%20이용한%20구간%20최대／최소%20트릭%20(Sliding%20Window%20Max／Min%20with%20a%20Monotonic%20Deque)/photo23.drawio.svg>)
 
 이러한 삽입, 삭제, 조회를 반복하면 수열을 한번만 순회하며 각 구간의 최솟값을 모두 구할 수 있다.
 

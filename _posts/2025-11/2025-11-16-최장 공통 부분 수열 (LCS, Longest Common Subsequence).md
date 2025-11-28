@@ -1,11 +1,11 @@
 ---
-title: "[알고리즘] LCS (Longest Common Subsequence)"
+title: "[알고리즘] 최장 공통 부분 수열 (LCS, Longest Common Subsequence)"
 date: 2025-11-16
 categories: [Algorithm, DP]
-tags: [다이나믹 프로그래밍, LCS, 토글링]
+tags: [다이나믹 프로그래밍, LCS, 토글링, 역추적]
 toc: true
 math: true
-image: /assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/thumbnail.drawio.svg
+image: /assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/thumbnail.drawio.svg
 ---
 
 ## LCS
@@ -35,39 +35,39 @@ $$
 
 문자열 $A$가 $ACAYKP$, 문자열 $B$가 $CAPCAK$ 일 때 LCS의 길이를 구하는 과정은 아래와 같다. 두 문자열을 2차원 배열로 표현하면 아래와 같이 문자와 인덱스를 매핑할 수 있다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo01.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo01.drawio.svg>)
 
 $(1, 1)$은 $A$의 접두사 $A$와 $B$의 접두사 $C$의 LCS의 길이로 두 접두사의 끝 문자가 일치하지 않으므로 현재 LCS의 길이는 $0$이다. 이는 $A$의 접두사가 공백이고 $B$의 접두사가 $C$인 상황에서 $A$의 접두사 뒤에 $A$를 붙인 경우 또는 $A$의 접두사가 $A$이고 $B$의 접두사가 공백인 상황에서 $B$의 접두사 뒤에 $C$를 붙인 경우로 볼 수 있다. 현재 끝 문자가 일치하지 않으니 두 경우의 LCS의 길이 중 큰 값이 현재 상태의 LCS의 길이가 된다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo02.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo02.drawio.svg>)
 
 $(1, 2)$는 $A$의 접두사 $A$와 $B$의 접두사 $CA$의 LCS의 길이로 두 접두사의 끝 문자가 일치하므로 현재 LCS의 길이는 $1$이다. 이는 $A$의 접두사가 공백이고 $B$의 접두사가 $C$인 상황에서 두 접두사 뒤에 $A$를 붙인 것으로 볼 수 있다. 공통 부분 문자가 새로 생겼으니 해당 경우의 LCS의 길이 + 1이 현재의 LCS의 길이가 된다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo03.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo03.drawio.svg>)
 
 $(1, 3)$은 $A$의 접두사 $A$와 $B$의 접두사 $CAP$의 LCS의 길이로 두 접두사의 끝 문자가 일치하지 않으므로 현재 LCS의 길이는 $1$이다. 이는 $A$의 접두사가 공백이고 $B$의 접두사가 $CAP$인 상황에서 $A$의 접두사 뒤에 $A$를 붙인 경우 또는 $A$의 접두사가 $A$이고 $B$의 접두사가 $CA$인 상황에서 $B$의 접두사 뒤에 $P$를 붙인 경우로 볼 수 있다. 현재 끝 문자가 일치하지 않으니 두 경우의 LCS의 길이 중 큰 값이 현재 상태의 LCS의 길이가 된다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo04.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo04.drawio.svg>)
 
 $(1, 5)$의 경우도 두 접두사의 끝 문자가 일치한다. $B$의 접두사 중 어떤 $A$도 현재 LCS의 후보가 될 수 있으며 어떤 $A$가 되든 LCS의 길이는 동일하다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo05.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo05.drawio.svg>)
 
 첫 행은 아래와 같이 구성할 수 있다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo06.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo06.drawio.svg>)
 
 $(2, 1)$은 $A$의 접두사 $AC$와 $B$의 접두사 $C$의 LCS의 길이로 두 접두사의 끝 문자가 일치하므로 현재 LCS의 길이는 $1$이다. 이는 $A$의 접두사가 $A$이고 $B$의 접두사가 공백인 상황에서 두 접두사 뒤에 $C$를 붙인 것으로 볼 수 있다. 공통 부분 문자가 새로 생겼으니 해당 경우의 LCS의 길이 + 1이 현재의 LCS의 길이가 된다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo07.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo07.drawio.svg>)
 
 $(2, 4)$은 $A$의 접두사 $AC$와 $B$의 접두사 $CAPC$의 LCS의 길이로 두 접두사의 끝 문자가 일치하므로 현재 LCS의 길이는 $1$이다. 이는 $A$의 접두사가 $A$이고 $B$의 접두사가 $CAP$인 상황에서 두 접두사 뒤에 $C$를 붙인 것으로 볼 수 있다. 공통 부분 문자가 새로 생겼으니 해당 경우의 LCS의 길이 + 1이 현재의 LCS의 길이가 된다. 해당 경우의 LCS의 길이는 왼쪽 윗 칸에 이미 구했다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo08.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo08.drawio.svg>)
 
 이 과정을 반복하면 아래와 같이 dp 테이블을 채울 수 있다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo09.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo09.drawio.svg>)
 
 이를 통해 두 문자열 $A$, $B$의 어떤 접두사에 대해서든지 LCS의 길이를 구할 수 있다. 2차원 배열을 활용한 다이나믹 프로그래밍은 $A$의 길이가 $N$, $B$의 길이가 $M$일 때, 시간 복잡도는 $O(NM)$, 공간 복잡도는 $O(NM)$ 이다. dp 테이블을 갱신할 때 이전 행의 정보만 필요하다는 점에서 토글링을 활용하면 공간 복잡도를 $O(2 \times min(N, M))$까지 줄일 수 있다.
 
@@ -79,7 +79,7 @@ $(2, 4)$은 $A$의 접두사 $AC$와 $B$의 접두사 $CAPC$의 LCS의 길이로
 
 방금 구한 dp 테이블에 대해 $(6, 6)$부터 역추적하여 아래와 같이 실제 LCS를 얻을 수 있다. 여기서 파란 칸이 실제 LCS에 포함되는 칸이고 빨간 칸은 탐색 과정에서 거쳐간 칸이다.
 
-![](</assets/posts/2025-11/LCS%20(Longest%20Common%20Subsequence)/photo10.drawio.svg>)
+![](</assets/posts/2025-11/최장%20공통%20부분%20수열%20(LCS,%20Longest%20Common%20Subsequence)/photo10.drawio.svg>)
 
 역추적을 통한 실제 LCS 구하기는 2차원 배열의 모든 정보가 필요하므로 토글링 기법을 활용했을 때는 실제 LCS를 구할 수 없다.
 

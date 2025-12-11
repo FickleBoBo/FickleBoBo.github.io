@@ -1,0 +1,16 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.2.6">
+  <diagram name="Page-1" id="nAK38uFfENiXGbC2_nUL">
+    <mxGraphModel dx="655" dy="938" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" math="1" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="D0IPf6RII49qkXgGdekG-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=18;" value="$$a^n = a \times a \times a \cdots \times a$$" vertex="1">
+          <mxGeometry height="100" width="400" x="150" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="D0IPf6RII49qkXgGdekG-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=18;" value="$$ a^n = a^{b_0 2^0} \times a^{b_1 2^1} \times \cdots \times a^{b_{\lfloor \log_2 n \rfloor} 2^{\lfloor \log_2 n \rfloor}} $$" vertex="1">
+          <mxGeometry height="100" width="400" x="150" y="250" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

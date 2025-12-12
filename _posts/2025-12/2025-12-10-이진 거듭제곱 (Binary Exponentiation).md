@@ -135,6 +135,7 @@ int binpow(int a, int n) {
 ## 4. Problems
 
 - [백준 1629번 - 곱셈](https://www.acmicpc.net/problem/1629)
+- [백준 10830번 - 행렬 제곱](https://www.acmicpc.net/problem/10830)
 
 ---
 

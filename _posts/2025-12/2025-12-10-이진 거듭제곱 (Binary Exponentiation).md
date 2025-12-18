@@ -1,7 +1,7 @@
 ---
 title: "[알고리즘] 이진 거듭제곱 (Binary Exponentiation)"
 date: 2025-12-10
-categories: [Algorithm]
+categories: [DS & Algo, Algorithm]
 tags: [수학, 분할 정복, 분할 정복을 이용한 거듭제곱]
 toc: true
 math: true

@@ -1,7 +1,7 @@
 ---
 title: "[알고리즘] 에라토스테네스의 체 (Sieve of Eratosthenes)"
 date: 2025-12-17
-categories: [Algorithm]
+categories: [DS & Algo, Algorithm]
 tags: [수학, 정수론, 소수 판정, 에라토스테네스의 체]
 toc: true
 math: true

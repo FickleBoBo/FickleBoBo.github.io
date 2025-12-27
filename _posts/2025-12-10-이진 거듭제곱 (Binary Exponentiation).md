@@ -1,11 +1,12 @@
 ---
-title: "[알고리즘] 이진 거듭제곱 (Binary Exponentiation)"
+title: "[자료구조/알고리즘] 이진 거듭제곱 (Binary Exponentiation)"
+slug: binary-exponentiation
 date: 2025-12-10
-categories: [DS & Algo, Algorithm]
-tags: [수학, 분할 정복, 분할 정복을 이용한 거듭제곱]
+categories: [DSA]
+tags: [Math, Divide and Conquer, Binary Exponentiation]
 toc: true
 math: true
-image: /assets/posts/2025-12/이진%20거듭제곱%20(Binary%20Exponentiation)/thumbnail.drawio.svg
+image: /assets/posts/binary-exponentiation/thumbnail.drawio.svg
 ---
 
 ## 1. 이진 거듭제곱
@@ -136,8 +137,8 @@ int binpow(int a, int n) {
 
 ## 4. Problems
 
-- [백준 1629번 - 곱셈](https://www.acmicpc.net/problem/1629)
-- [백준 10830번 - 행렬 제곱](https://www.acmicpc.net/problem/10830)
+- [BaekJoon 1629번 - 곱셈](https://www.acmicpc.net/problem/1629)
+- [BaekJoon 10830번 - 행렬 제곱](https://www.acmicpc.net/problem/10830)
 
 ---
 

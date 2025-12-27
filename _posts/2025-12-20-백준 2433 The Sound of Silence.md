@@ -1,8 +1,9 @@
 ---
-title: "[백준] 2433번 - The Sound of Silence [Java][C++]"
+title: "[BaekJoon] 2433번 - The Sound of Silence [Java][C++]"
+slug: baekjoon-2433
 date: 2025-12-20
 categories: [PS, BaekJoon]
-tags: [슬라이딩 윈도우, 우선순위 큐, 덱, 덱을 이용한 구간 최댓값 트릭]
+tags: [Sliding Window, Data Structures, Priority Queue, Monotonic Queue]
 toc: true
 math: true
 ---
@@ -13,13 +14,13 @@ math: true
 
 ## 1. 문제 풀이
 
-단조 덱을 활용한 슬라이딩 윈도우와 우선순위 큐 두 가지 방식 모두 적용 가능한 문제로 구간의 최솟값과 최댓값이 모두 필요한데 이를 각각 단조 증가 덱, 단조 감소 덱 또는 최소힙, 최대힙으로 관리하며 최댓값과 최솟값의 차를 $c$ 와 비교하는 방식으로 해결했다.
+[단조 큐를 활용한 슬라이딩 윈도우](/posts/sliding-window-maximum) 와 우선순위 큐 두 가지 방식 모두 적용 가능한 문제로 구간의 최솟값과 최댓값이 모두 필요한데 이를 각각 단조 증가 큐, 단조 감소 큐 또는 최소힙, 최대힙으로 관리하며 최댓값과 최솟값의 차를 $c$ 와 비교하는 방식으로 해결했다.
 
 ---
 
 ## 2. 코드
 
-### 1. 덱을 이용한 구간 최댓값 트릭 [Java]
+### 1. 단조 큐 [Java]
 
 번호와 인덱스를 맞추기 위해 앞에 패딩을 한 칸 줬다.
 
@@ -43,8 +44,8 @@ public class Main {
             arr[i] = Integer.parseInt(st.nextToken());
         }
 
-        Deque<Integer> minDq = new ArrayDeque<>();  // 단조 증가 덱
-        Deque<Integer> maxDq = new ArrayDeque<>();  // 단조 감소 덱
+        Deque<Integer> minDq = new ArrayDeque<>();  // 단조 증가 큐
+        Deque<Integer> maxDq = new ArrayDeque<>();  // 단조 감소 큐
         for (int i = 1; i <= n; i++) {
             // 구간에서 나가는 인덱스 처리
             if (!minDq.isEmpty() && minDq.peekFirst() == (i - m)) {
@@ -152,7 +153,7 @@ public class Main {
 }
 ```
 
-### 3. 덱을 이용한 구간 최댓값 트릭 [C++]
+### 3. 단조 큐 [C++]
 
 ```c++
 #include <bits/stdc++.h>
@@ -168,8 +169,8 @@ int main() {
     vector<int> v(n);
     for (int& x : v) cin >> x;
 
-    deque<int> minDq;  // 단조 증가 덱
-    deque<int> maxDq;  // 단조 감소 덱
+    deque<int> minDq;  // 단조 증가 큐
+    deque<int> maxDq;  // 단조 감소 큐
     bool hasSilence = false;
 
     for (int i = 0; i < n; i++) {
@@ -251,33 +252,5 @@ int main() {
     }
 }
 ```
-
----
-
-## 3. 풀이 정보
-
-### 1. 덱을 이용한 구간 최댓값 트릭 [Java]
-
-| 언어    | 시간   | 메모리    | 코드 길이 |
-| ------- | ------ | --------- | --------- |
-| Java 11 | 888 ms | 152360 KB | 1990 B    |
-
-### 2. 우선순위 큐 [Java]
-
-| 언어    | 시간    | 메모리    | 코드 길이 |
-| ------- | ------- | --------- | --------- |
-| Java 11 | 1272 ms | 185024 KB | 2001 B    |
-
-### 3. 덱을 이용한 구간 최댓값 트릭 [C++]
-
-| 언어   | 시간   | 메모리  | 코드 길이 |
-| ------ | ------ | ------- | --------- |
-| C++ 17 | 176 ms | 6064 KB | 1307 B    |
-
-### 4. 우선순위 큐 [C++]
-
-| 언어   | 시간   | 메모리   | 코드 길이 |
-| ------ | ------ | -------- | --------- |
-| C++ 17 | 264 ms | 18500 KB | 1002 B    |
 
 ---

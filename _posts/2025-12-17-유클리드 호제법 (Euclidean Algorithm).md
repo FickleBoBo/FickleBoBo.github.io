@@ -1,11 +1,12 @@
 ---
-title: "[알고리즘] 유클리드 호제법 (Euclidean Algorithm)"
+title: "[자료구조/알고리즘] 유클리드 호제법 (Euclidean Algorithm)"
+slug: euclidean-algorithm
 date: 2025-12-17
-categories: [DS & Algo, Algorithm]
-tags: [수학, 정수론, 유클리드 호제법]
+categories: [DSA]
+tags: [Number Theory, Euclidean Algorithm]
 toc: true
 math: true
-image: /assets/posts/2025-12/유클리드%20호제법%20(Euclidean%20Algorithm)/thumbnail.drawio.svg
+image: /assets/posts/euclidean-algorithm/thumbnail.drawio.svg
 ---
 
 ## 1. 유클리드 호제법
@@ -35,7 +36,7 @@ $72$ 를 $36$ 으로 나눈 나머지가 $0$ 이 됐다. 따라서, $78696$ 과 
 
 ## 2. 유클리드 호제법 성능
 
-유클리드 호제법은 두 수 $a$, $b$ 에 대해 $O(\log{\min(a, b)})$ 의 시간복잡도를 갖는 알고리즘이다. 나머지가 최대한 느리게 줄어들수록 계산량이 많아지는데 Lamé's theorem 에 따르면 연속한 피보나치 수 쌍의 경우가 worst case이다.
+유클리드 호제법은 두 수 $a$, $b$ 에 대해 $O(\log{\min(a, b)})$ 의 시간복잡도를 갖는 알고리즘이다. 나머지가 최대한 느리게 줄어들수록 계산량이 많아지는데 Lamé's theorem에 따르면 연속한 피보나치 수 쌍의 경우가 worst case이다.
 
 ---
 
@@ -105,11 +106,11 @@ $$
 
 유클리드 호제법은 재귀를 활용한 구현과 재귀를 활용하지 않은 구현 두 가지 모두 가능하다.
 
-재귀를 활용할 경우 위 점화식을 그대로 코드로 옮기기만 하면 된다.
+재귀를 활용할 경우 위 점화식을 그대로 코드로 옮기기만 하면 되며, 재귀를 활용하지 않을 경우 두 수를 swap 하는 과정을 추가해주면 된다.
 
-재귀를 활용하지 않을 경우 두 수를 swap 하는 과정을 추가해주면 된다.
+두 방식 모두 $a < b$ 인 경우 다음 재귀나 swap을 통해 두 수가 바뀐 채 실행되기 때문에 두 수의 대소 관계를 고려하지 않아도 동작한다.
 
-두 방식 모두 $a < b$ 인 경우 다음 재귀나 swap을 통해 두 수가 바뀐 채 실행되기 때문에 두 수의 대소 관계를 고려하지 않아도 동작한다. C++의 경우 C++ 17부터 `std::gcd` 로 아예 함수를 제공한다.
+C++의 경우 C++ 17부터 `std::gcd`로 아예 함수를 제공한다.(`std::lcm`도 있다.)
 
 ### 1. 재귀를 활용한 유클리드 호제법 [Java]
 
@@ -165,10 +166,10 @@ int gcd(int a, int b) {
 
 ## 5. Problems
 
-- [백준 9613번 - GCD 합](https://www.acmicpc.net/problem/9613)
-- [백준 1735번 - 분수 합](https://www.acmicpc.net/problem/1735)
-- [백준 5347번 - LCM](https://www.acmicpc.net/problem/5347)
-- [백준 17087번 - 숨바꼭질 6](https://www.acmicpc.net/problem/17087)
+- [BaekJoon 9613번 - GCD 합](https://www.acmicpc.net/problem/9613)
+- [BaekJoon 1735번 - 분수 합](https://www.acmicpc.net/problem/1735)
+- [BaekJoon 5347번 - LCM](https://www.acmicpc.net/problem/5347)
+- [BaekJoon 17087번 - 숨바꼭질 6](https://www.acmicpc.net/problem/17087)
 
 ---
 

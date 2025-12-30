@@ -11,11 +11,15 @@ image: /assets/posts/lis-using-binary-search/thumbnail.drawio.svg
 
 ## 1. LIS
 
+<br>
+
 기존 2중 반복문을 활용한 [LIS](/posts/longest-increasing-subsequence) 는 간단하게 구현할 수 있다는 장점이 있지만 $O(N^2)$ 의 시간복잡도라는 성능의 아쉬움이 있었다. LIS를 구하는 과정에서 이분 탐색을 활용하면 시간복잡도를 $O(N\log{N})$ 까지 개선할 수 있다.
 
 ---
 
 ## 2. 이분 탐색을 활용한 LIS
+
+<br>
 
 주어진 수열이 $$\{10, 45, 30, 35, 20, 25, 40, 15\}$$ 일 때 dp 배열이 기존에는 해당 원소를 포함한 LIS의 길이를 저장했다면 이번엔 인덱스를 LIS의 길이로 갖는 가능한 최소 끝 값을 저장하면 된다. 이러면 기존에는 이전에 등장한 원소들을 전부 비교하며 dp를 갱신했다면 이제는 이분 탐색으로 비교할 수 있다.
 
@@ -129,6 +133,8 @@ image: /assets/posts/lis-using-binary-search/thumbnail.drawio.svg
 
 ## 3. 역추적을 통한 실제 LIS 구하기
 
+<br>
+
 위 방식으로 LIS의 길이는 잘 구할 수 있지만 dp 배열을 갱신하는 과정에서 이전 정보들이 덮어 씌워지기 때문에 dp 배열만 가지고 실제 LIS를 구할 수 없다. 이를 위해 별도의 저장 공간이 필요한데 수열에서 $i$ 번째 원소가 LIS의 몇 번째 자리인지 저장하는 `pos` 배열과, 해당 윈소 앞에오는 LIS 원소의 인덱스를 저장하는 `prev` 배열을 활용하면 된다. 위에서 dp 배열을 갱신하는 과정에 `pos`와 `prev` 배열을 갱신하는 과정을 추가해주자.
 
 $10$ 은 dp 배열의 $0$ 번 인덱스에 위치했다. `pos` 배열의 $0$ 번 인덱스를 해당 원소의 인덱스(0-based)로 갱신해주면 $pos[0] = 0$ 이 된다. `prev` 배열은 $10$ 을 포함한 LIS에서 $10$ 앞에 오는 원소의 인덱스로 갱신하면 되는데 현재 그런 원소가 없으므로 없다는 의미로 $-1$ 로 채워줬다.
@@ -185,6 +191,8 @@ $15$ 는 dp 배열의 $1$ 번 인덱스에 위치했다. `pos` 배열의 $1$ 번
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 12015번 - 가장 긴 증가하는 부분 수열 2](https://www.acmicpc.net/problem/12015)
 - [BaekJoon 14003번 - 가장 긴 증가하는 부분 수열 5](https://www.acmicpc.net/problem/14003)
 - [BaekJoon 13711번 - LCS 4](https://www.acmicpc.net/problem/13711)
@@ -192,6 +200,8 @@ $15$ 는 dp 배열의 $1$ 번 인덱스에 위치했다. `pos` 배열의 $1$ 번
 ---
 
 ## Ref
+
+<br>
 
 - [wikipedia - 최장 증가 부분 수열](https://en.wikipedia.org/wiki/Longest_increasing_subsequence)
 - [cp-algorithms - Longest Increasing Subsequence](https://cp-algorithms.com/dynamic_programming/longest_increasing_subsequence.html)

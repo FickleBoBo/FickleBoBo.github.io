@@ -11,11 +11,15 @@ image: /assets/posts/longest-increasing-subsequence/thumbnail.drawio.svg
 
 ## 1. LIS
 
+<br>
+
 LIS는 Longest Increasing Subsequence의 약자로 최장 증가 부분 수열을 의미한다. 컴퓨터 공학에서 LIS 문제는 주어진 수열에서 오름차순으로 정렬된 가장 긴 부분 수열을 찾는 문제로 여기서의 부분 수열은 연속적이거나 유일할 필요는 없다. LIS는 DP 문제로 전체 수열의 LIS를 더 작은 부분 수열의 LIS를 통해 구해나가며 기존 계산한 LIS 값들을 활용한다.
 
 ---
 
 ## 2. 2중 반복문을 활용한 LIS
+
+<br>
 
 주어진 수열이 $$\{10, 45, 30, 35, 20, 25, 40, 15\}$$ 일 때 2중 반복문을 활용하면 간단하게 LIS를 구할 수 있다.
 
@@ -91,13 +95,17 @@ $$
 
 <br>
 
-2중 반복문을 활요한 LIS는 수열의 길이가 $N$ 일 때, $O(N^2)$ 의 시간복잡도와 $O(N)$ 의 공간복잡도가 소요되는 알고리즘이다.
+2중 반복문을 활용한 LIS는 수열의 길이가 $N$ 일 때, $O(N^2)$ 의 시간복잡도와 $O(N)$ 의 공간복잡도가 소요되는 알고리즘이다.
 
 ---
 
 ## 3. 역추적을 통한 실제 LIS 구하기
 
+<br>
+
 위 과정을 통해 주어진 수열의 LIS의 길이를 구할 수 있었는데 LIS의 길이 뿐만 아니라 실제 LIS도 구할 수 있다. 실제 LIS를 구하기 위해 $prev$ 라는 임시 배열을 활용하는데 이 $prev$ 에는 dp 배열에 LIS의 갱신을 발생시켰던 원소의 인덱스를 저장한다. 인덱스는 $0$ 이상의 정수이기 때문에 이전의 어떤 원소도 LIS의 갱신을 발생시키지 않았음을 표현하기 위해 초기에는 $-1$ 같은 음수로 초기화하면 된다.
+
+<br>
 
 위 수열에 대해 $prev$ 배열을 구하면 아래와 같다.
 
@@ -135,6 +143,8 @@ dp 배열에서 최댓값이 위치한 곳이 LIS의 끝 원소이므로 해당 
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 11053번 - 가장 긴 증가하는 부분 수열](https://www.acmicpc.net/problem/11053)
 - [BaekJoon 11054번 - 가장 긴 바이토닉 부분 수열](https://www.acmicpc.net/problem/11054)
 - [BaekJoon 14002번 - 가장 긴 증가하는 부분 수열 4](https://www.acmicpc.net/problem/14002)
@@ -142,6 +152,8 @@ dp 배열에서 최댓값이 위치한 곳이 LIS의 끝 원소이므로 해당 
 ---
 
 ## Ref
+
+<br>
 
 - [wikipedia - 최장 증가 부분 수열](https://en.wikipedia.org/wiki/Longest_increasing_subsequence)
 - [cp-algorithms - Longest Increasing Subsequence](https://cp-algorithms.com/dynamic_programming/longest_increasing_subsequence.html)

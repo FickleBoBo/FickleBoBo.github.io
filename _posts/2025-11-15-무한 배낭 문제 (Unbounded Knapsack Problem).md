@@ -11,6 +11,8 @@ image: /assets/posts/unbounded-knapsack-problem/thumbnail.png
 
 ## 1. 무한 배낭 문제
 
+<br>
+
 [0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 무한 배낭 문제는 각 물건이 무한히 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다.
 
 무한 배낭 문제는 0/1 배낭 문제와 유사한데 현재 물건을 담을지 말지 판단할 때 현재 물건을 이미 담았던 배낭을 통해 탐색하는 과정만 다르다.
@@ -18,6 +20,8 @@ image: /assets/posts/unbounded-knapsack-problem/thumbnail.png
 ---
 
 ## 2. 2차원 배열을 활용한 무한 배낭 문제
+
+<br>
 
 기존 0/1 배낭 문제를 2차원 배열을 활용한 다이나믹 프로그래밍으로 풀 경우 점화식은 아래와 같았다. 각 물건을 담을지 안 담을지 판단해서 배낭에 담긴 물건의 가치의 합이 최대가 되게 하는 경우다.
 
@@ -55,6 +59,8 @@ $$
 
 ## 3. 1차원 배열을 활용한 무한 배낭 문제
 
+<br>
+
 역시 기존 0/1 배낭 문제를 1차원 배열을 활용한 다이나믹 프로그래밍으로 풀 경우와 유사하다. 기존 0/1 배낭 문제의 점화식은 아래와 같았다.
 
 <br>
@@ -73,6 +79,8 @@ $$
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 2293번 - 동전 1](https://www.acmicpc.net/problem/2293)
 - [BaekJoon 2294번 - 동전 2](https://www.acmicpc.net/problem/2294)
 - [BaekJoon 1106번 - 호텔](https://www.acmicpc.net/problem/1106)
@@ -80,6 +88,8 @@ $$
 ---
 
 ## Ref
+
+<br>
 
 - [wikipedia - 배낭 문제](https://ko.wikipedia.org/wiki/%EB%B0%B0%EB%82%AD_%EB%AC%B8%EC%A0%9C)
 - [cp-algorithms - Knapsack Problem](https://cp-algorithms.com/dynamic_programming/knapsack.html)

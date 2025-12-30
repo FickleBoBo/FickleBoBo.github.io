@@ -11,6 +11,8 @@ image: /assets/posts/counter-clockwise/thumbnail.drawio.svg
 
 ## 1. CCW
 
+<br>
+
 CCW(Counter-Clockwise)는 반시계 방향이라는 뜻으로, 평면 상의 세 점의 상대적인 방향을 판별하는 알고리즘이다.
 
 서로 다른 세 점 $A$, $B$, $C$ 가 있을 때, $A \rightarrow B \rightarrow C$ 가 시계 방향인지 반시계 방향인지 아니면 일직선인지 판별할 수 있다.
@@ -18,6 +20,8 @@ CCW(Counter-Clockwise)는 반시계 방향이라는 뜻으로, 평면 상의 세
 ---
 
 ## 2. 벡터의 외적
+
+<br>
 
 두 벡터 $A$, $B$ 의 외적(Cross Product)은 두 벡터 $A$, $B$ 에 모두 수직이며 크기는 $\lVert A \times B \rVert = \lVert A \rVert \, \lVert B \rVert \sin\theta$ 인 벡터가 된다. 교환 법칙이 성립하지 않아 순서에 따라 크기는 같고 방향이 반대인 벡터가 나온다.
 
@@ -28,6 +32,8 @@ CCW(Counter-Clockwise)는 반시계 방향이라는 뜻으로, 평면 상의 세
 ---
 
 ## 3. 위치 관계 판정
+
+<br>
 
 아래와 같이 평면 위에 세 점 $A$, $B$, $C$ 가 있을 때, $A \rightarrow B \rightarrow C$ 가 시계 방향인지 반시계 방향인지 아니면 일직선인지 판별해보자.
 
@@ -65,7 +71,11 @@ $A \rightarrow B \rightarrow C$ 의 방향 판별은 벡터 $\overrightarrow{AB}
 
 ## 4. CCW 코드
 
+<br>
+
 세 점의 좌표가 각각 $A = (x_1,\ y_1)$, $B = (x_2,\ y_2)$, $C = (x_3,\ y_3)$ 일 때, $A \rightarrow B \rightarrow C$ 의 방향을 구하는 CCW 코드는 아래와 같다. CCW는 방향 정보가 의미가 있고 크기 정보는 별 의미가 없어서 보통 $-1$, $0$, $1$ 같이 부호만 반환을 많이 한다.
+
+<br>
 
 ### 1. CCW [Java]
 
@@ -76,6 +86,8 @@ static int ccw(int x1, int y1, int x2, int y2, int x3, int y3) {
     return Integer.signum((x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1));
 }
 ```
+
+<br>
 
 ### 2. CCW [C++]
 
@@ -90,11 +102,15 @@ int ccw(int x1, int y1, int x2, int y2, int x3, int y3) {
 
 ## 5. Problems
 
+<br>
+
 - [BaekJoon 1064번 - 평행사변형](https://www.acmicpc.net/problem/1064)
 
 ---
 
 ## Ref
+
+<br>
 
 - [cp-algorithms - Cross Product](https://cp-algorithms.com/geometry/basic-geometry.html#cross-product)
 

@@ -11,6 +11,8 @@ image: /assets/posts/sliding-window/thumbnail.drawio.svg
 
 ## 1. 슬라이딩 윈도우
 
+<br>
+
 슬라이딩 윈도우(Sliding Window)는 배열이나 리스트와 같은 데이터 구조에서 연속된 부분 배열의 합이나 애너그램(Anagram) 등을 효율적으로 계산하는 데 사용되는 일종의 테크닉이다. 주로 고정된 크기의 윈도우(Window)를 활용하여 데이터를 처리하며 이 과정에서 반복적인 계산을 줄여 시간복잡도를 낮출 수 있다.
 
 슬라이딩 윈도우의 기본 아이디어는 윈도우의 크기를 $W$ 라고 할 때, 윈도우를 한 칸 옮기면 $(W - 1)$ 칸은 겹친다는 것을 활용한다. 이를 통해 이전 윈도우의 계산 결과를 다음 윈도우에 대한 계산에 활용할 수 있다.
@@ -18,6 +20,8 @@ image: /assets/posts/sliding-window/thumbnail.drawio.svg
 ---
 
 ## 2. 단순 탐색
+
+<br>
 
 주어진 배열($arr$)이 아래와 같을 때 배열에서 크기가 $4$ 인 연속된 구간의 합을 모두 구해야 하는 상황을 가정하자. 단순한 탐색 방법으로는 2중 반복문을 통해 바깥쪽 반복문은 각 원소를 출발점으로 순회하고 안쪽 반복문은 $4$ 칸의 합계를 구하는 방법이다.
 
@@ -91,6 +95,8 @@ $$
 
 ## 3. 슬라이딩 윈도우 탐색
 
+<br>
+
 동일한 배열에 대해 슬라이딩 윈도우를 적용할 경우 $O(N)$ 의 시간복잡도로 탐색을 완료할 수 있다.
 
 ![](/assets/posts/sliding-window/photo01.drawio.svg)
@@ -157,6 +163,8 @@ $$
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 21921번 - 블로그](https://www.acmicpc.net/problem/21921)
 - [BaekJoon 24499번 - blobyum](https://www.acmicpc.net/problem/24499)
 - [BaekJoon 15565번 - 귀여운 라이언](https://www.acmicpc.net/problem/15565)
@@ -167,6 +175,8 @@ $$
 ---
 
 ## Ref
+
+<br>
 
 - [IOI KOREA - Sliding Window, 슬라이딩 윈도우](https://www.youtube.com/watch?v=uH9VJRIpIDY)
 - [F-Lab - 슬라이딩 윈도우 알고리즘](https://f-lab.kr/insight/sliding-window-algorithm-20240516)

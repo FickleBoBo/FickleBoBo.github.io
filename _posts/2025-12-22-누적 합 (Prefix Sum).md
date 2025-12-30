@@ -11,6 +11,8 @@ image: /assets/posts/prefix-sum/thumbnail.drawio.svg
 
 ## 1. 누적 합
 
+<br>
+
 누적 합(Prefix Sum)은 배열의 앞에서부터의 합을 미리 계산해 두는 일종의 전처리(Preprocessing) 기법이다.
 
 주어진 배열에서 반복적으로 임의의 구간의 합을 구해야 하는 문제를 상상해보자. 배열의 크기가 $N$, 쿼리의 수가 $M$ 일 때, 각 쿼리마다 매번 주어진 구간의 시작 위치부터 끝 위치까지 더하는 과정을 반복한다면 $O(N \times M)$ 의 시간복잡도와 $O(1)$ 의 공간복잡도가 소요될 것이다.
@@ -26,6 +28,8 @@ image: /assets/posts/prefix-sum/thumbnail.drawio.svg
 ---
 
 ## 2. 누적 합 예시
+
+<br>
 
 주어진 배열($arr$)이 아래와 같을 때 다음과 같이 누적 합 배열($prefix\ sum$)을 생성할 수 있다.
 
@@ -49,7 +53,11 @@ image: /assets/posts/prefix-sum/thumbnail.drawio.svg
 
 ## 3. 누적 합 코드
 
+<br>
+
 인덱스 $0$ 에 패딩을 준 덕분에 누적 합 배열의 첫 번째 원소를 초기화할 때 음수 인덱스를 참조하게 되는 예외 처리를 하지 않아도 되게 된다.
+
+<br>
 
 ### 1. 누적 합 [Java]
 
@@ -60,6 +68,8 @@ for (int i = 1; i <= N; i++) {
     pSum[i] = pSum[i - 1] + arr[i - 1];
 }
 ```
+
+<br>
 
 ### 2. 누적 합 [C++]
 
@@ -75,12 +85,16 @@ for (int i = 1; i <= n; i++) {
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 11659번 - 구간 합 구하기 4](https://www.acmicpc.net/problem/11659)
 - [BaekJoon 21921번 - 블로그](https://www.acmicpc.net/problem/21921)
 
 ---
 
 ## Ref
+
+<br>
 
 - [BOJ BOOK - 누적 합](https://book.acmicpc.net/algorithm/prefix-sum)
 

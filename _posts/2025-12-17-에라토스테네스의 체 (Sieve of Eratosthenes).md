@@ -11,6 +11,8 @@ image: /assets/posts/sieve-of-eratosthenes/thumbnail.drawio.svg
 
 ## 1. 에라토스테네스의 체
 
+<br>
+
 에라토스테네스의 체(Sieve of Eratosthenes)는 고대 그리스 수학자 에라토스테네스가 만들어 낸 소수를 찾는 방법으로 $N$ 보다 작거나 같은 모든 소수를 판정할 수 있는 빠르고 쉬운 알고리즘이다.
 
 에라토스테네스의 체는 소수의 배수들은 소수가 아니라는 점을 활용하여 소수가 아닌 수들을 지워가며 최종적으로 소수를 찾는다.
@@ -18,6 +20,8 @@ image: /assets/posts/sieve-of-eratosthenes/thumbnail.drawio.svg
 ---
 
 ## 2. 에라토스테네스의 체 성능
+
+<br>
 
 에라토스테네스의 체는 $O(N\log{\log{N}})$ 의 시간복잡도와 $O(N)$ 의 공간복잡도를 갖는 알고리즘이다.
 
@@ -28,6 +32,8 @@ image: /assets/posts/sieve-of-eratosthenes/thumbnail.drawio.svg
 ---
 
 ## 3. 에라토스테네스의 체 진행 과정
+
+<br>
 
 에라토스테네스의 체로 $1$ 부터 $100$ 사이의 소수를 구하는 과정을 살펴보자. 주어진 수들을 보기 좋게 $10 \times 10$ 행렬로 나타내면 아래와 같다.
 
@@ -125,9 +131,13 @@ $8$, $9$, $10$ 은 소수가 아니다. $\sqrt{100} = 10$ 이기 때문에 $100$
 
 ## 4. 에라토스테네스의 체 코드
 
+<br>
+
 에라토스테네스의 체는 기본적으로 2중 반복문을 활용하지만 최적화가 이루어져 $O(N^2)$ 의 시간복잡도가 아니다. 바깥쪽 반복문은 $\sqrt{N}$ 까지 배수를 탐색할 소수를, 안쪽 반복문은 소수일 경우 그 배수들을 거르는 역할을 한다. 정확하게 구현해야 최적의 시간복잡도로 동작한다.
 
 아래는 예시 코드로 $N < 1$ 의 경우 인덱스 범위 문제나 $N$ 이 정수 타입 상한 근처면 $i * i$ 가 오버플로우가 발생할 수 있기는 하지만 대부분의 경우 무난히 동작한다. 해당 케이스도 방어하려면 초기 배열의 크기를 $2$ 이상으로 잡거나 $i$ 를 더 큰 정수 타입을 사용하면 된다.
+
+<br>
 
 ### 1. 에라토스테네스의 체 [Java]
 
@@ -148,6 +158,8 @@ static boolean[] sieve(int N) {
     return isPrime;
 }
 ```
+
+<br>
 
 ### 2. 에라토스테네스의 체 [C++]
 
@@ -172,6 +184,8 @@ vector<bool> sieve(int n) {
 
 ## 5. Problems
 
+<br>
+
 - [BaekJoon 1929번 - 소수 구하기](https://www.acmicpc.net/problem/1929)
 - [BaekJoon 17103번 - 골드바흐 파티션](https://www.acmicpc.net/problem/17103)
 - [BaekJoon 15965번 - K번째 소수](https://www.acmicpc.net/problem/15965)
@@ -183,6 +197,8 @@ vector<bool> sieve(int n) {
 ---
 
 ## Ref
+
+<br>
 
 - [cp-algorithms - Sieve of Eratosthenes](https://cp-algorithms.com/algebra/sieve-of-eratosthenes.html)
 

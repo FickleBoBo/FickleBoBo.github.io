@@ -11,6 +11,8 @@ image: /assets/posts/bounded-knapsack-problem/thumbnail.png
 
 ## 1. 다중 배낭 문제
 
+<br>
+
 [0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 다중 배낭 문제는 각 물건이 1개 이상 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다. 이때 각 물건이 무한히 있지는 않다.
 
 다중 배낭 문제는 이를 0/1 배낭 문제로 변형하여 해결할 수 있다.
@@ -18,6 +20,8 @@ image: /assets/posts/bounded-knapsack-problem/thumbnail.png
 ---
 
 ## 2. 단순 변형
+
+<br>
 
 가장 간단한 방법은 각 물건 1개마다 0/1 배낭 문제를 적용하는 것이다. 물건의 무게와 가치가 $(6, 13)$ 인 물건이 2개, $(4, 8)$ 인 물건이 3개일 경우 총 5개의 물건에 대해 $N = 5$ 인 0/1 배낭 문제로 해결하는 것이다.
 
@@ -28,6 +32,8 @@ image: /assets/posts/bounded-knapsack-problem/thumbnail.png
 ---
 
 ## 3. 이진 그룹핑 최적화 (Binary Grouping Optimization)
+
+<br>
 
 특정 물건이 $K$ 개 있을 경우 이를 $K$ 개로 분할해 0/1 배낭 문제를 적용하는 것을 좀 더 효율화한 것으로 보다 적은 그룹으로 분할하여 탐색량을 줄이는 기법이다.
 
@@ -53,11 +59,15 @@ image: /assets/posts/bounded-knapsack-problem/thumbnail.png
 
 ## 4. Problems
 
+<br>
+
 - [BaekJoon 12920번 - 평범한 배낭 2](https://www.acmicpc.net/problem/12920)
 
 ---
 
 ## Ref
+
+<br>
 
 - [wikipedia - 배낭 문제](https://ko.wikipedia.org/wiki/%EB%B0%B0%EB%82%AD_%EB%AC%B8%EC%A0%9C)
 - [cp-algorithms - Knapsack Problem](https://cp-algorithms.com/dynamic_programming/knapsack.html)

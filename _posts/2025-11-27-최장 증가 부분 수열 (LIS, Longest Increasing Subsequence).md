@@ -13,7 +13,7 @@ image: /assets/posts/longest-increasing-subsequence/thumbnail.drawio.svg
 
 <br>
 
-LIS는 Longest Increasing Subsequence의 약자로 최장 증가 부분 수열을 의미한다. 컴퓨터 공학에서 LIS 문제는 주어진 수열에서 오름차순으로 정렬된 가장 긴 부분 수열을 찾는 문제로 여기서의 부분 수열은 연속적이거나 유일할 필요는 없다. LIS는 DP 문제로 전체 수열의 LIS를 더 작은 부분 수열의 LIS를 통해 구해나가며 기존 계산한 LIS 값들을 활용한다.
+LIS는 Longest Increasing Subsequence의 약자로 **최장 증가 부분 수열**을 의미한다. 컴퓨터 공학에서 LIS 문제는 **주어진 수열에서 오름차순으로 정렬된 가장 긴 부분 수열을 찾는 문제**로 여기서의 부분 수열은 연속적이거나 유일할 필요는 없다. LIS는 DP 문제로 전체 수열의 LIS를 더 작은 부분 수열의 LIS를 통해 구해나가며 기존 계산한 LIS 값들을 활용한다.
 
 ---
 

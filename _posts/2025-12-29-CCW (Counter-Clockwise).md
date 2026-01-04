@@ -13,7 +13,7 @@ image: /assets/posts/counter-clockwise/thumbnail.drawio.svg
 
 <br>
 
-CCW(Counter-Clockwise)는 반시계 방향이라는 뜻으로, 평면 상의 세 점의 상대적인 방향을 판별하는 알고리즘이다.
+**CCW(Counter-Clockwise)**는 반시계 방향이라는 뜻으로, **평면 상의 세 점의 상대적인 방향을 판별**하는 알고리즘이다.
 
 서로 다른 세 점 $A$, $B$, $C$ 가 있을 때, $A \rightarrow B \rightarrow C$ 가 시계 방향인지 반시계 방향인지 아니면 일직선인지 판별할 수 있다.
 

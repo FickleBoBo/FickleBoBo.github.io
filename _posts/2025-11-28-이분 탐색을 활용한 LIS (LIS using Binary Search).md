@@ -13,7 +13,7 @@ image: /assets/posts/lis-using-binary-search/thumbnail.drawio.svg
 
 <br>
 
-기존 2중 반복문을 활용한 [LIS](/posts/longest-increasing-subsequence) 는 간단하게 구현할 수 있다는 장점이 있지만 $O(N^2)$ 의 시간복잡도라는 성능의 아쉬움이 있었다. LIS를 구하는 과정에서 이분 탐색을 활용하면 시간복잡도를 $O(N\log{N})$ 까지 개선할 수 있다.
+기존 2중 반복문을 활용한 [LIS](/posts/longest-increasing-subsequence) 는 간단하게 구현할 수 있다는 장점이 있지만 $O(N^2)$ 의 시간복잡도라는 성능의 아쉬움이 있었다. LIS를 구하는 과정에서 **이분 탐색**을 활용하면 시간복잡도를 $O(N\log{N})$ 까지 개선할 수 있다.
 
 ---
 

@@ -13,7 +13,7 @@ image: /assets/posts/bounded-knapsack-problem/thumbnail.png
 
 <br>
 
-[0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 다중 배낭 문제는 각 물건이 1개 이상 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다. 이때 각 물건이 무한히 있지는 않다.
+[0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 **다중 배낭 문제(Bounded Knapsack Problem)**는 각 물건이 1개 이상 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다. 이때 각 물건이 무한히 있지는 않다.
 
 다중 배낭 문제는 이를 0/1 배낭 문제로 변형하여 해결할 수 있다.
 

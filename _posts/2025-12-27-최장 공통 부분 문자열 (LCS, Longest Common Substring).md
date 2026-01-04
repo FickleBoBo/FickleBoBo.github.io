@@ -13,7 +13,7 @@ image: /assets/posts/longest-common-substring/thumbnail.drawio.svg
 
 <br>
 
-LCS(Longest Common Substring)는 최장 공통 부분 문자열이라는 뜻으로 주어진 여러 개의 문자열 모두의 부분 문자열이 되는 문자열들 중에 가장 긴 것을 찾는 문제다. 최장 공통 부분 수열인 [LCS(Longest Common Subsequence)](/posts/longest-common-subsequence) 와는 다르다는 것에 주의해야 한다. 최장 공통 부분 수열과 마찬가지로 최장 공통 부분 문자열 역시 다이나믹 프로그래밍을 활용해 해결할 수 있다.
+**LCS(Longest Common Substring)**는 최장 공통 부분 문자열이라는 뜻으로 **주어진 여러 개의 문자열 모두의 부분 문자열이 되는 문자열들 중에 가장 긴 것을 찾는 문제**다. 최장 공통 부분 수열인 [LCS(Longest Common Subsequence)](/posts/longest-common-subsequence) 와는 다르다는 것에 주의해야 한다. 최장 공통 부분 수열과 마찬가지로 최장 공통 부분 문자열 역시 **다이나믹 프로그래밍**을 활용해 해결할 수 있다.
 
 ---
 

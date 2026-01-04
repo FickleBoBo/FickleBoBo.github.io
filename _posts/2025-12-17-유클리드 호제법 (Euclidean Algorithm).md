@@ -13,7 +13,7 @@ image: /assets/posts/euclidean-algorithm/thumbnail.drawio.svg
 
 <br>
 
-유클리드 호제법(Euclidean Algorithm)은 두 자연수 또는 다항식의 최대공약수(GCD, Greatest Common Divisor)를 구하는 알고리즘의 하나이다. 호제법이란 말은 두 수가 서로 상대방 수를 나누어서 결국 원하는 수를 얻는다는 뜻이다.
+**유클리드 호제법(Euclidean Algorithm)**은 두 자연수 또는 다항식의 **최대공약수(GCD, Greatest Common Divisor)**를 구하는 알고리즘의 하나이다. 호제법이란 말은 두 수가 서로 상대방 수를 나누어서 결국 원하는 수를 얻는다는 뜻이다.
 
 <br>
 
@@ -98,7 +98,7 @@ $$
 
 <br>
 
-최소공배수(LCM, Least Common Multiple)는 두 수의 곱을 최대공약수로 나누면 간단하게 구할 수 있다.
+**최소공배수(LCM, Least Common Multiple)**는 두 수의 곱을 최대공약수로 나누면 간단하게 구할 수 있다.
 
 <br>
 

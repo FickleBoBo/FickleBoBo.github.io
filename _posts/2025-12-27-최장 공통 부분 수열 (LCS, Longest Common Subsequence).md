@@ -13,7 +13,7 @@ image: /assets/posts/longest-common-subsequence/thumbnail.drawio.svg
 
 <br>
 
-LCS(Longest Common Subsequence)는 최장 공통 부분 수열이라는 뜻으로 주어진 여러 개의 수열 모두의 부분 수열이 되는 수열들 중에 가장 긴 것을 찾는 문제다. 이 문제를 해결하는 간단한 방법은 다이나믹 프로그래밍을 활용하는 것이다.
+**LCS(Longest Common Subsequence)**는 최장 공통 부분 수열이라는 뜻으로 **주어진 여러 개의 수열 모두의 부분 수열이 되는 수열들 중에 가장 긴 것을 찾는 문제**다. 이 문제를 해결하는 간단한 방법은 **다이나믹 프로그래밍**을 활용하는 것이다.
 
 ---
 

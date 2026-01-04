@@ -13,7 +13,7 @@ image: /assets/posts/unbounded-knapsack-problem/thumbnail.png
 
 <br>
 
-[0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 무한 배낭 문제는 각 물건이 무한히 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다.
+[0/1 배낭 문제](/posts/0-1-knapsack-problem) 가 각 물건이 1개씩 있고 배낭에 담느냐 안 담느냐를 선택하는 문제였다면 **무한 배낭 문제(Unbounded Knapsack Problem)**는 각 물건이 무한히 있는 경우 배낭의 물건의 가치가 최대가 되게 하는 문제다.
 
 무한 배낭 문제는 0/1 배낭 문제와 유사한데 현재 물건을 담을지 말지 판단할 때 현재 물건을 이미 담았던 배낭을 통해 탐색하는 과정만 다르다.
 

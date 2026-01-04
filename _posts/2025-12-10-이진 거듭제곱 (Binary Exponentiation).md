@@ -13,7 +13,7 @@ image: /assets/posts/binary-exponentiation/thumbnail.drawio.svg
 
 <br>
 
-이진 거듭제곱(Binary Exponentiation, Exponentiation by Squaring)은 $a^n$ 연산의 결과를 $O(\log{n})$ 의 시간복잡도로 해결하는 알고리즘이다.
+**이진 거듭제곱(Binary Exponentiation, Exponentiation by Squaring)**은 $a^n$ 연산의 결과를 $O(\log{n})$ 의 시간복잡도로 해결하는 알고리즘이다.
 
 $a^n$ 은 $a$ 를 $n$ 번 곱한 수이므로 반복문을 활용해 $a \times a \times \cdots \times a$ 처럼 $a$ 를 $n$ 번을 곱하면 시간복잡도는 $O(n)$ 이 된다. 재귀를 활용할 경우 $a^0 = 1$, $a^n = a \times a^{n-1}$ 을 종료 조건과 재귀 조건으로 활용해 재귀 함수를 만들 수 있고, 이 경우 재귀 스택은 $n$ 번 쌓이게 되며 역시 시간복잡도가 $O(n)$ 이 된다.
 

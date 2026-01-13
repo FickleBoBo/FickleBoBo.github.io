@@ -155,6 +155,7 @@ int binpow(int a, int n) {
 
 - [BaekJoon 1629번 - 곱셈](https://www.acmicpc.net/problem/1629)
 - [BaekJoon 10830번 - 행렬 제곱](https://www.acmicpc.net/problem/10830)
+- [BaekJoon 11444번 - 피보나치 수 6](https://www.acmicpc.net/problem/11444)
 
 ---
 

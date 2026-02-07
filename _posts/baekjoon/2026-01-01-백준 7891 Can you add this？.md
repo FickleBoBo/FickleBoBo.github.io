@@ -37,7 +37,7 @@ public class Main {
         StringBuilder sb = new StringBuilder();
 
         int t = Integer.parseInt(br.readLine());
-        for (int tc = 1; tc <= t; tc++) {
+        while (t-- > 0) {
             st = new StringTokenizer(br.readLine());
             int x = Integer.parseInt(st.nextToken());
             int y = Integer.parseInt(st.nextToken());
@@ -65,7 +65,7 @@ int main() {
     int t;
     cin >> t;
 
-    for (int tc = 1; tc <= t; tc++) {
+    while (t--) {
         int x, y;
         cin >> x >> y;
         cout << x + y << '\n';

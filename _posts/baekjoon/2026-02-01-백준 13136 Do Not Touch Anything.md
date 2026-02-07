@@ -35,11 +35,11 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        int R = Integer.parseInt(st.nextToken());
-        int C = Integer.parseInt(st.nextToken());
-        int N = Integer.parseInt(st.nextToken());
+        int r = Integer.parseInt(st.nextToken());
+        int c = Integer.parseInt(st.nextToken());
+        int n = Integer.parseInt(st.nextToken());
 
-        System.out.println((long) ((R + N - 1) / N) * ((C + N - 1) / N));
+        System.out.println((long) ((r + n - 1) / n) * ((c + n - 1) / n));
     }
 }
 ```

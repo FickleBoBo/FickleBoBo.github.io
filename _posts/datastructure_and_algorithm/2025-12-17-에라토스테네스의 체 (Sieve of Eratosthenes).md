@@ -142,14 +142,14 @@ $8$, $9$, $10$ 은 소수가 아니다. $\sqrt{100} = 10$ 이기 때문에 $100$
 ### 1. 에라토스테네스의 체 [Java]
 
 ```java
-static boolean[] sieve(int N) {
-    boolean[] isPrime = new boolean[1 + N];
+static boolean[] sieve(int n) {
+    boolean[] isPrime = new boolean[1 + n];
     Arrays.fill(isPrime, true);
     isPrime[0] = isPrime[1] = false;
 
-    for (int i = 2; i * i <= N; i++) {
+    for (int i = 2; i * i <= n; i++) {
         if (isPrime[i]) {
-            for (int j = i * i; j <= N; j += i) {
+            for (int j = i * i; j <= n; j += i) {
                 isPrime[j] = false;
             }
         }

@@ -62,10 +62,10 @@ image: /assets/posts/prefix-sum/thumbnail.drawio.svg
 ### 1. 누적 합 [Java]
 
 ```java
-int[] pSum = new int[1 + N];
+int[] psum = new int[1 + n];
 
-for (int i = 1; i <= N; i++) {
-    pSum[i] = pSum[i - 1] + arr[i - 1];
+for (int i = 1; i <= n; i++) {
+    psum[i] = psum[i - 1] + arr[i - 1];
 }
 ```
 

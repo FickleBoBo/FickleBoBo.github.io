@@ -1,0 +1,106 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.2">
+  <diagram name="Page-1" id="ZfZtTBC7BwtcdJ9tphjr">
+    <mxGraphModel dx="2629" dy="2038" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="0번 - ROOT" vertex="1">
+          <mxGeometry height="100" width="150" x="350" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="4번 -&amp;nbsp;APPLE" vertex="1">
+          <mxGeometry height="100" width="150" x="550" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="1번 -&amp;nbsp;KIWI" vertex="1">
+          <mxGeometry height="100" width="150" x="150" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="3번 -&amp;nbsp;APPLE" vertex="1">
+          <mxGeometry height="100" width="150" x="250" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="5번 -&amp;nbsp;APPLE" vertex="1">
+          <mxGeometry height="100" width="150" x="450" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="2번 -&amp;nbsp;BANANA" vertex="1">
+          <mxGeometry height="100" width="150" x="50" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="6번 -&amp;nbsp;BANANA" vertex="1">
+          <mxGeometry height="100" width="150" x="650" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeWidth=2;fontSize=15;fontStyle=1" value="7번 -&amp;nbsp;KIWI" vertex="1">
+          <mxGeometry height="100" width="150" x="650" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-9" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-2" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="250" y="530" as="sourcePoint" />
+            <mxPoint x="300" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-10" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-5" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="140" y="646" as="sourcePoint" />
+            <mxPoint x="228" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-11" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-7" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="137" y="634" as="sourcePoint" />
+            <mxPoint x="183" y="576" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-12" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-7" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-8" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="267" y="628" as="sourcePoint" />
+            <mxPoint x="234" y="577" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-13" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-3" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="287" y="705" as="sourcePoint" />
+            <mxPoint x="283" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-14" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-3" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="492" y="499" as="sourcePoint" />
+            <mxPoint x="408" y="431" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-15" edge="1" parent="1" source="FxyMSu0pGQtQU6gGHEaJ-3" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" target="FxyMSu0pGQtQU6gGHEaJ-6" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="503" y="566" as="sourcePoint" />
+            <mxPoint x="457" y="624" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-19" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;strokeWidth=2;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="200" as="sourcePoint" />
+            <mxPoint x="850" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-21" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;strokeWidth=2;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="399" as="sourcePoint" />
+            <mxPoint x="850" y="399" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-22" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;strokeWidth=2;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="600" as="sourcePoint" />
+            <mxPoint x="850" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=15;" value="nxt[0] = [&lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;APPLE&quot;:4}, &lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;KIWI&quot;:1}&lt;br&gt;]" vertex="1">
+          <mxGeometry height="100" width="150" x="500" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=15;" value="nxt[1] = [&lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;APPLE&quot;:3}, &lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;BANANA&quot;:2}&lt;br&gt;]" vertex="1">
+          <mxGeometry height="100" width="150" x="300" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=15;" value="nxt[4] = [&lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;APPLE&quot;:5}, &lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;BANANA&quot;:6}&lt;br&gt;]" vertex="1">
+          <mxGeometry height="100" width="150" x="700" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="FxyMSu0pGQtQU6gGHEaJ-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontSize=15;" value="nxt[6] = [&lt;br&gt;&amp;nbsp; &amp;nbsp; {&quot;KIWI&quot;:7}&lt;br&gt;]" vertex="1">
+          <mxGeometry height="100" width="150" x="800" y="450" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

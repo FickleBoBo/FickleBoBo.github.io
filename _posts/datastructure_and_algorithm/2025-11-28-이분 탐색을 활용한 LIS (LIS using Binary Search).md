@@ -3,7 +3,7 @@ title: "[자료구조/알고리즘] 이분 탐색을 활용한 LIS (LIS using Bi
 slug: lis-using-binary-search
 date: 2025-11-28
 categories: [DSA]
-tags: [Dynamic Programming, LIS, Binary Search, Traceback]
+tags: [Dynamic Programming, LIS, Binary Search]
 toc: true
 math: true
 image: /assets/posts/lis-using-binary-search/thumbnail.drawio.svg

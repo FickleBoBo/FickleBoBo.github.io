@@ -3,7 +3,7 @@ title: "[자료구조/알고리즘] 에라토스테네스의 체 (Sieve of Erato
 slug: sieve-of-eratosthenes
 date: 2025-12-17
 categories: [DSA]
-tags: [Number Theory, Primality Test, Sieve of Eratosthenes]
+tags: [Number Theory, Sieve of Eratosthenes]
 toc: true
 math: true
 image: /assets/posts/sieve-of-eratosthenes/thumbnail.drawio.svg

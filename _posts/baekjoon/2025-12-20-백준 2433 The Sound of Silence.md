@@ -3,7 +3,7 @@ title: "[BaekJoon] 2433번 - The Sound of Silence [Java][C++]"
 slug: baekjoon-2433
 date: 2025-12-20
 categories: [PS, BaekJoon]
-tags: [Sliding Window, Data Structures, Priority Queue, Monotonic Queue]
+tags: [Sliding Window, Priority Queue, Monotonic Queue]
 toc: true
 math: true
 ---
@@ -16,7 +16,7 @@ math: true
 
 <br>
 
-[단조 큐를 활용한 슬라이딩 윈도우](/posts/sliding-window-maximum) 와 우선순위 큐 두 가지 방식 모두 적용 가능한 문제로 구간의 최솟값과 최댓값이 모두 필요한데 이를 각각 단조 증가 큐, 단조 감소 큐 또는 최소힙, 최대힙으로 관리하며 최댓값과 최솟값의 차를 $c$ 와 비교하는 방식으로 해결했다.
+단조 큐를 활용한 슬라이딩 윈도우와 우선순위 큐 두 가지 방식 모두 적용 가능한 문제로 구간의 최솟값과 최댓값이 모두 필요한데 이를 각각 단조 증가 큐, 단조 감소 큐 또는 최소힙, 최대힙으로 관리하며 최댓값과 최솟값의 차를 $c$ 와 비교하는 방식으로 해결했다.
 
 ---
 
@@ -24,7 +24,7 @@ math: true
 
 <br>
 
-### 1. 단조 큐 [Java]
+### 1. Sliding Window + Monotonic Queue [Java]
 
 번호와 인덱스를 맞추기 위해 앞에 패딩을 한 칸 줬다.
 
@@ -90,7 +90,7 @@ public class Main {
 
 <br>
 
-### 2. 우선순위 큐 [Java]
+### 2. Sliding Window + Priority Queue [Java]
 
 번호와 인덱스를 맞추기 위해 앞에 패딩을 한 칸 줬다.
 
@@ -161,15 +161,15 @@ public class Main {
 
 <br>
 
-### 3. 단조 큐 [C++]
+### 3. Sliding Window + Monotonic Queue [C++]
 
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(0);
+    cin.tie(0);
 
     int n, m, c;
     cin >> n >> m >> c;
@@ -219,15 +219,15 @@ int main() {
 
 <br>
 
-### 4. 우선순위 큐 [C++]
+### 4. Sliding Window + Priority Queue [C++]
 
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(0);
+    cin.tie(0);
 
     int n, m, c;
     cin >> n >> m >> c;
@@ -262,5 +262,13 @@ int main() {
     }
 }
 ```
+
+---
+
+## 3. Ref
+
+<br>
+
+- [단조 큐를 활용한 슬라이딩 윈도우](/posts/sliding-window-maximum)
 
 ---

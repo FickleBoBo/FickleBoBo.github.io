@@ -3,7 +3,7 @@ title: "[자료구조/알고리즘] 이진 거듭제곱 (Binary Exponentiation)"
 slug: binary-exponentiation
 date: 2025-12-10
 categories: [DSA]
-tags: [Math, Divide and Conquer, Binary Exponentiation]
+tags: [Math, Binary Exponentiation, Divide and Conquer]
 toc: true
 math: true
 image: /assets/posts/binary-exponentiation/thumbnail.drawio.svg

@@ -526,7 +526,7 @@ public class SegmentTree {
 ### 6. 세그먼트 트리 - 구간 최솟값 [C++]
 
 ```c++
-constexpr int MAX = INT_MAX;
+const int MAX = INT_MAX;
 
 struct SegTree {
     int n;
@@ -650,7 +650,7 @@ public class SegmentTree {
 ### 8. 세그먼트 트리 - 구간 최댓값 [C++]
 
 ```c++
-constexpr int MIN = INT_MIN;
+const int MIN = INT_MIN;
 
 struct SegTree {
     int n;

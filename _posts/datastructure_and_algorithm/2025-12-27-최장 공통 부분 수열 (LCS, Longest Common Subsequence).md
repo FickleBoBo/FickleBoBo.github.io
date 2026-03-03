@@ -3,7 +3,7 @@ title: "[자료구조/알고리즘] 최장 공통 부분 수열 (LCS, Longest Co
 slug: longest-common-subsequence
 date: 2025-12-27
 categories: [DSA]
-tags: [Strings, Dynamic Programming, LCS, Traceback]
+tags: [Strings, Dynamic Programming, LCS]
 toc: true
 math: true
 image: /assets/posts/longest-common-subsequence/thumbnail.drawio.svg

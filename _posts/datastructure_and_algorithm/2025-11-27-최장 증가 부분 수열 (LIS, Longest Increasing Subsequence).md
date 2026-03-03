@@ -3,7 +3,7 @@ title: "[자료구조/알고리즘] 최장 증가 부분 수열 (LIS, Longest In
 slug: longest-increasing-subsequence
 date: 2025-11-27
 categories: [DSA]
-tags: [Dynamic Programming, LIS, Traceback]
+tags: [Dynamic Programming, LIS]
 toc: true
 math: true
 image: /assets/posts/longest-increasing-subsequence/thumbnail.drawio.svg

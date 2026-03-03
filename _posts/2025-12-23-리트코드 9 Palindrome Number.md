@@ -24,7 +24,7 @@ math: true
 
 <br>
 
-### 1. 문자열 [Java]
+### 1. Strings [Java]
 
 ```java
 class Solution {
@@ -39,7 +39,7 @@ class Solution {
 
 <br>
 
-### 2. 문자열 [Java]
+### 2. Strings [Java]
 
 ```java
 class Solution {
@@ -57,7 +57,7 @@ class Solution {
 
 <br>
 
-### 3. 수학 [Java]
+### 3. Math [Java]
 
 $x$ 가 음수면 앞에 마이너스 부호가 있어서 먼저 가치지기를 해줬다.
 
@@ -84,7 +84,7 @@ class Solution {
 
 <br>
 
-### 4. 문자열 [C++]
+### 4. Strings [C++]
 
 ```c++
 class Solution {
@@ -98,7 +98,7 @@ public:
 
 <br>
 
-### 5. 문자열 [C++]
+### 5. Strings [C++]
 
 ```c++
 class Solution {
@@ -117,7 +117,7 @@ public:
 
 <br>
 
-### 6. 수학 [C++]
+### 6. Math [C++]
 
 $x$ 가 음수면 앞에 마이너스 부호가 있어서 먼저 가치지기를 해줬다.
 

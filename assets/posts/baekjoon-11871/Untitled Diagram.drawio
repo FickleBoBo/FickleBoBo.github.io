@@ -1,0 +1,55 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.6.1">
+  <diagram name="Page-1" id="OV2U-AGUNW8UugYIXZV_">
+    <mxGraphModel dx="1252" dy="679" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1600" math="1" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=none;strokeColor=default;" value="$$g(0) = \operatorname{mex}(\emptyset) = 0$$" vertex="1">
+          <mxGeometry height="50" width="250" x="300" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(1) = \operatorname{mex}\{g(0)\} = \operatorname{mex}\{0\} = 1$$" vertex="1">
+          <mxGeometry height="50" width="350" x="450" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(5) = \operatorname{mex}\{g(0), g(1), g(3)\} = \operatorname{mex}\{0, 1, 2\} = 3$$" vertex="1">
+          <mxGeometry height="50" width="350" x="450" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(3) = \operatorname{mex}\{g(0), g(1)\} = \operatorname{mex}\{0, 1\} = 2$$" vertex="1">
+          <mxGeometry height="50" width="350" x="450" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(7) = \operatorname{mex}\{g(0), g(1), g(3), g(5)\} = \operatorname{mex}\{0, 1, 2, 3\} = 4$$" vertex="1">
+          <mxGeometry height="50" width="350" x="450" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(2) = \operatorname{mex}(\emptyset) = 0$$" vertex="1">
+          <mxGeometry height="50" width="350" x="50" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(4) = \operatorname{mex}\{g(0), g(2)\} = \operatorname{mex}\{0, 0\} = 1$$" vertex="1">
+          <mxGeometry height="50" width="350" x="50" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(6) = \operatorname{mex}\{g(0),&amp;nbsp;g(2), g(4)\} = \operatorname{mex}\{0, 0, 1\} = 2$$" vertex="1">
+          <mxGeometry height="50" width="350" x="50" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=none;strokeColor=default;" value="$$g(8) = \operatorname{mex}\{g(0),&amp;nbsp;g(2), g(4), g(6)\} = \operatorname{mex}\{0, 0, 1, 2\} = 3$$" vertex="1">
+          <mxGeometry height="50" width="350" x="50" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=none;strokeColor=default;" value="$$g(2k) = k - 1$$" vertex="1">
+          <mxGeometry height="50" width="350" x="50" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=none;strokeColor=default;" value="$$g(2k - 1) = k$$" vertex="1">
+          <mxGeometry height="50" width="350" x="450" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-17" edge="1" parent="1" source="V7ZKCOKhU9Olwp_EIU-R-3" style="edgeStyle=segmentEdgeStyle;endArrow=classic;html=1;curved=0;rounded=0;endSize=8;startSize=8;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="V7ZKCOKhU9Olwp_EIU-R-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="150" y="80" as="sourcePoint" />
+            <mxPoint x="200" y="30" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="V7ZKCOKhU9Olwp_EIU-R-19" edge="1" parent="1" source="V7ZKCOKhU9Olwp_EIU-R-3" style="edgeStyle=segmentEdgeStyle;endArrow=classic;html=1;curved=0;rounded=0;endSize=8;startSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="V7ZKCOKhU9Olwp_EIU-R-15" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="590" y="70" as="sourcePoint" />
+            <mxPoint x="640" y="20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -3,7 +3,7 @@ title: "[BaekJoon] 10170번 - NFC West vs North [Java][C++]"
 slug: baekjoon-10170
 date: 2026-01-01
 categories: [PS, BaekJoon]
-tags: [Warm Up]
+tags: [Unlinked]
 toc: true
 math: true
 ---
@@ -12,7 +12,7 @@ math: true
 
 ---
 
-## 1. 문제 풀이
+## 1. 아이디어
 
 <br>
 
@@ -73,5 +73,21 @@ int main() {
     cout << "Minnesota      5  10  1" << '\n';
 }
 ```
+
+---
+
+## 3. 디버깅
+
+<br>
+
+없음.
+
+---
+
+## 4. 참고
+
+<br>
+
+없음.
 
 ---

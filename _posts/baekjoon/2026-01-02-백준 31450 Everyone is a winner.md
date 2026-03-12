@@ -3,7 +3,7 @@ title: "[BaekJoon] 31450번 - Everyone is a winner [Java][C++]"
 slug: baekjoon-31450
 date: 2026-01-02
 categories: [PS, BaekJoon]
-tags: [Warm Up]
+tags: [Unlinked]
 toc: true
 math: true
 ---
@@ -12,11 +12,11 @@ math: true
 
 ---
 
-## 1. 문제 풀이
+## 1. 아이디어
 
 <br>
 
-모든 아이들이 똑같은 개수의 메달을 받아야 하므로 $M$ 을 $K$ 로 나눈 나머지가 $0$ 인지 판단하면 된다.
+모든 아이들이 똑같은 개수의 메달을 받아야 하므로 M을 K로 나눈 나머지가 0인지 판단하면 된다.
 
 ---
 
@@ -69,5 +69,21 @@ int main() {
     }
 }
 ```
+
+---
+
+## 3. 디버깅
+
+<br>
+
+없음.
+
+---
+
+## 4. 참고
+
+<br>
+
+없음.
 
 ---

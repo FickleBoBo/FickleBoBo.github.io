@@ -3,7 +3,7 @@ title: "[BaekJoon] 23234번 - The World Responds [Java][C++]"
 slug: baekjoon-23234
 date: 2026-01-01
 categories: [PS, BaekJoon]
-tags: [Warm Up]
+tags: [Unlinked]
 toc: true
 math: true
 ---
@@ -12,7 +12,7 @@ math: true
 
 ---
 
-## 1. 문제 풀이
+## 1. 아이디어
 
 <br>
 
@@ -49,5 +49,21 @@ int main() {
     cout << "The world says hello!";
 }
 ```
+
+---
+
+## 3. 디버깅
+
+<br>
+
+없음.
+
+---
+
+## 4. 참고
+
+<br>
+
+없음.
 
 ---

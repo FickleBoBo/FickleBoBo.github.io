@@ -30,3 +30,7 @@ assets/js/dist
 *~
 .DS_Store
 Thumbs.db
+
+# Python cache (from .claude/skills tooling)
+__pycache__/
+*.pyc

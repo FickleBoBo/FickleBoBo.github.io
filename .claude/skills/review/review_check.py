@@ -115,6 +115,51 @@ def check(text):
             if _has_empty_code_block(secs['코드']):
                 issues.append("빈 코드블록")
 
+    issues += _callout_issues(body)
+
+    return issues
+
+
+def _callout_issues(body):
+    """Chirpy prompt callouts and their Prettier guard.
+
+    A callout is a blockquote closed by a kramdown IAL:
+
+        <!-- prettier-ignore -->
+        > 본문
+        {: .prompt-tip }
+
+    Prettier treats the IAL line as a lazy continuation of the blockquote and
+    rewrites it to `> {: .prompt-tip }`, which makes kramdown attach the class to
+    the inner <p> instead of the <blockquote>. The theme selector is
+    blockquote[class^='prompt-'], so the styling silently disappears — no error,
+    no visible marker in the diff beyond one added '> '. The only reliable guard
+    is the prettier-ignore comment, so a missing one is reported before it fires.
+    """
+    issues = []
+    lines = body.split('\n')
+    broken = unguarded = 0
+
+    for i, ln in enumerate(lines):
+        if re.match(r'^>\s*\{:\s*\.prompt-\w+\s*\}\s*$', ln):
+            broken += 1
+        elif re.match(r'^\{:\s*\.prompt-\w+\s*\}\s*$', ln):
+            # Walk back past the blockquote this IAL closes.
+            j = i - 1
+            while j >= 0 and lines[j].startswith('>'):
+                j -= 1
+            if j < 0 or lines[j].strip() != '<!-- prettier-ignore -->':
+                unguarded += 1
+
+    if broken:
+        issues.append(
+            f"콜아웃 깨짐 {broken}건 — '> {{: .prompt-... }}' 형태. "
+            "'>' 를 지우고 앞줄에 <!-- prettier-ignore --> 추가"
+        )
+    if unguarded:
+        issues.append(
+            f"콜아웃 prettier-ignore 누락 {unguarded}건 — 다음 저장 때 깨짐"
+        )
     return issues
 
 

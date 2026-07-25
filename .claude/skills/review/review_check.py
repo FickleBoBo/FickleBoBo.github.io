@@ -7,10 +7,18 @@ unfilled 복잡도 table, missing sections, TODO title/link) and prints a chunk 
 for the Sonnet review agents. It does NOT judge content — that's the LLM's job
 (see SKILL.md).
 
+The `fill` subcommand writes complexity values the reviewer worked out into the
+skeleton table. The reviewer decides the values; every mechanical concern (which
+rows are blank, whether the count lines up, ordering, refusing to touch published
+posts or already-filled tables) is settled here rather than in prose — same split
+as tag.py, where the LLM picks the tags and the script does the writing.
+
 Usage:
     python3 review_check.py                # all drafts in _drafts/
     python3 review_check.py 120807         # this problem (drafts first, then posts)
     python3 review_check.py 120807 1929
+    python3 review_check.py fill 120809 "O(N)" "O(1)"
+    python3 review_check.py fill 12900 "O(N)" "O(N)" "O(N)" "O(1)"   # 접근 2개, 순서대로
 """
 
 import re
@@ -198,6 +206,100 @@ def _has_empty_code_block(section):
     return False
 
 
+# ── fill: write complexity values into the skeleton table ──
+def _blank_row_indices(lines):
+    """Line indices of blank data rows inside the 복잡도 section, in file order.
+
+    Working on whole-file line indices (rather than the section text) is what
+    makes the write unambiguous: with several approaches every blank row is the
+    byte-identical string '|  |  |', so nothing but position can tell them apart.
+    """
+    idxs, in_sec = [], False
+    for i, line in enumerate(lines):
+        m = re.match(r'^##\s+\d+\.\s+(.+?)\s*$', line)
+        if m:
+            in_sec = m.group(1).strip() == '복잡도'
+            continue
+        if not in_sec:
+            continue
+        s = line.strip()
+        if not s.startswith('|'):
+            continue
+        cells = [c.strip() for c in s.strip('|').split('|')]
+        if not ''.join(cells):  # header/separator rows always have content
+            idxs.append(i)
+    return idxs
+
+
+def _as_math(value):
+    """'O(N)' / '$O(N)$' -> '$O(N)$'. The published tables all use $…$."""
+    v = value.strip()
+    if v.startswith('$') and v.endswith('$') and len(v) > 1:
+        return v
+    return f'${v}$'
+
+
+def find_draft(number):
+    """fill only ever touches _drafts/ — see cmd_fill."""
+    for p in sorted(DRAFTS_DIR.rglob("*.md")):
+        if is_ps(p, DRAFTS_DIR) and filename_number(p) == number:
+            return p
+    return None
+
+
+def cmd_fill(args):
+    if len(args) < 3:
+        print("사용법: review_check.py fill <번호> <시간> <공간> [<시간> <공간> ...]")
+        return 2
+    number, values = args[0], args[1:]
+
+    if len(values) % 2:
+        print(f"거부: 값이 {len(values)}개 — 시간·공간을 쌍으로 넘겨야 합니다.")
+        return 1
+    pairs = list(zip(values[::2], values[1::2]))
+
+    path = find_draft(number)
+    if path is None:
+        # Published posts are deliberately out of reach: fill is for skeletons.
+        if any(is_ps(p, POSTS_DIR) and filename_number(p) == number
+               for p in POSTS_DIR.rglob("*.md")):
+            print(f"거부: {number}번은 이미 _posts/에 발행된 글입니다. "
+                  "발행본 수정은 이 명령의 범위 밖입니다.")
+        else:
+            print(f"거부: _drafts/에서 {number}번 초안을 찾을 수 없습니다.")
+        return 1
+
+    lines = path.read_text(encoding='utf-8').split('\n')
+    idxs = _blank_row_indices(lines)
+
+    if not idxs:
+        print(f"거부: {path.name} — 복잡도 표에 빈 행이 없습니다. "
+              "(이미 채워졌거나 표가 없음. 채워진 값은 덮어쓰지 않습니다.)")
+        return 1
+    if len(idxs) != len(pairs):
+        print(f"거부: 빈 행 {len(idxs)}개인데 값은 {len(pairs)}쌍입니다. "
+              "접근(풀이) 수만큼 순서대로 넘기십시오.")
+        return 1
+
+    for i, (t, s) in zip(idxs, pairs):
+        lines[i] = f"| {_as_math(t)} | {_as_math(s)} |"
+    path.write_text('\n'.join(lines), encoding='utf-8')
+
+    print(f"채움: {path.relative_to(BLOG_DIR)}")
+    for n, (t, s) in enumerate(pairs, 1):
+        label = f"풀이 {n}" if len(pairs) > 1 else "복잡도"
+        print(f"  {label}: 시간 {_as_math(t)} / 공간 {_as_math(s)}")
+
+    remaining = check(path.read_text(encoding='utf-8'))
+    if any('복잡도' in it for it in remaining):
+        print("  ⚠ 기록 후에도 '복잡도 표 미기입'이 남아 있습니다 — 확인 필요.")
+        return 1
+    print("  ✓ 복잡도 미기입 해소")
+    if remaining:
+        print("  (남은 다른 이슈: " + ", ".join(remaining) + ")")
+    return 0
+
+
 # ── Chunk planning ─────────────────────────────
 def plan_chunks(file_info):
     chunks, cur, cur_chars = [], [], 0
@@ -214,10 +316,14 @@ def plan_chunks(file_info):
 
 # ── Main ───────────────────────────────────────
 def main():
-    targets = find_targets(sys.argv[1:])
+    args = sys.argv[1:]
+    if args and args[0] == 'fill':
+        return cmd_fill(args[1:])
+
+    targets = find_targets(args)
     if not targets:
         print("검사할 포스트가 없습니다.")
-        return
+        return 0
 
     print("=== 기계 검사 ===")
     file_info = []
@@ -240,7 +346,8 @@ def main():
         print(f"\n청크 {i} ({len(ch)}개, {total:,}자):")
         for path, _ in ch:
             print(f"  {path}")  # absolute path — pass to the Sonnet agent
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

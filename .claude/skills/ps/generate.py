@@ -13,7 +13,10 @@ Usage:
     python3 generate.py 2026-07-24 --review       # include a 리뷰 section
 
 Anything that already has a draft (_drafts/) or a published post (_posts/) is
-skipped, so re-running is safe and only fills in what's missing.
+skipped, so re-running is safe and only fills in what's missing. Existence is
+matched on the problem number across every date — one post per problem, since
+the slug carries no date — with one exception: a draft still titled TODO (a
+title fetch that failed earlier) gets retried and renamed in place.
 
 Sections: 아이디어 / 복잡도 / 코드  (+ 리뷰 only with --review).
 Solutions are grouped by approach (Main / Main2 / ...); languages within one
@@ -267,6 +270,36 @@ def _complexity_table():
     return ['| 시간복잡도 | 공간복잡도 |', '| :-: | :-: |', '|  |  |']
 
 
+def retitle_draft(path, platform, number, title, link):
+    """Fill a real title into a draft that was written with a TODO placeholder.
+
+    Only the front matter title line, a TODO problem link, and the filename are
+    touched — the body (아이디어/복잡도 the user may already have written) is
+    left exactly as it is.
+    """
+    plat = PLATFORMS[platform]
+    text = path.read_text(encoding='utf-8')
+
+    lines = text.split('\n')
+    for i, ln in enumerate(lines):
+        if ln.startswith('title: "') and '- TODO' in ln:
+            # Every title_format ends in '- {title}', so replacing the first
+            # '- TODO' keeps the trailing [Java][C++] language tags intact.
+            lines[i] = ln.replace('- TODO', '- ' + title.replace('"', '\\"'), 1)
+            break
+    text = '\n'.join(lines)
+    text = text.replace('[문제 링크](TODO)', f'[문제 링크]({link})')
+
+    date_part = path.name[:10]  # YYYY-MM-DD — keep the draft's original date
+    new_path = path.with_name(
+        f"{date_part}-{plat['name_ko']} {number} {sanitize(title)}.md"
+    )
+    new_path.write_text(text, encoding='utf-8')
+    if new_path != path:
+        path.unlink()
+    return new_path
+
+
 def generate_post(date_str, platform, number, title, groups, link, include_review=False):
     plat = PLATFORMS[platform]
 
@@ -356,12 +389,12 @@ def process_day(year, month, day, filter_numbers, include_review=False):
 
     if date_str < CUTOFF_DATE:
         print(f"[SKIP] {date_str} < cutoff {CUTOFF_DATE}")
-        return 0
+        return 0, 0
 
     day_dir = ALGO_DIR / f"{year}-{month:02d}" / "src" / f"day_{day:02d}"
     if not day_dir.exists():
         print(f"Error: Not found: {day_dir}")
-        return 0
+        return 0, 0
 
     # Scan problem directories
     problems = []
@@ -382,27 +415,48 @@ def process_day(year, month, day, filter_numbers, include_review=False):
 
     if not problems:
         print(f"No problems found in {day_dir}")
-        return 0
+        return 0, 0
 
     print(f"Found {len(problems)} problem(s) in {day_dir}\n")
 
     generated = []
+    retitled = []
     for platform, number, problem_dir in problems:
         plat = PLATFORMS[platform]
         print(f"[{plat['name_ko']} {number}]")
 
-        # Skip early (before any network title fetch) if a draft/post already
-        # exists for this date+number. Glob-match on the number so a later-edited
-        # title — or a filled-in TODO — still counts as existing.
+        # Match on the number across every date, not just this one: the slug is
+        # date-independent (programmers-120583), so a second draft for a problem
+        # re-solved on a later day would collide on URL. One post per problem.
+        # Globbing the number (not the title) also means a hand-edited title
+        # still counts as existing.
         draft_dir = DRAFTS_DIR / plat['post_dir']
         post_subdir = POSTS_DIR / plat['post_dir']
-        exist_glob = f"{date_str}-{plat['name_ko']} {number} *.md"
-        if list(draft_dir.glob(exist_glob)) or list(post_subdir.glob(exist_glob)):
+        exist_glob = f"*-{plat['name_ko']} {number} *.md"
+        drafts = sorted(draft_dir.glob(exist_glob))
+        existing = drafts + sorted(post_subdir.glob(exist_glob))
+        # A draft left with a TODO title (transient title-fetch failure) is not
+        # "done" — it gets a retry instead of being skipped forever.
+        todo_drafts = [p for p in drafts if p.stem.endswith(f" {number} TODO")]
+        if existing and not todo_drafts:
             print("  SKIP (already exists)")
             continue
 
         # Fetch title
         title, extra = fetch_title(platform, number)
+
+        if todo_drafts:
+            if not title:
+                print("  SKIP (title still TODO — fetch failed again)")
+                continue
+            link = get_problem_link(platform, number, slug=extra)
+            for p in todo_drafts:
+                new_path = retitle_draft(p, platform, number, title, link)
+                print(f"  Retitled TODO -> {title}: "
+                      f"_drafts/{plat['post_dir']}/{new_path.name}")
+            retitled.append(todo_drafts[0])
+            continue
+
         if not title:
             title = "TODO"
             print("  Title: TODO (manual input needed)")
@@ -434,7 +488,7 @@ def process_day(year, month, day, filter_numbers, include_review=False):
         print(f"  Created: _drafts/{plat['post_dir']}/{filename}")
         generated.append(draft_path)
 
-    return len(generated)
+    return len(generated), len(retitled)
 
 
 def all_day_targets():
@@ -514,10 +568,16 @@ def main():
             sys.exit(1)
 
     total = 0
+    total_retitled = 0
     for year, month, day in day_targets:
-        total += process_day(year, month, day, filter_numbers, include_review)
+        made, fixed = process_day(year, month, day, filter_numbers, include_review)
+        total += made
+        total_retitled += fixed
 
-    print(f"\nDone. Generated {total} post(s).")
+    summary = f"\nDone. Generated {total} post(s)."
+    if total_retitled:
+        summary += f" Retitled {total_retitled} TODO draft(s)."
+    print(summary)
 
 
 if __name__ == '__main__':

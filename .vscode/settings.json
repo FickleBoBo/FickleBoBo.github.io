@@ -6,9 +6,14 @@
   "files.associations": {
     "*.html": "liquid"
   },
-  "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-  },
+  // 마크다운도 Prettier로 포맷팅한다(테마 기본값은 markdown-all-in-one이지만
+  // 표 정렬만 해서 빈 줄 정리가 안 됨). 대신 Prettier는 blockquote 뒤의
+  // kramdown IAL을 blockquote 안으로 끌어들여 `> {: .prompt-tip }`으로 만드는데,
+  // 그러면 클래스가 안쪽 <p>에 붙어 콜아웃 스타일이 사라진다.
+  // 콜아웃 앞에는 반드시 <!-- prettier-ignore --> 를 붙일 것.
+  // "[markdown]": {
+  //   "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+  // },
   // Formatter
   "[html][liquid]": {
     "editor.defaultFormatter": "Shopify.theme-check-vscode"

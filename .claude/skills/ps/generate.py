@@ -175,7 +175,7 @@ def _cf_problemset():
 
 
 def fetch_title_cf(number):
-    m = re.match(r'(\d+)([A-Za-z]\d?)', str(number))
+    m = re.fullmatch(r'(\d+)([A-Za-z]\d*)', str(number))
     if not m:
         return None, None
     contest_id, index = int(m.group(1)), m.group(2).upper()
@@ -220,7 +220,7 @@ def get_problem_link(platform, number, slug=None):
     if platform == 'leet':
         return f"https://leetcode.com/problems/{slug}/" if slug else "TODO"
     if platform == 'cofo':
-        m = re.match(r'(\d+)([A-Za-z]\d?)', str(number))
+        m = re.fullmatch(r'(\d+)([A-Za-z]\d*)', str(number))
         if m:
             return (
                 f"https://codeforces.com/problemset/problem/"

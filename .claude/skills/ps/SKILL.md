@@ -46,7 +46,8 @@ python3 .claude/skills/ps/generate.py $ARGUMENTS
 
 - 프로그래머스: 각 사이트에서 정상 조회된다.
 - 리트코드: `questionFrontendId`(사용자에게 보이는 번호)로 조회. 검색이 안 잡히면 `TODO`.
-- 코드포스: API 조회를 시도하되 실패 시 `TODO`.
+- 코드포스: `problemset.problems`(아카이브 전체)로 조회. 아카이브에 아직 없는 최신 대회·gym
+  문제만 `contest.standings`로 폴백한다. 둘 다 실패하면 `TODO`.
 
 ## 보고
 

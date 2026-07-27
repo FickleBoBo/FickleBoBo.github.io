@@ -93,9 +93,9 @@ FILENAME_SANITIZE = {
 
 
 # ── HTTP helpers ───────────────────────────────
-def api_get(url):
+def api_get(url, timeout=10):
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req, timeout=10) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode('utf-8'))
 
 
@@ -159,14 +159,38 @@ def fetch_title_leet(number):
     return None, None
 
 
+_CF_PROBLEMSET = None
+
+
+def _cf_problemset():
+    # Whole archive in one call (~2MB). Cached so a run with several Codeforces
+    # problems only pays for it once.
+    global _CF_PROBLEMSET
+    if _CF_PROBLEMSET is None:
+        data = api_get(
+            "https://codeforces.com/api/problemset.problems", timeout=30
+        )
+        _CF_PROBLEMSET = data['result']['problems']
+    return _CF_PROBLEMSET
+
+
 def fetch_title_cf(number):
     m = re.match(r'(\d+)([A-Za-z]\d?)', str(number))
     if not m:
         return None, None
-    contest_id, index = m.group(1), m.group(2).upper()
+    contest_id, index = int(m.group(1)), m.group(2).upper()
+
+    for p in _cf_problemset():
+        if p.get('contestId') == contest_id and p.get('index') == index:
+            return p['name'], None
+
+    # Not in the archive yet (contest too recent, or gym). Fall back to the
+    # contest's own standings. NOTE: for non-gym contests Codeforces rejects
+    # this call outright if *any* extra query parameter is present — no
+    # from/count paging allowed, so the full standings come down (~8MB).
     data = api_get(
-        f"https://codeforces.com/api/contest.standings?"
-        f"contestId={contest_id}&from=1&count=1"
+        f"https://codeforces.com/api/contest.standings?contestId={contest_id}",
+        timeout=60,
     )
     for p in data['result']['problems']:
         if p['index'] == index:

@@ -63,12 +63,10 @@ class Solution {
 #include <bits/stdc++.h>
 using namespace std;
 
-int cnt[26];
-
 class Solution {
    public:
     bool isAnagram(string s, string t) {
-        memset(cnt, 0, sizeof(cnt));
+        int cnt[26] = {};
 
         for (char c : s) cnt[c - 'a']++;
         for (char c : t) cnt[c - 'a']--;

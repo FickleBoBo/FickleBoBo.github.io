@@ -54,6 +54,12 @@ CUTOFF_DATE = "2026-07-24"
 #  since solved.ac is Cloudflare-blocked), and the boj branch in get_problem_link.
 
 # ── Platform / language config ─────────────────
+# title_format: '번' attaches to a number, so it is used wherever the problem is
+# identified by one (BOJ 1000번 / LeetCode 704번 / Programmers 154540번 — the
+# last is really a lesson id the site never displays, but Korean PS writing has
+# settled on referring to it that way). Codeforces is the exception: '2148A' is
+# contest id + slot letter, not a number, so it takes no suffix — and no '#'
+# either, which Codeforces uses for round numbers rather than problems.
 PLATFORMS = {
     'prms': {
         'name_ko': '프로그래머스',
@@ -74,7 +80,7 @@ PLATFORMS = {
         'post_dir': 'codeforces',
         'slug_prefix': 'codeforces',
         'category': 'Codeforces',
-        'title_format': '[Codeforces] #{num} - {title}',
+        'title_format': '[Codeforces] {num} - {title}',
     },
 }
 

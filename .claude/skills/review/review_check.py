@@ -130,6 +130,7 @@ def check(text):
                 issues.append("빈 코드블록")
 
     issues += _callout_issues(body)
+    issues += _math_spacing_issues(body)
 
     return issues
 
@@ -175,6 +176,42 @@ def _callout_issues(body):
             f"콜아웃 prettier-ignore 누락 {unguarded}건 — 다음 저장 때 깨짐"
         )
     return issues
+
+
+def _math_spacing_issues(body):
+    """Inline math must be followed by a space before a Korean particle.
+
+    The blog's settled convention is `$d$ 라`, not `$d$라` — 21 published
+    instances against 0 once the outliers were fixed. This is typography, not
+    rendering: Chirpy's MathJax takes ['$','$'] as inline delimiters and parses
+    `$x$의` fine, and kramdown passes single-$ through untouched. So nothing
+    breaks — it just reads inconsistently, which is exactly the kind of drift
+    nobody catches by eye.
+
+    Only the trailing side is checked. A missing space there comes from the
+    particle attaching to the formula, which is how Korean is normally written;
+    the leading side takes a space naturally and has never been violated.
+
+    Fenced code is skipped — a `$` there is shell/PHP, not math.
+    """
+    hits = []
+    in_fence = False
+
+    for i, line in enumerate(body.split('\n'), start=1):
+        if line.lstrip().startswith('```'):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        for m in re.finditer(r'\$[^$\n]+\$[가-힣]', line):
+            hits.append((i, m.group(0)))
+
+    if not hits:
+        return []
+
+    shown = ', '.join(f"{n}행 `{s}`" for n, s in hits[:3])
+    more = f" 외 {len(hits) - 3}건" if len(hits) > 3 else ""
+    return [f"수식 뒤 공백 없음 {len(hits)}건 — {shown}{more}. 조사 앞에 공백을 넣는다"]
 
 
 def _has_blank_table_row(section):

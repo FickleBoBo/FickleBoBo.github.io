@@ -110,8 +110,14 @@ def check(text):
             issues.append("아이디어 비어있음")
 
     # 복잡도: any all-blank table data row = unfilled skeleton
-    if '복잡도' in secs and _has_blank_table_row(secs['복잡도']):
-        issues.append("복잡도 표 미기입")
+    if '복잡도' in secs:
+        if _has_blank_table_row(secs['복잡도']):
+            issues.append("복잡도 표 미기입")
+        else:
+            # Only meaningful once values exist; 미기입 already covers the empty case.
+            n = _missing_var_defs(secs['복잡도'])
+            if n:
+                issues.append(f"복잡도 기호 정의 없음 (표 {n}개)")
 
     # 코드: fenced blocks present, each with a language tag and non-empty body
     if '코드' in secs:
@@ -206,6 +212,45 @@ def _has_empty_code_block(section):
     return False
 
 
+# ── 복잡도 기호 정의 ───────────────────────────
+def _symbols(row):
+    """Variable letters in a complexity expression. 'O' and \\commands don't count.
+
+    Adjacent letters matter — $O(MN \\log N)$ must yield both M and N — so this
+    strips LaTeX commands first and then takes every remaining letter rather than
+    trying to match word boundaries.
+    """
+    return sorted(set(re.findall(r'[A-Za-z]', re.sub(r'\\[a-zA-Z]+', ' ', row))) - {'O'})
+
+
+def _is_separator(cells_line):
+    return bool(re.fullmatch(r'\|[\s:|-]+\|', cells_line) and re.search(r'[-:]', cells_line))
+
+
+def _missing_var_defs(section):
+    """Count filled complexity rows that use symbols but carry no definition note.
+
+    A table reading $O(MN \\log N)$ is unreadable when nothing says what M and N
+    are — 42748 shipped in exactly that state. The convention is a '> …' note
+    directly under each table, so this flags the tables still missing one.
+    Symbol-free rows ($O(1)$ only) are skipped: there is nothing to define.
+    """
+    lines = section.split('\n')
+    missing = 0
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if not s.startswith('|') or '시간복잡도' in s or _is_separator(s):
+            continue
+        if not _symbols(s):
+            continue
+        j = i + 1
+        if j < len(lines) and not lines[j].strip():
+            j += 1
+        if not (j < len(lines) and lines[j].lstrip().startswith('>')):
+            missing += 1
+    return missing
+
+
 # ── fill: write complexity values into the skeleton table ──
 def _blank_row_indices(lines):
     """Line indices of blank data rows inside the 복잡도 section, in file order.
@@ -291,10 +336,116 @@ def cmd_fill(args):
         print(f"  {label}: 시간 {_as_math(t)} / 공간 {_as_math(s)}")
 
     remaining = check(path.read_text(encoding='utf-8'))
-    if any('복잡도' in it for it in remaining):
+    # Match '미기입' specifically: '복잡도 기호 정의 없음' also contains '복잡도',
+    # and that one is expected here — vars writes it in a separate step.
+    if any('복잡도 표 미기입' in it for it in remaining):
         print("  ⚠ 기록 후에도 '복잡도 표 미기입'이 남아 있습니다 — 확인 필요.")
         return 1
     print("  ✓ 복잡도 미기입 해소")
+    if any('기호 정의' in it for it in remaining):
+        print(f"  → 다음: review_check.py vars {number} \"<기호 정의>\"")
+    if remaining:
+        print("  (남은 다른 이슈: " + ", ".join(remaining) + ")")
+    return 0
+
+
+# ── vars: write the symbol-definition note under each table ──
+def _data_row_indices(lines):
+    """Whole-file line indices of every 복잡도 table's data row, in file order."""
+    idxs, in_sec = [], False
+    for i, line in enumerate(lines):
+        m = re.match(r'^##\s+\d+\.\s+(.+?)\s*$', line)
+        if m:
+            in_sec = m.group(1).strip() == '복잡도'
+            continue
+        if not in_sec:
+            continue
+        s = line.strip()
+        if not s.startswith('|') or '시간복잡도' in s or _is_separator(s):
+            continue
+        idxs.append(i)
+    return idxs
+
+
+def find_post(number):
+    """vars reaches published posts too — unlike fill, this only adds a reading aid."""
+    for root in (DRAFTS_DIR, POSTS_DIR):
+        for p in sorted(root.rglob("*.md")):
+            if is_ps(p, root) and filename_number(p) == number:
+                return p
+    return None
+
+
+def cmd_vars(args):
+    if len(args) < 2:
+        print('사용법: review_check.py vars <번호> "<정의>" ["<정의2>" ...]')
+        print('  예: review_check.py vars 42748 "$N$ = `array` 길이, $M$ = `commands` 개수"')
+        return 2
+    number, defs = args[0], args[1:]
+
+    path = find_post(number)
+    if path is None:
+        print(f"거부: {number}번 포스트를 _drafts/·_posts/ 어디에서도 찾을 수 없습니다.")
+        return 1
+
+    lines = path.read_text(encoding='utf-8').split('\n')
+    idxs = _data_row_indices(lines)
+    if not idxs:
+        print(f"거부: {path.name} — 복잡도 표를 찾을 수 없습니다.")
+        return 1
+
+    sym_lists = [_symbols(lines[i]) for i in idxs]
+    blank = [n for n, i in enumerate(idxs, 1)
+             if not ''.join(c.strip() for c in lines[i].strip('|').split('|'))]
+    if blank:
+        print(f"거부: 표 {blank}가 비어 있습니다 — fill로 값을 먼저 채우십시오.")
+        return 1
+
+    need = [n for n, s in enumerate(sym_lists, 1) if s]
+    if len(defs) != len(need):
+        print(f"거부: 기호가 있는 표는 {len(need)}개인데 정의는 {len(defs)}개입니다.")
+        for n, s in enumerate(sym_lists, 1):
+            print(f"   표 {n}: {lines[idxs[n - 1]].strip()}   기호={s or '없음(생략 대상)'}")
+        return 1
+
+    # Every symbol in a row must appear in its note, or the note doesn't do its job.
+    for n, d in zip(need, defs):
+        bare = re.sub(r'\\[a-zA-Z]+', ' ', d)
+        absent = [s for s in sym_lists[n - 1] if s not in bare]
+        if absent:
+            print(f"거부: 표 {n}의 기호 {absent}가 정의 문구에 없습니다.")
+            print(f"   표: {lines[idxs[n - 1]].strip()}")
+            print(f"   정의: {d}")
+            return 1
+
+    written = []
+    for n, d in sorted(zip(need, defs), reverse=True):
+        i = idxs[n - 1]
+        note = '> ' + d.strip().lstrip('>').strip()
+        j = i + 1
+        if j < len(lines) and not lines[j].strip():
+            j += 1
+        if j < len(lines) and lines[j].lstrip().startswith('>'):
+            replaced = lines[j] != note
+            lines[j] = note
+            written.append((n, note, '교체' if replaced else '변경 없음'))
+        else:
+            lines[i + 1:i + 1] = ['', note]
+            written.append((n, note, '추가'))
+
+    path.write_text('\n'.join(lines), encoding='utf-8')
+
+    where = '_posts' if POSTS_DIR in path.parents else '_drafts'
+    print(f"기호 정의: {path.relative_to(BLOG_DIR)}  [{where}]")
+    for n, note, how in sorted(written):
+        label = f"풀이 {n}" if len(idxs) > 1 else "복잡도"
+        print(f"  {label} {how}: {note}")
+
+    remaining = check(path.read_text(encoding='utf-8'))
+    if any('기호 정의' in it for it in remaining):
+        print("  ⚠ 기록 후에도 '복잡도 기호 정의 없음'이 남아 있습니다 — 확인 필요.")
+        return 1
+    print("  ✓ 기호 정의 완료")
     if remaining:
         print("  (남은 다른 이슈: " + ", ".join(remaining) + ")")
     return 0
@@ -319,6 +470,8 @@ def main():
     args = sys.argv[1:]
     if args and args[0] == 'fill':
         return cmd_fill(args[1:])
+    if args and args[0] == 'vars':
+        return cmd_vars(args[1:])
 
     targets = find_targets(args)
     if not targets:

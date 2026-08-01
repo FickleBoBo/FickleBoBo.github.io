@@ -19,7 +19,7 @@ title: BoBo World # the main title
 tagline: back to basics # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
-  A minimal, responsive and feature-rich Jekyll theme for technical writing.
+  개발/IT 전반을 기록하는 개인 기술 블로그. 지금은 PS(프로그래머스·리트코드·코드포스) 풀이 위주로 채워지고 있습니다.
 
 # Fill in the protocol & hostname for your site.
 # E.g. 'https://username.github.io', note that it does not end with a '/'.

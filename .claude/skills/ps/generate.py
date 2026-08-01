@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate PS blog post skeletons from the Algorithm solution repo.
+Generate PS blog post skeletons from the PS solution repo.
 
 Usage:
     python3 generate.py [<YYYY-MM-DD|YYYY-MM>] [problem_numbers...] [--review]
@@ -23,8 +23,8 @@ Solutions are grouped by approach (Main / Main2 / ...); languages within one
 approach share a 풀이 header and one complexity table. With multiple approaches
 both 복잡도 and 코드 split into 풀이 1, 풀이 2, ... with matching numbers.
 
-Reads solutions from  ~/Desktop/GITHUB/Algorithm/{YYYY-MM}/src/day_{N}/{platform}_{number}/
-Writes skeletons to   ~/Desktop/GITHUB/FickleBoBo.github.io/_drafts/{platform_dir}/
+Reads solutions from  ~/Desktop/github/PS/{YYYY-MM}/src/day_{N}/{platform}_{number}/
+Writes skeletons to   ~/Desktop/github/FickleBoBo.github.io/_drafts/{platform_dir}/
 
 Platforms: prms / leet / cofo   (BOJ and SWEA intentionally not supported — see NOTE below)
 Only solutions dated on/after 2026-07-24 are processed.
@@ -38,8 +38,8 @@ from pathlib import Path
 
 # ── Paths ──────────────────────────────────────
 HOME = Path.home()
-ALGO_DIR = HOME / "Desktop" / "GITHUB" / "Algorithm"
-BLOG_DIR = HOME / "Desktop" / "GITHUB" / "FickleBoBo.github.io"
+ALGO_DIR = HOME / "Desktop" / "github" / "PS"
+BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
 DRAFTS_DIR = BLOG_DIR / "_drafts"
 POSTS_DIR = BLOG_DIR / "_posts"
 
@@ -432,6 +432,12 @@ def process_day(year, month, day, filter_numbers, include_review=False):
         if not entry.is_dir():
             continue
         name_lower = entry.name.lower()
+        # `_fail` (attempted, unsolved) / `_ignore` (solved, opt out of a post)
+        # mark a dir as permanently out of scope for /ps — never generate.
+        if name_lower.endswith('_fail') or name_lower.endswith('_ignore'):
+            if not filter_numbers:
+                print(f"  [SKIP] {entry.name}")
+            continue
         for prefix in PLATFORMS:
             if name_lower.startswith(f'{prefix}_'):
                 number = entry.name[len(prefix) + 1:]
@@ -524,7 +530,7 @@ def process_day(year, month, day, filter_numbers, include_review=False):
 def all_day_targets():
     """(year, month, day) for every day_N dir on/after CUTOFF, across all months.
 
-    Used by the no-argument path: sweep the whole Algorithm repo since the blog
+    Used by the no-argument path: sweep the whole PS repo since the blog
     restart and let process_day skip anything that already has a draft/post.
     """
     cutoff_month = CUTOFF_DATE[:7]  # 'YYYY-MM'

@@ -9,7 +9,7 @@ Usage:
 
 For each problem it:
   1. finds the draft in _drafts/{platform}/ by problem number,
-  2. commits the matching source dir in the Algorithm repo,
+  2. commits the matching source dir in the PS repo,
   3. moves the draft to _posts/{platform}/,
   4. commits the moved post in the Blog repo (rolls the move back on failure).
 
@@ -25,8 +25,8 @@ from pathlib import Path
 
 # ── Paths ──────────────────────────────────────
 HOME = Path.home()
-ALGO_DIR = HOME / "Desktop" / "GITHUB" / "Algorithm"
-BLOG_DIR = HOME / "Desktop" / "GITHUB" / "FickleBoBo.github.io"
+ALGO_DIR = HOME / "Desktop" / "github" / "PS"
+BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
 DRAFTS_DIR = BLOG_DIR / "_drafts"
 POSTS_DIR = BLOG_DIR / "_posts"
 
@@ -44,7 +44,7 @@ PS_DIRS = {'programmers', 'leetcode', 'codeforces'}
 # ── Claude trailer ─────────────────────────────
 # This repo is exempt from the "leave no Claude trace" rule, so blog commits
 # carry the trailer. Model-agnostic on purpose: the script doesn't know which
-# model invoked it. Flip ALGO_TRAILER to False to keep it off the Algorithm repo.
+# model invoked it. Flip ALGO_TRAILER to False to keep it off the PS repo.
 CLAUDE_TRAILER = "Co-Authored-By: Claude <noreply@anthropic.com>"
 BLOG_TRAILER = True
 ALGO_TRAILER = True
@@ -209,13 +209,13 @@ def publish_one(number):
     commit_msg = f"feat: {title}"
     print(f"[2] 커밋 메시지: {commit_msg}")
 
-    # Algorithm repo (before the move — nothing to roll back if it fails).
+    # PS repo (before the move — nothing to roll back if it fails).
     algo_rel = f"{parsed['year_month']}/src/day_{parsed['day']:02d}/{parsed['prefix']}_{parsed['number']}"
     algo_committed = False
     if not (ALGO_DIR / algo_rel).exists():
-        print(f"[3] Algorithm 경로 없음, 건너뜀: {algo_rel}")
+        print(f"[3] PS 경로 없음, 건너뜀: {algo_rel}")
     else:
-        print("[3] Algorithm 레포 커밋")
+        print("[3] PS 레포 커밋")
         algo_committed = git_commit(ALGO_DIR, [algo_rel], commit_msg, ALGO_TRAILER)
 
     # Move draft -> posts, mirroring the platform subdir it already lives in.
@@ -229,7 +229,7 @@ def publish_one(number):
     slug = extract_frontmatter(post, "slug")
     moved_names, assets_files = move_assets(slug)
 
-    # Blog repo (roll post + assets + the Algorithm commit back if it fails).
+    # Blog repo (roll post + assets + the PS commit back if it fails).
     print("[5] Blog 레포 커밋")
     blog_files = [str(post.relative_to(BLOG_DIR)), str(draft.relative_to(BLOG_DIR))]
     blog_files.extend(assets_files)
@@ -244,7 +244,7 @@ def publish_one(number):
         if algo_committed:
             subprocess.run(["git", "reset", "--soft", "HEAD~1"], cwd=ALGO_DIR,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print("  (롤백: Algorithm 커밋 취소 — git reset --soft HEAD~1)")
+            print("  (롤백: PS 커밋 취소 — git reset --soft HEAD~1)")
         raise
 
     print("완료.\n")
@@ -268,7 +268,7 @@ def main():
 
     # Summary table
     print(f"{'='*50}\n결과")
-    print("| # | 문제 | Algorithm | Blog |")
+    print("| # | 문제 | PS | Blog |")
     print("| :-: | :-- | :-: | :-: |")
     for i, r in enumerate(results, 1):
         algo = "✅" if r['algo'] else "-"

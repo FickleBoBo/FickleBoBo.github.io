@@ -14,3 +14,8 @@
 *.png binary
 *.jpg binary
 *.ico binary
+
+# GitHub Linguist treats Markdown as prose and excludes it from the
+# repo's language stats by default; this blog is mostly Markdown posts.
+*.md linguist-detectable=true
+README.md linguist-detectable=false

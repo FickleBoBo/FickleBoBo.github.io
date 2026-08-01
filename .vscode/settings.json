@@ -1,35 +1,41 @@
 {
-  // Prettier
+  // Prettier — 기본 포맷터
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+
   // Shopify Liquid
   "files.associations": {
     "*.html": "liquid"
   },
-  // 마크다운도 Prettier로 포맷팅한다(테마 기본값은 markdown-all-in-one이지만
-  // 표 정렬만 해서 빈 줄 정리가 안 됨). 대신 Prettier는 blockquote 뒤의
-  // kramdown IAL을 blockquote 안으로 끌어들여 `> {: .prompt-tip }`으로 만드는데,
-  // 그러면 클래스가 안쪽 <p>에 붙어 콜아웃 스타일이 사라진다.
-  // 콜아웃 앞에는 반드시 <!-- prettier-ignore --> 를 붙일 것.
-  // "[markdown]": {
-  //   "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-  // },
-  // Formatter
+
+  // 마크다운도 Prettier로 포맷한다(테마 기본값 markdown-all-in-one은 표 정렬만 하고
+  // 빈 줄 정리를 안 함). 단, Prettier는 blockquote 뒤 kramdown IAL을 안으로 끌어들여
+  // `> {: .prompt-tip }`을 만들어 콜아웃 클래스가 빗나가게 하므로, 콜아웃 앞에는
+  // 반드시 <!-- prettier-ignore -->를 붙일 것.
+
+  // Formatter (언어별 오버라이드)
   "[html][liquid]": {
     "editor.defaultFormatter": "Shopify.theme-check-vscode"
   },
   "[shellscript]": {
     "editor.defaultFormatter": "mkhl.shfmt"
   },
-  // Disable vscode built-in stylelint
+
+  // Stylelint (VSCode 내장 css/scss/less 검증 끄고 stylelint로 대체)
   "css.validate": false,
   "scss.validate": false,
   "less.validate": false,
-  // Stylint extension settings
   "stylelint.snippet": ["css", "scss"],
   "stylelint.validate": ["css", "scss"],
+
   // Run tasks in macOS
   "terminal.integrated.profiles.osx": {
     "zsh": { "path": "/bin/zsh", "args": ["-l", "-i"] }
+  },
+
+  // Markdownlint: `[Java][C++]` 같은 언어 태그 표기를 정의 안 된 레퍼런스 링크로
+  // 오인해 MD052 오탐을 낸다(이 블로그 컨벤션이지 실제 링크 아님) — 이 워크스페이스만 끔.
+  "markdownlint.config": {
+    "MD052": false
   }
 }

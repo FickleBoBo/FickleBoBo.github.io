@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 HOME = Path.home()
-BLOG_DIR = HOME / "Desktop" / "GITHUB" / "FickleBoBo.github.io"
+BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
 DRAFTS_DIR = BLOG_DIR / "_drafts"
 POSTS_DIR = BLOG_DIR / "_posts"
 PS_DIRS = {'programmers', 'leetcode', 'codeforces'}

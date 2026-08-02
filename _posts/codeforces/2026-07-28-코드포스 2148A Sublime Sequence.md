@@ -3,7 +3,7 @@ title: "[Codeforces] 2148A - Sublime Sequence [Java][C++]"
 slug: codeforces-2148a
 date: 2026-07-28
 categories: [PS, Codeforces]
-tags: [math]
+tags: [ad hoc, math]
 toc: true
 math: true
 ---

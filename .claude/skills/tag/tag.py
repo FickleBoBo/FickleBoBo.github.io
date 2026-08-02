@@ -174,7 +174,7 @@ def audit_post(path, tags):
     found = []
     post_tags = read_post_tags(path)
     if post_tags is None:
-        return [f"front matter 없음"]
+        return ["front matter 없음"]
     if not post_tags:
         return ["tags 비어있음"]
     if post_tags == [UNLINKED]:
@@ -198,13 +198,36 @@ def audit_post(path, tags):
 
 
 # ── Commands ───────────────────────────────────
+def _suggest(tag, tags):
+    """A near-miss for a rejected tag: the fullwidth/plain slash swap, or case.
+
+    'hash set/hash map' is the mistake this exists for — the vocabulary uses
+    U+FF0F, which looks identical in most fonts and is not on the keyboard.
+    """
+    for cand in (tag.replace('/', '／'), tag.replace('／', '/'), tag.lower()):
+        if cand != tag and cand in tags:
+            return cand
+    return None
+
+
 def cmd_apply(number, leaves):
     tags = parse_tags_md()
     unknown = [t for t in leaves if t not in tags]
     if unknown:
         print("Error: 어휘에 없는 태그 — tags.md에 정의된 것만 사용:")
         for t in unknown:
-            print(f"  '{t}'")
+            hint = _suggest(t, tags)
+            print(f"  '{t}'" + (f"  → '{hint}' 아닌가요?" if hint else ""))
+        sys.exit(1)
+    # auto_companion=false marks a category that exists only as a parent
+    # ('technique'). Blocking it here rather than only in the audit keeps the
+    # rule where the data is — otherwise it gets attached and flagged after.
+    blocked = [t for t in leaves if not tags[t].get('auto_companion', True)]
+    if blocked:
+        print("Error: 부착 금지 태그 (auto_companion=false — 카테고리 전용, 자식만 부착):")
+        for t in blocked:
+            children = sorted(n for n, f in tags.items() if f.get('parent') == t)
+            print(f"  '{t}' — 자식: {', '.join(children) if children else '없음'}")
         sys.exit(1)
     post = find_post(number)
     if not post:

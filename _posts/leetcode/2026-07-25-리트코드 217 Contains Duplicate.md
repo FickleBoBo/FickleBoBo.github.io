@@ -14,7 +14,7 @@ math: true
 
 ## 1. 아이디어
 
-정수 배열 `nums`에 대해 겹치는 원소가 하나라도 있으면 `true`, 없으면 `false`를 반환하는 문제로 집합을 활용하면 간단하게 해결할 수 있다. `nums`의 모든 원소를 담은 집합의 크기가 `nums`의 크기와 같으면 겹치는 원소가 없는 것이고 작다면 겹치는 원소가 하나라도 존재하는 것이다.
+정수 배열 `nums`에 대해 겹치는 원소가 하나라도 있으면 `true`, 없으면 `false`를 반환하는 문제로 집합을 활용하면 간단하게 해결할 수 있다. `nums`의 각 원소를 집합에 넣을 때 이미 집합에 존재하면 겹치는 원소가 존재하는 것이므로 `true`를 반환하고 한번도 발견한적이 없는 채 종료되면 `false`를 반환해줬다.
 
 ---
 
@@ -39,10 +39,11 @@ class Solution {
     public boolean containsDuplicate(int[] nums) {
         Set<Integer> set = new HashSet<>();
         for (int x : nums) {
+            if (set.contains(x)) return true;
             set.add(x);
         }
 
-        return set.size() != nums.length;
+        return false;
     }
 }
 ```
@@ -54,8 +55,13 @@ using namespace std;
 class Solution {
    public:
     bool containsDuplicate(vector<int>& nums) {
-        unordered_set<int> st(nums.begin(), nums.end());
-        return st.size() != nums.size();
+        unordered_set<int> st;
+        for (int x : nums) {
+            if (st.count(x)) return true;
+            st.insert(x);
+        }
+
+        return false;
     }
 };
 ```

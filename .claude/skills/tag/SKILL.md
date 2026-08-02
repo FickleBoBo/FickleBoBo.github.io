@@ -40,6 +40,10 @@ python3 .claude/skills/tag/tag.py vocab                  # 어휘 자체검증
   tree set／tree map 등)는 **문제 해결의 핵심일 때만.** 단순 보조·라이브러리 사용은 노이즈이므로 제외.
 - **`technique` 카테고리 자체는 부착 금지** — 자식(two pointers, prefix sum, binary search 등)만.
 - **multi-tag 적극**: 여러 기법이 모두 검색가치가 있으면 다 부착(예: `knapsack` + `greedy`).
+- **상위 알고리즘이 함의하는 하위 기법은 생략**: 어떤 기법이 다른 명명 알고리즘의 **표준 구성요소**로만
+  쓰였다면 별도 부착하지 않는다 — 상위 태그가 이미 그 사실을 함의하므로 자동 중복이 된다.
+  예: 크루스칼은 정의상 항상 유니온 파인드로 사이클을 거르므로 `kruskal`에 `union find`를 덧붙이지
+  않는다. **그 기법 자체가 독립적으로 풀이의 핵심일 때만** 부착한다(연결성 판별에 쓴 DSU 등).
 - **umbrella 단독은 last resort**: 적합한 specific 자식이 있으면 그것을 우선. 자식이 없고 분류
   자체가 핵심일 때만 umbrella(`graph`, `dp`, `math` 등) 단독 부착 가능.
 - **trivial 글**(알고리즘 없이 언어 사용법 수준)은 `warm up` 단독.
@@ -47,8 +51,8 @@ python3 .claude/skills/tag/tag.py vocab                  # 어휘 자체검증
   등으로 근사하고, 반복되면 어휘 신설을 사용자와 논의(선제 신설 금지).
 
 ### 입력 주의
-- `hash set／hash map`, `tree set／tree map`의 `／`는 **fullwidth 슬래시(U+FF0F)**다. 일반 `/`로
-  입력하면 어휘에 없는 태그로 처리되어 실패한다. `tags.md`에서 정확한 문자를 복사해 쓴다.
+- 태그 이름의 `／`는 **fullwidth 슬래시(U+FF0F)**다(`hash set／hash map` 등). 일반 `/`로 쓰면
+  거부되지만 스크립트가 올바른 후보를 제시하므로, 그대로 다시 실행하면 된다.
 
 ## 보고
 - 부착 후 `tag.py` 출력(이전 → 이후 태그, 확장 개수)을 그대로 전달.

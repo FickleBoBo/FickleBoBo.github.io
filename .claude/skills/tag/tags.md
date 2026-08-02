@@ -127,8 +127,8 @@ attach_when: 위상 정렬 사용
 
 [union find]
 parent: graph
-attach_when: 유니온 파인드(DSU) 사용
-note: 사용처 거의 graph 전용 (kruskal MST, connectivity 등)
+attach_when: DSU가 그 자체로 풀이의 핵심 기법일 때(연결성 판별 등). 크루스칼처럼 다른 명명 알고리즘의 표준 구현 요소로만 쓰이면 부착하지 않는다(kruskal 태그가 이미 그 사실을 함의).
+note: kruskal/MST의 구현 수단으로 쓰인 경우는 kruskal 태그로 충분 — 별도 부착 금지.
 
 [2-sat]
 parent: graph

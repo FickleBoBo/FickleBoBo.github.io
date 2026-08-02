@@ -283,7 +283,7 @@ def compute_drift(path):
               f"건너뜀 (수동 확인 필요)")
         return None
 
-    changes, missing_lang, dropped = [], [], []
+    changes, missing_lang, dropped, dropped_lang = [], [], [], []
     for idx, approach in enumerate(draft_approaches):
         if idx >= len(ps_groups):
             dropped.append(idx + 1)
@@ -298,19 +298,37 @@ def compute_drift(path):
                 changes.append({'approach_idx': idx, 'label': approach['label'],
                                  'lang': EXT_TO_LANG[ext], 'fence': fence,
                                  'old': old_code, 'new': new_code})
+        # Both directions, reported in LANG_ORDER so output is deterministic.
         extra_langs = set(ps_by_ext) - set(approach['fences'])
         if extra_langs:
             missing_lang.append((idx + 1, approach['label'],
-                                  [EXT_TO_LANG[e]['name'] for e in extra_langs]))
+                                  [l['name'] for l in LANG_ORDER if l['ext'] in extra_langs]))
+        # The draft has a language the PS repo no longer does: that fence is
+        # stale forever and no diff would ever surface it, so warn explicitly.
+        gone_langs = set(approach['fences']) - set(ps_by_ext)
+        if gone_langs:
+            dropped_lang.append((idx + 1, approach['label'],
+                                  [l['name'] for l in LANG_ORDER if l['ext'] in gone_langs]))
 
     new_approaches = ps_groups[len(draft_approaches):]
+    if new_approaches:
+        # apply_drift anchors new sections to the last code fence and the last
+        # 복잡도 table row. Without either, it would die on max()/next()/None+1,
+        # so drop the insert (keeping any code changes) and tell the user.
+        has_fence = any(a['fences'] for a in draft_approaches)
+        has_table_row = any(lines[i].strip().startswith('|')
+                            for i in range(complexity_bounds[0], complexity_bounds[1]))
+        if not has_fence or not has_table_row:
+            print(f"[경고] {parsed['number']} — 새 풀이 {len(new_approaches)}개의 삽입 지점을 "
+                  f"찾을 수 없어(코드펜스/복잡도 표 없음) 신설을 건너뜁니다 (수동 확인 필요)")
+            new_approaches = []
 
     return {
         'path': path, 'parsed': parsed, 'lines': lines,
         'code_bounds': code_bounds, 'complexity_bounds': complexity_bounds,
         'complexity_h3': complexity_h3, 'draft_approaches': draft_approaches,
         'ps_groups': ps_groups, 'changes': changes, 'new_approaches': new_approaches,
-        'missing_lang': missing_lang, 'dropped': dropped,
+        'missing_lang': missing_lang, 'dropped': dropped, 'dropped_lang': dropped_lang,
     }
 
 
@@ -327,8 +345,8 @@ def print_diff_report(drift):
     p = drift['parsed']
     print(f"\n[{p['number']}] {p['platform_ko']} {p['number']}")
 
-    if not any([drift['changes'], drift['new_approaches'],
-                drift['missing_lang'], drift['dropped']]):
+    if not any([drift['changes'], drift['new_approaches'], drift['missing_lang'],
+                drift['dropped'], drift['dropped_lang']]):
         print("  변경 없음")
         return
 
@@ -350,6 +368,11 @@ def print_diff_report(drift):
     for idx1, label, langs in drift['missing_lang']:
         tag = f"풀이 {idx1}" + (f" ({label})" if label != '풀이' else '')
         print(f"  {tag}: PS 레포에 있는 언어 {', '.join(langs)}가 드래프트엔 없음 — 수동 추가 필요")
+
+    for idx1, label, langs in drift['dropped_lang']:
+        tag = f"풀이 {idx1}" + (f" ({label})" if label != '풀이' else '')
+        print(f"  {tag}: 드래프트의 {', '.join(langs)} 코드가 PS 레포에서 사라짐 "
+              f"— 그 코드블록은 갱신되지 않습니다 (자동 삭제 안 함, 수동 확인 필요)")
 
     for idx1 in drift['dropped']:
         print(f"  풀이 {idx1}: PS 레포에서 소스가 사라짐 — 수동 확인 필요 (자동 삭제 안 함)")
@@ -466,7 +489,7 @@ def main():
                 print_apply_report(drift)
             else:
                 print(f"\n[{drift['parsed']['number']}] 변경 없음 — 건너뜀")
-            if drift['missing_lang'] or drift['dropped']:
+            if drift['missing_lang'] or drift['dropped'] or drift['dropped_lang']:
                 print("  (수동 확인 필요 항목이 있습니다 — 위 diff 모드로 다시 확인하세요)")
         else:
             print_diff_report(drift)

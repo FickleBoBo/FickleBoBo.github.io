@@ -533,6 +533,9 @@ def all_day_targets():
     Used by the no-argument path: sweep the whole PS repo since the blog
     restart and let process_day skip anything that already has a draft/post.
     """
+    if not ALGO_DIR.is_dir():
+        print(f"Error: PS 레포를 찾을 수 없습니다: {ALGO_DIR}")
+        sys.exit(1)
     cutoff_month = CUTOFF_DATE[:7]  # 'YYYY-MM'
     targets = []
     for month_dir in sorted(ALGO_DIR.iterdir()):

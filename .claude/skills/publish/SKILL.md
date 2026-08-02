@@ -35,3 +35,15 @@ python3 .claude/skills/publish/publish.py $ARGUMENTS
 
 스크립트 출력의 결과표(문제별 PS / Blog 커밋 여부)를 사용자에게 그대로 전달한다.
 초안을 못 찾거나 여러 개 매칭되면 스크립트가 멈추므로, 그 메시지를 전달하고 번호를 명확히 하도록 요청한다.
+
+## 범위 밖: 이미 발행된 글 수정
+
+`/publish`는 `_drafts/`만 다룬다. **이미 `_posts/`에 있는 글을 고치는 건 전부 수동**이며,
+`/sync`·`review_check.py fill`도 발행본을 거부한다(`vars`만 예외로 허용).
+
+- **커밋 메시지를 `feat: {title}` 그대로 쓰지 말 것** — 기존 발행 커밋과 글자 그대로 같아져
+  git log에서 구분이 안 된다. 무엇을 했는지 적는다:
+  `feat: [Programmers] 43105번 포스트에 0-패딩 근거 추가`. 트레일러는 발행과 동일하게 유지.
+- **산문 보강**(설명 추가·정정)은 순수 Edit으로 끝난다.
+- **풀이 추가**(PS 레포에 `Solution2`가 생긴 경우)는 `generate.py`와 **동일한 Java 변환을 손으로**
+  적용해야 한다 — `package ...;` 제거 + `class Solution2` → `class Solution`. 복잡도 표도 수동.

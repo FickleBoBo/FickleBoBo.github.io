@@ -44,9 +44,11 @@ class Solution {
                 stk.push(c);
             } else {
                 if (stk.isEmpty()) return false;
-                if (c == ')' && stk.pop() != '(') return false;
-                if (c == '}' && stk.pop() != '{') return false;
-                if (c == ']' && stk.pop() != '[') return false;
+
+                char x = stk.pop();
+                if (c == ')' && x != '(') return false;
+                if (c == '}' && x != '{') return false;
+                if (c == ']' && x != '[') return false;
             }
         }
 

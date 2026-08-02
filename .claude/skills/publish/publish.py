@@ -105,7 +105,9 @@ def move_assets(slug):
             shutil.move(str(f), str(pub / f.name))
             moved_names.append(f.name)
         staged.rmdir()
-        print(f"  이미지 이동: assets/{slug}/ → assets/posts/{slug}/")
+        if moved_names:
+            print(f"  이미지 이동 {len(moved_names)}개: "
+                  f"assets/{slug}/ → assets/posts/{slug}/")
     if not pub.is_dir():
         return moved_names, []
     # Stage both: the published dir (additions) and the old staging path, so a
@@ -222,25 +224,36 @@ def publish_one(number):
     post_dir = POSTS_DIR / draft.parent.name
     post_dir.mkdir(parents=True, exist_ok=True)
     post = post_dir / draft.name
-    shutil.move(str(draft), str(post))
-    print(f"[4] 이동: _drafts/ → {post.relative_to(BLOG_DIR)}")
+    # shutil.move would silently clobber an existing post of the same name.
+    if post.exists():
+        print(f"Error: 같은 이름의 발행본이 이미 있습니다: {post.relative_to(BLOG_DIR)}")
+        sys.exit(1)
 
-    # Move images alongside the post (assets/{slug}/ -> assets/posts/{slug}/).
-    slug = extract_frontmatter(post, "slug")
-    moved_names, assets_files = move_assets(slug)
-
-    # Blog repo (roll post + assets + the PS commit back if it fails).
-    print("[5] Blog 레포 커밋")
-    blog_files = [str(post.relative_to(BLOG_DIR)), str(draft.relative_to(BLOG_DIR))]
-    blog_files.extend(assets_files)
+    # Everything from the move on is rolled back together — the PS repo is
+    # already committed at this point, so a failure anywhere here (move, assets,
+    # Blog commit, Ctrl-C) must undo it too or the two repos end up half-published.
+    moved_post = False
+    moved_names, slug = [], None
     try:
+        shutil.move(str(draft), str(post))
+        moved_post = True
+        print(f"[4] 이동: _drafts/ → {post.relative_to(BLOG_DIR)}")
+
+        # Move images alongside the post (assets/{slug}/ -> assets/posts/{slug}/).
+        slug = extract_frontmatter(post, "slug")
+        moved_names, assets_files = move_assets(slug)
+
+        print("[5] Blog 레포 커밋")
+        blog_files = [str(post.relative_to(BLOG_DIR)), str(draft.relative_to(BLOG_DIR))]
+        blog_files.extend(assets_files)
         blog_committed = git_commit(BLOG_DIR, blog_files, commit_msg, BLOG_TRAILER)
-    except SystemExit:
-        draft.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(post), str(draft))
-        print(f"  (롤백: {draft.relative_to(BLOG_DIR)}로 복원)")
+    except BaseException:  # SystemExit from git_commit, OSError from move, Ctrl-C
         if moved_names:
             unmove_assets(slug, moved_names)
+        if moved_post:
+            draft.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(post), str(draft))
+            print(f"  (롤백: {draft.relative_to(BLOG_DIR)}로 복원)")
         if algo_committed:
             subprocess.run(["git", "reset", "--soft", "HEAD~1"], cwd=ALGO_DIR,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -250,6 +263,23 @@ def publish_one(number):
     print("완료.\n")
     return {'number': number, 'title': title,
             'algo': algo_committed, 'blog': blog_committed}
+
+
+def print_summary(results, failed=None, remaining=0):
+    print(f"{'='*50}\n결과")
+    if results:
+        print("| # | 문제 | PS | Blog |")
+        print("| :-: | :-- | :-: | :-: |")
+        for i, r in enumerate(results, 1):
+            algo = "✅" if r['algo'] else "-"
+            blog = "✅" if r['blog'] else "-"
+            print(f"| {i} | {r['number']} {r['title']} | {algo} | {blog} |")
+    else:
+        print("(발행된 문제 없음)")
+    if failed is not None:
+        print(f"\n⚠ 문제 {failed}에서 중단됐습니다. 위 표까지가 실제로 커밋된 분량이고, "
+              f"{failed}번은 롤백되어 커밋되지 않았습니다"
+              + (f". 남은 {remaining}개는 손대지 않았습니다." if remaining else "."))
 
 
 def main():
@@ -264,16 +294,16 @@ def main():
     for i, number in enumerate(numbers, 1):
         if len(numbers) > 1:
             print(f"{'='*50}\n[{i}/{len(numbers)}] 문제 {number}\n{'='*50}")
-        results.append(publish_one(number))
+        try:
+            results.append(publish_one(number))
+        except BaseException:
+            # Each problem is its own commit, so a mid-batch failure leaves the
+            # earlier ones published. Dying without the table would hide which —
+            # the user would have to reconstruct it from git log.
+            print_summary(results, failed=number, remaining=len(numbers) - i)
+            raise
 
-    # Summary table
-    print(f"{'='*50}\n결과")
-    print("| # | 문제 | PS | Blog |")
-    print("| :-: | :-- | :-: | :-: |")
-    for i, r in enumerate(results, 1):
-        algo = "✅" if r['algo'] else "-"
-        blog = "✅" if r['blog'] else "-"
-        print(f"| {i} | {r['number']} {r['title']} | {algo} | {blog} |")
+    print_summary(results)
 
 
 if __name__ == "__main__":

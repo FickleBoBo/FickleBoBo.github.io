@@ -258,7 +258,7 @@ attach_when: 가장 긴 공통 부분 수열
 [bitmask dp]
 parent: dp
 attach_when: 비트마스크로 상태 압축한 DP
-note: 일반 비트 조작은 technique의 bitmask. 분리
+note: 일반 비트 조작은 technique의 bit manipulation. 분리
 
 [tree dp]
 parent: dp
@@ -532,9 +532,9 @@ attach_when: 2차원 누적합 활용
 parent: technique
 attach_when: 차분 배열 (range update + point query)
 
-[bitmask]
+[bit manipulation]
 parent: technique
-attach_when: 비트 조작 기법 (DP가 아닌 일반 비트마스크)
+attach_when: 비트 연산 자체의 성질(XOR 자기상쇄, 시프트, 개별 비트 조작 등)을 이용한 기법. 부분집합을 비트로 표현해 순회/상태 압축하는 쓰임은 아님(DP면 bitmask dp, 아니어도 상태 압축 성격이면 검토 필요)
 note: bitmask dp는 별도 (dp 카테고리)
 
 [coordinate compression]

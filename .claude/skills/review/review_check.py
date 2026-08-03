@@ -7,6 +7,11 @@ unfilled 복잡도 table, missing sections, TODO title/link) and prints a chunk 
 for the Sonnet review agents. It does NOT judge content — that's the LLM's job
 (see SKILL.md).
 
+It also flags PS-repo drift per target (borrowed read-only from ../sync/sync.py —
+see _report_drift) so a stale code block gets surfaced before anyone, human or
+LLM, reviews it as if it were current. Never applies a fix itself; that's still
+`/sync apply`.
+
 The `fill` subcommand writes complexity values the reviewer worked out into the
 skeleton table. The reviewer decides the values; every mechanical concern (which
 rows are blank, whether the count lines up, ordering, refusing to touch published
@@ -24,6 +29,9 @@ Usage:
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "sync"))
+import sync  # noqa: E402 — sibling skill dir, must follow the sys.path insert above
 
 HOME = Path.home()
 BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
@@ -488,6 +496,30 @@ def cmd_vars(args):
     return 0
 
 
+# ── PS repo drift check (reused from sync.py, not reimplemented) ──
+def _report_drift(path):
+    """Print sync.py's drift report for `path` if — and only if — there's drift.
+
+    Draft code blocks are copies of the PS repo, not references (see memory:
+    leet_242 drifted silently once). review_check.py has no notion of the PS
+    repo by design, so this borrows sync.compute_drift()/print_diff_report()
+    wholesale rather than re-deriving the comparison here. Read-only — never
+    calls sync.apply_drift(); fixing drift is still `/sync apply`.
+
+    compute_drift() prints its own `[경고] ...` line and returns None for cases
+    it can't safely analyze (missing PS dir, malformed sections) — left as-is,
+    it's already informative on its own.
+    """
+    drift = sync.compute_drift(path)
+    if drift is None:
+        return
+    has_drift = bool(drift['changes'] or drift['new_approaches']
+                      or drift['missing_lang'] or drift['dropped']
+                      or drift['dropped_lang'])
+    if has_drift:
+        sync.print_diff_report(drift)
+
+
 # ── Chunk planning ─────────────────────────────
 def plan_chunks(file_info):
     chunks, cur, cur_chars = [], [], 0
@@ -527,6 +559,7 @@ def main():
                 print(f"  ⚠ {it}")
         else:
             print("  ✓ 기계 검사 통과")
+        _report_drift(path)
         file_info.append((path, len(text)))
 
     chunks = plan_chunks(file_info)

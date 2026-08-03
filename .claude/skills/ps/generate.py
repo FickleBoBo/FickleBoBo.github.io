@@ -36,61 +36,19 @@ import sys
 import urllib.request
 from pathlib import Path
 
-# ── Paths ──────────────────────────────────────
-HOME = Path.home()
-ALGO_DIR = HOME / "Desktop" / "github" / "PS"
-BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
-DRAFTS_DIR = BLOG_DIR / "_drafts"
-POSTS_DIR = BLOG_DIR / "_posts"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ps_common import (  # noqa: E402 — sibling _lib dir, must follow sys.path insert above
+    ALGO_DIR, BLOG_DIR, DRAFTS_DIR, POSTS_DIR, PLATFORMS, read_codes, group_tags,
+)
 
 # Only generate for solutions dated on/after the blog restart.
 CUTOFF_DATE = "2026-07-24"
 
-# NOTE: BaekJoon(boj) is intentionally omitted — the online judge has been down
-# since 2026-04-28 (no submissions possible), so no new BOJ solutions land here.
-# Re-add when BOJ reopens: restore the 'boj' platform config, its title fetcher
-# (read from the local crawl mirror at
+# NOTE: BaekJoon(boj) is intentionally omitted — see ps_common.PLATFORMS for
+# why, and how to re-add it (its title fetcher would live here — read from the
+# local crawl mirror at
 #  ~/Library/Mobile Documents/com~apple~CloudDocs/baekjoon-crawling/data/problems/{num}.json,
-#  since solved.ac is Cloudflare-blocked), and the boj branch in get_problem_link.
-
-# ── Platform / language config ─────────────────
-# title_format: '번' attaches to a number, so it is used wherever the problem is
-# identified by one (BOJ 1000번 / LeetCode 704번 / Programmers 154540번 — the
-# last is really a lesson id the site never displays, but Korean PS writing has
-# settled on referring to it that way). Codeforces is the exception: '2148A' is
-# contest id + slot letter, not a number, so it takes no suffix — and no '#'
-# either, which Codeforces uses for round numbers rather than problems.
-PLATFORMS = {
-    'prms': {
-        'name_ko': '프로그래머스',
-        'post_dir': 'programmers',
-        'slug_prefix': 'programmers',
-        'category': 'Programmers',
-        'title_format': '[Programmers] {num}번 - {title}',
-    },
-    'leet': {
-        'name_ko': '리트코드',
-        'post_dir': 'leetcode',
-        'slug_prefix': 'leetcode',
-        'category': 'LeetCode',
-        'title_format': '[LeetCode] {num}번 - {title}',
-    },
-    'cofo': {
-        'name_ko': '코드포스',
-        'post_dir': 'codeforces',
-        'slug_prefix': 'codeforces',
-        'category': 'Codeforces',
-        'title_format': '[Codeforces] {num} - {title}',
-    },
-}
-
-LANG_ORDER = [
-    {'ext': '.java', 'name': 'Java', 'block': 'java'},
-    {'ext': '.cpp', 'name': 'C++', 'block': 'c++'},
-    {'ext': '.py', 'name': 'Python', 'block': 'python'},
-]
-
-CODE_FILE_PREFIXES = ['Main', 'Solution']
+#  since solved.ac is Cloudflare-blocked — plus a boj branch in get_problem_link).
 
 FILENAME_SANITIZE = {
     '/': '／', '?': '？', ':': '：', '*': '＊',
@@ -235,65 +193,11 @@ def get_problem_link(platform, number, slug=None):
     return "TODO"
 
 
-# ── Code reading ───────────────────────────────
-def process_java(code):
-    code = re.sub(r'package\s+[\w.]+;\s*\n*', '', code)
-    code = re.sub(r'(class\s+)(Main|Solution)\d+', r'\1\2', code)
-    return code.strip()
-
-
-def read_codes(problem_dir):
-    """Return solutions grouped by approach.
-
-    Each suffix group (Main / Main2 / ...) is one approach; the languages
-    within it share the same algorithm (and thus complexity).
-    Returns [[(lang, code), ...], ...] — one inner list per approach.
-    """
-    # Find which prefix is used (Main or Solution)
-    prefix = None
-    for p in CODE_FILE_PREFIXES:
-        if any((problem_dir / f"{p}{lang['ext']}").exists() for lang in LANG_ORDER):
-            prefix = p
-            break
-    if not prefix:
-        return []
-    # Approaches in order: Main (''), Main2 ('2'), Main3 ('3'), ...
-    suffixes = ['']
-    n = 2
-    while True:
-        if any((problem_dir / f"{prefix}{n}{lang['ext']}").exists() for lang in LANG_ORDER):
-            suffixes.append(str(n))
-            n += 1
-        else:
-            break
-    groups = []
-    for suffix in suffixes:
-        group = []
-        for lang in LANG_ORDER:
-            fp = problem_dir / f"{prefix}{suffix}{lang['ext']}"
-            if fp.exists():
-                code = fp.read_text(encoding='utf-8')
-                code = process_java(code) if lang['ext'] == '.java' else code.strip()
-                group.append((lang, code))
-        if group:
-            groups.append(group)
-    return groups
-
-
 # ── Post generation ────────────────────────────
 def sanitize(name):
     for c, r in FILENAME_SANITIZE.items():
         name = name.replace(c, r)
     return name
-
-
-def _group_tags(group):
-    """'[Java][C++]' for the languages present in one approach group."""
-    names = []
-    for lang, _ in group:
-        if lang['name'] not in names:
-            names.append(lang['name'])
-    return ''.join(f'[{n}]' for n in names)
 
 
 def _complexity_table():
@@ -393,7 +297,7 @@ def generate_post(date_str, platform, number, title, groups, link, include_revie
     lines += ['---', '', f'## {next(sec)}. 코드', '']
     for i, group in enumerate(groups, 1):
         num = f'{i}. ' if multi else ''
-        lines.append(f'### {num}풀이 {_group_tags(group)}')
+        lines.append(f'### {num}풀이 {group_tags(group)}')
         lines.append('')
         for lang, code in group:
             lines.append(f'```{lang["block"]}')

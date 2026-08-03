@@ -25,9 +25,9 @@ itself, which is why it's allowed to touch code fences at all (see
 ../../memory note on PS code being the user's own territory: sync doesn't
 generate solutions, it re-syncs a copy of one that already exists). The Nth
 `###` block under 코드 is matched to the Nth approach group in the PS repo
-(Main/Main2/... or Solution/Solution2/..., same grouping ../ps/generate.py
-uses), in file order. Language within an approach matches by the fence's
-language tag, not position.
+(Main/Main2/... or Solution/Solution2/..., grouped by ../_lib/ps_common.py's
+read_codes(), shared with generate.py), in file order. Language within an
+approach matches by the fence's language tag, not position.
 
 A brand new approach (PS repo has more groups than the draft) gets a new
 ### N. 풀이 section + a matching empty 복잡도 table, mirroring generate.py's
@@ -44,27 +44,11 @@ import re
 import sys
 from pathlib import Path
 
-# ── Paths (mirrors ../ps/generate.py, ../publish/publish.py) ──
-HOME = Path.home()
-ALGO_DIR = HOME / "Desktop" / "github" / "PS"
-BLOG_DIR = HOME / "Desktop" / "github" / "FickleBoBo.github.io"
-DRAFTS_DIR = BLOG_DIR / "_drafts"
-
-PLATFORM_MAP = {
-    '프로그래머스': 'prms',
-    '리트코드': 'leet',
-    '코드포스': 'cofo',
-}
-PS_DIRS = {'programmers', 'leetcode', 'codeforces'}
-
-LANG_ORDER = [
-    {'ext': '.java', 'name': 'Java', 'block': 'java'},
-    {'ext': '.cpp', 'name': 'C++', 'block': 'c++'},
-    {'ext': '.py', 'name': 'Python', 'block': 'python'},
-]
-EXT_TO_LANG = {l['ext']: l for l in LANG_ORDER}
-BLOCK_TO_LANG = {l['block']: l for l in LANG_ORDER}
-CODE_FILE_PREFIXES = ['Main', 'Solution']
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ps_common import (  # noqa: E402 — sibling _lib dir, must follow sys.path insert above
+    ALGO_DIR, BLOG_DIR, DRAFTS_DIR, PLATFORM_MAP, PS_DIRS,
+    LANG_ORDER, EXT_TO_LANG, BLOCK_TO_LANG, read_codes, group_tags,
+)
 
 
 # ── Filename parsing (same regex as ../publish/publish.py) ──
@@ -102,51 +86,10 @@ def all_draft_numbers():
     return numbers
 
 
-# ── PS repo reading (same grouping as ../ps/generate.py:read_codes) ──
-def process_java(code):
-    code = re.sub(r'package\s+[\w.]+;\s*\n*', '', code)
-    code = re.sub(r'(class\s+)(Main|Solution)\d+', r'\1\2', code)
-    return code.strip()
-
-
+# ── PS repo reading (grouping logic lives in ps_common.read_codes) ──
 def resolve_problem_dir(parsed):
     return (ALGO_DIR / parsed['year_month'] / "src" / f"day_{parsed['day']:02d}"
             / f"{parsed['prefix']}_{parsed['number']}")
-
-
-def read_ps_groups(problem_dir):
-    prefix = None
-    for p in CODE_FILE_PREFIXES:
-        if any((problem_dir / f"{p}{lang['ext']}").exists() for lang in LANG_ORDER):
-            prefix = p
-            break
-    if not prefix:
-        return []
-    suffixes = ['']
-    n = 2
-    while any((problem_dir / f"{prefix}{n}{lang['ext']}").exists() for lang in LANG_ORDER):
-        suffixes.append(str(n))
-        n += 1
-    groups = []
-    for suffix in suffixes:
-        group = []
-        for lang in LANG_ORDER:
-            fp = problem_dir / f"{prefix}{suffix}{lang['ext']}"
-            if fp.exists():
-                code = fp.read_text(encoding='utf-8')
-                code = process_java(code) if lang['ext'] == '.java' else code.strip()
-                group.append((lang, code))
-        if group:
-            groups.append(group)
-    return groups
-
-
-def _group_tags(group):
-    names = []
-    for lang, _ in group:
-        if lang['name'] not in names:
-            names.append(lang['name'])
-    return ''.join(f'[{n}]' for n in names)
 
 
 # ── Draft section/approach parsing ─────────────
@@ -254,7 +197,7 @@ def compute_drift(path):
               f"{problem_dir.relative_to(ALGO_DIR)} (이동됐거나 _fail/_ignore로 바뀜)")
         return None
 
-    ps_groups = read_ps_groups(problem_dir)
+    ps_groups = read_codes(problem_dir)
     if not ps_groups:
         print(f"[경고] {parsed['number']} — PS 레포에 코드 파일 없음: {problem_dir}")
         return None
@@ -411,7 +354,7 @@ def apply_drift(drift):
         code_lines = []
         for offset, group in enumerate(drift['new_approaches']):
             i = start_idx + offset
-            code_lines += ['', f"### {i}. 풀이 {_group_tags(group)}", '']
+            code_lines += ['', f"### {i}. 풀이 {group_tags(group)}", '']
             for j, (lang, code) in enumerate(group):
                 code_lines.append(f"```{lang['block']}")
                 code_lines.extend(code.split('\n'))

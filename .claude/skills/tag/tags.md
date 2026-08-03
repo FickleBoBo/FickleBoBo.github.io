@@ -1,7 +1,7 @@
 # PS Blog Tag Vocabulary — Single Source of Truth
 
 이 파일은 PS 블로그(`FickleBoBo.github.io`) 태그 시스템의 단일 진실 소스다.
-15 카테고리 + 134 태그의 closed vocabulary를 정의한다.
+15 카테고리 + 135 태그의 closed vocabulary를 정의한다.
 
 ## 운영 원칙
 
@@ -103,7 +103,7 @@ parent: data structure
 attach_when: 트라이 사용 (string 또는 XOR trie 등)
 note: string에 한정되지 않는 광범위 자료구조라 data structure에 분류
 
-## 2. graph (31)
+## 2. graph (32)
 
 [graph]
 attach_when: 자식 그래프 태그 부착 시 auto-companion. 또는 자식이 적합하지 않으나 그래프 분류가 풀이의 핵심인 경우 단독 부착 가능.
@@ -111,7 +111,7 @@ attach_when: 자식 그래프 태그 부착 시 auto-companion. 또는 자식이
 [bfs]
 parent: graph
 attach_when: BFS 탐색이 풀이의 핵심
-note: 무가중치 그래프에서 BFS로 최소 이동 횟수를 구하는 것은 `shortest path`로 치지 않는다. `bfs` 단독으로 둘 것 (2026-07-17 확정)
+note: 무가중치 그래프에서 BFS로 최소 이동 횟수를 구하는 것은 `shortest path`로 치지 않는다. `bfs` 단독으로 둘 것 (옛 블로그에서 확정된 원칙, 계승)
 
 [dfs]
 parent: graph
@@ -151,6 +151,11 @@ parent: graph
 attach_when: 오일러 경로/회로 (모든 간선 1회 방문)
 note: tree의 euler tour와는 완전히 다른 개념
 
+[floyd's cycle detection]
+parent: graph
+attach_when: 플로이드의 토끼와 거북이(느린/빠른 포인터)로 함수형 그래프(각 정점이 간선 하나만 갖는 구조)에서 사이클 검출
+note: 2026-08-03 신설, 근거 글 1개(LeetCode 202 Happy Number). 배열/문자열을 훑는 technique의 `two pointers`와는 다른 개념 — 혼동 방지 위해 별도 태그
+
 [tree]
 parent: graph
 attach_when: 자식 트리 알고리즘 부착 시 auto-companion. 또는 자식이 적합하지 않으나 트리 분류가 풀이의 핵심인 경우 단독 부착 가능.
@@ -175,7 +180,7 @@ attach_when: 센트로이드 분할 (트리 분할정복)
 [shortest path]
 parent: graph
 attach_when: 가중치 그래프의 최단경로. 자식 알고리즘(dijkstra/bellman ford/floyd warshall/0-1 bfs) 부착 시 auto-companion. 또는 자식이 적합하지 않으나 최단경로 분류가 풀이의 핵심인 경우 단독 부착 가능.
-note: 무가중치 BFS 거리는 제외 — `bfs` 단독으로 둔다. 붙이면 `bfs`와 검색 결과가 거의 겹쳐 구분값이 사라짐 (2026-07-17 확정)
+note: 무가중치 BFS 거리는 제외 — `bfs` 단독으로 둔다. 붙이면 `bfs`와 검색 결과가 거의 겹쳐 구분값이 사라짐 (옛 블로그에서 확정된 원칙, 계승)
 
 [dijkstra]
 parent: shortest path
@@ -297,12 +302,12 @@ attach_when: sum over subsets DP (부분집합 합 O(2^n * n))
 
 [string]
 attach_when: 자식 문자열 태그 부착 시 auto-companion. 또는 자식이 적합하지 않으나 문자열의 성질·구조·조작 자체가 풀이의 핵심인 경우 단독 부착 가능.
-note: dp 상태값이 문자열이면 부착(3687 성냥개비 — `String[] dp`, 전이가 문자열 연결, 비교가 길이→사전순). 숫자를 문자열로 **표현만** 하는 경우는 제외 — 11005 진법 변환 2·33964 레퓨닛의 덧셈·10872/27433 팩토리얼이 `[math]` 단독인 근거. 판별법: dp/알고리즘이 문자열 위에서 도는가, 아니면 입출력 표현일 뿐인가 (2026-07-17 확정)
+note: dp 상태값이 문자열이면 부착(예: 상태를 문자열로 관리하고 전이가 문자열 연결, 비교가 길이→사전순인 DP). 숫자를 문자열로 **표현만** 하는 경우(진법 변환, 큰 수 덧셈, 팩토리얼처럼 출력 형식이 문자열일 뿐인 경우)는 제외 — `[math]` 단독. 판별법: dp/알고리즘이 문자열 위에서 도는가, 아니면 입출력 표현일 뿐인가 (옛 블로그에서 확정된 원칙, 계승)
 
 [palindrome]
 parent: string
 attach_when: 회문 성질이 풀이의 핵심인 문제 (s == reverse(s) 비교, 양 끝 두 포인터 대칭, 회문 분할 등). manacher 같은 specific 알고리즘이 있으면 그것도 함께 부착.
-note: solved.ac 매핑 없음 — 관습상 `구현`/`문자열`로 분류되나 본 시스템은 problem type 단독 태그로 추가
+note: 관습적으로는 `구현`/`문자열`에 묻히지만, 이 시스템은 problem type으로서 독립 태그로 뺀다
 
 [manacher]
 parent: palindrome
@@ -311,7 +316,7 @@ attach_when: 마나허 알고리즘 (선형 시간 팰린드롬)
 [anagram]
 parent: string
 attach_when: 애너그램 판별이 풀이의 핵심인 문제 (문자 빈도 비교, 정렬 후 비교 등)
-note: solved.ac 매핑 없음 — problem type 단독 태그
+note: palindrome과 같은 이유로 problem type 단독 태그
 
 [kmp]
 parent: string
@@ -585,7 +590,7 @@ attach_when: 스프라그-그런디 정리 (그런디 수 계산)
 
 [implementation]
 attach_when: 코드 구현 자체가 복잡한 문제 (엣지 케이스, 상태 관리, parsing 등)
-note: **구현이 본체인 문제에만** 부착. 그리디·dp 등 알고리즘적 통찰이 본체면 제외 — 35296 아침 점호가 `[greedy]` 단독인 근거(엣지 케이스가 있어도 그리디가 실질). 발행본 22건의 기준선은 2480 주사위 세개·8958 OX퀴즈처럼 알고리즘 없이 규칙을 코드로 옮기는 문제. 엣지 케이스 유무로 붙이기 시작하면 거의 모든 문제에 붙어 검색 가치가 사라짐 (2026-07-17 확정)
+note: **구현이 본체인 문제에만** 부착. 그리디·dp 등 알고리즘적 통찰이 본체면 제외(엣지 케이스가 있어도 그 알고리즘이 실질이면 알고리즘 태그가 우선). 기준선은 알고리즘 없이 규칙을 코드로 옮기는 문제 — 이 블로그에서는 118666 성격 유형 검사하기가 첫 사례. 엣지 케이스 유무로 붙이기 시작하면 거의 모든 문제에 붙어 검색 가치가 사라짐 (옛 블로그에서 확정된 원칙, 계승)
 
 ## 11. simulation (1)
 
@@ -602,8 +607,9 @@ note: backtracking(technique)과 구분 — backtracking은 가지치기 + DFS-l
 
 [ad hoc]
 attach_when: 특정 알고리즘 없이 case-by-case 추론
-note: 수학 논증 + case 분석으로 $O(1)$ 공식을 도출하는 글은 `math`와 **함께** 부착 (28123, 33702). 공식 하나로 끝나고 case를 안 가르면 `math` 단독 (2292 벌집, 2869 달팽이).
-note: **홀짝/parity 태그는 신설 보류** — 33702 비밀번호의 이분 색칠 논증(홀수칸 5 / 짝수칸 4)을 정확히 가리킬 어휘가 없어 `ad hoc`이 대신 받고 있음. 근거가 글 1개뿐이고 solved.ac에도 대응 태그가 없어 `solved_ac:` 매핑이 빈다. 같은 논증의 글이 2~3개 쌓이면 그때 `parity`(math 산하) 신설 후 `tag_migrate`로 소급 부착할 것 (2026-07-17 판단)
+note: 수학 논증 + case 분석으로 $O(1)$ 공식을 도출하는 글은 `math`와 **함께** 부착(이 블로그에서는 2148A가 짝/홀 case-split 논증 사례). 공식 하나로 끝나고 case를 안 가르면 `math` 단독.
+note: **홀짝/parity라는 이름의 태그는 아직 어휘에 없음** — 이분 색칠 같은 홀짝 논증이 나오면 지금은 `ad hoc`이 대신 받는다. 신설 여부는 아래 2026-08-03 정정 노트 기준(개수가 아니라 표준 개념 여부)을 따를 것.
+note: **"글 1개 = 신설 보류"는 일률 규칙이 아니다 (2026-08-03 정정).** parity가 보류된 진짜 이유는 *그 개념 자체가 사후에 귀납적으로 뽑아낸 애드혹 패턴*이라 재현성이 불확실했기 때문이지, 단순히 글이 1개였기 때문이 아니다. 반대로 이름과 정의가 이미 표준으로 확립된 알고리즘(dijkstra/kruskal/manacher와 같은 급 — 예: `floyd's cycle detection`, graph 산하 2026-08-03 신설)은 **글 1개로도 즉시 신설 가능**하다. 판단 기준은 "몇 건 쌓였는가"가 아니라 "이 태그가 재사용 가능한 표준 개념인가, 아니면 이 글에서만 관찰된 귀납적 패턴인가".
 
 ## 14. constructive (1)
 

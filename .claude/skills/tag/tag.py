@@ -70,12 +70,7 @@ def compute_ancestry(tag, tags):
 
 
 def _depth(tag, tags):
-    d, cur, seen = 0, tags.get(tag, {}).get('parent'), set()
-    while cur and cur not in seen:
-        seen.add(cur)
-        d += 1
-        cur = tags.get(cur, {}).get('parent')
-    return d
+    return len(compute_ancestry(tag, tags))
 
 
 def expand_with_ancestry(leaves, tags):
@@ -121,29 +116,30 @@ def filename_number(path):
     return m.group(1) if m else None
 
 
+def _ps_posts(root):
+    """PS post files directly under root (_drafts or _posts), platform dirs only."""
+    if not root.exists():
+        return
+    for p in root.rglob("*.md"):
+        if p.relative_to(root).parts[0] in PS_DIRS:
+            yield p
+
+
 def find_post(number):
     for root in (DRAFTS_DIR, POSTS_DIR):
-        for p in root.rglob("*.md"):
-            if p.relative_to(root).parts[0] in PS_DIRS and filename_number(p) == number:
+        for p in _ps_posts(root):
+            if filename_number(p) == number:
                 return p
     return None
 
 
 def find_all_posts():
-    posts = []
-    for root in (DRAFTS_DIR, POSTS_DIR):
-        if root.exists():
-            posts += [p for p in root.rglob("*.md")
-                      if p.relative_to(root).parts[0] in PS_DIRS]
-    return sorted(posts)
+    return sorted(p for root in (DRAFTS_DIR, POSTS_DIR) for p in _ps_posts(root))
 
 
 def find_draft_posts():
     """PS posts under _drafts — the publish-pending (just-reviewed) set."""
-    if not DRAFTS_DIR.exists():
-        return []
-    return sorted(p for p in DRAFTS_DIR.rglob("*.md")
-                  if p.relative_to(DRAFTS_DIR).parts[0] in PS_DIRS)
+    return sorted(_ps_posts(DRAFTS_DIR))
 
 
 # ── Audit ──────────────────────────────────────

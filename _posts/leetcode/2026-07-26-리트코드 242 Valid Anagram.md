@@ -3,7 +3,7 @@ title: "[LeetCode] 242번 - Valid Anagram [Java][C++]"
 slug: leetcode-242
 date: 2026-07-26
 categories: [PS, LeetCode]
-tags: [string, anagram, sorting]
+tags: [data structure, string, anagram, hash set／hash map, sorting]
 toc: true
 math: true
 ---

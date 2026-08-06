@@ -140,9 +140,30 @@ class Solution {
 };
 ```
 
-### 3. 정렬 [C++]
+### 3. 정렬 [Java][C++]
 
-C++에서 문자열을 바로 정렬할 수 있는걸 활용해 카운팅 배열없이도 간단하게 해결할 수 있다.
+문자열을 바로 정렬할 수 있는걸 활용해 카운팅 배열없이도 간단하게 해결할 수 있다.
+
+```java
+import java.util.*;
+
+class Solution {
+    public boolean isAnagram(String s, String t) {
+        if (s.length() != t.length()) return false;
+
+        char[] arr1 = s.toCharArray();
+        char[] arr2 = t.toCharArray();
+        Arrays.sort(arr1);
+        Arrays.sort(arr2);
+
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i]) return false;
+        }
+
+        return true;
+    }
+}
+```
 
 ```c++
 #include <bits/stdc++.h>

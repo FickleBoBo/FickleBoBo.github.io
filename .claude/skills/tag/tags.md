@@ -499,6 +499,8 @@ note: catch-all 카테고리. 자식 부착해도 technique 자체는 부착 안
 parent: technique
 attach_when: 정렬이 문제 해결의 핵심 (greedy + 정렬, 좌표 정렬 후 sweeping 등). 단순 입력 정렬 X
 attach_policy: strict
+note: 비교 기반 호출(Collections.sort 등)에 한정되지 않는다 — 빈도를 인덱스로 써서 실제 순서(랭킹)를 만들어내는 버킷/카운팅 정렬도 "정렬이 핵심"이면 부착 대상(LeetCode 347 버킷 정렬 접근, 2026-08-08). 반대로 카운팅/집계만 하고 순서를 만들어내지 않는 경우(존재 확인·합계 비교용, 예: LeetCode 242 Valid Anagram의 카운팅 배열 접근)는 정렬 자체가 발생하지 않았으므로 부착 대상 아님 — 이쪽은 애초에 sorting/hash set／hash map 어느 쪽도 강제로 붙이지 않는다.
+note: bucket sort 등 정렬 알고리즘별 개별 leaf 신설은 2026-08-08 논의에서 보류 — sorting 하나로 퉁치기엔 비교 기반과 인덱스 기반이 메커니즘상 다르다는 문제 제기는 있었으나, 지금은 sorting으로 근사하고 정렬 계열 근거 글이 몇 건 더 쌓이면 sieve 계열(위 참고)처럼 flat sibling 분리를 재검토한다.
 
 [divide and conquer]
 parent: technique

@@ -30,3 +30,7 @@ assets/js/dist
 *~
 .DS_Store
 Thumbs.db
+
+# Python 부산물(ps/sync 스킬 스크립트 실행 시 생성됨)
+__pycache__/
+*.pyc

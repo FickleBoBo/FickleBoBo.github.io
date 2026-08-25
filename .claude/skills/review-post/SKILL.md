@@ -8,7 +8,7 @@ description: _drafts/의 PS 포스트를 완성도 관점에서 평가하고 des
 ## 실행
 
 1. `python3 <review-code 스킬의 base directory>/scripts/chunk_drafts.py --mode post [경로 ...]`로 대상 드래프트를 청크로 분할(스크립트는 `review-code` 스킬 소유 — 그대로 가져다 씀, `sync`가 `ps`의 스크립트를 그대로 쓰는 것과 같은 패턴). 사용자가 특정 포스트를 지목하면 `_drafts/{platform}/`에서 그 포스트에 해당하는 파일을 찾아 절대경로로 넘김 — 안 지목하면 인자 없이 호출(전체 배치).
-2. 청크마다 백그라운드 서브에이전트(`review-code`와 동일한 방식: Agent 도구, subagent_type 생략, `run_in_background: true`) 하나씩 dispatch. 프롬프트엔 **이 SKILL.md 경로 + 아래 "처리 절차"/"출력 형식"을 따르라는 지시 + 배정된 드래프트 파일 경로 목록**만 전달(체크리스트를 프롬프트에 옮겨적지 않음)
+2. 청크마다 백그라운드 서브에이전트(`review-code`와 동일한 방식: Agent 도구, subagent_type 생략, `run_in_background: true`) 하나씩 dispatch. **`isolation: "worktree"`는 쓰지 않음** — 이 스킬은 드래프트 `.md` 파일을 직접 Edit하므로, 격리된 워크트리에서 실행하면 수정 내용이 그 격리 복사본에만 남고 실제 레포에는 반영되지 않음(읽기만 하는 `review-code`는 이 문제 없음, worktree 써도 무방). 프롬프트엔 **이 SKILL.md 경로 + 아래 "처리 절차"/"출력 형식"을 따르라는 지시 + 배정된 드래프트 파일 경로 목록**만 전달(체크리스트를 프롬프트에 옮겨적지 않음)
 3. 모든 서브에이전트가 끝나면 드래프트별 결과 + 등급 + 전체 배치 요약 표로 보고
 
 **기본은 인자 없이 전체 배치.** 스킵 조건은 없음 — `## 1. 아이디어`가 비어있어도 review-post가 직접 채우는 게 정상 동작이라(아래 "1단계" 참고), `review-code` 이후로는 항상 전체 대상.

@@ -351,17 +351,15 @@ def build_body(problem_url, folder_path, by_language):
 
     idea_section = IDEA_HEADING
 
-    retro_section = "## 회고"
-
-    reference_section = "## 참고"
+    # 회고/참고는 기본 스캐폴드에 넣지 않음(2026-08-27 확정) — 실제로 쓸 내용이 있을 때만
+    # 사람이 "## 회고"/"## 참고" 헤딩을 직접 추가. 빈 헤딩만 미리 깔아두면 안 쓰는 경우가
+    # 대부분이라 대부분의 포스트에서 그대로 방치되는 보일러플레이트가 됨.
 
     # 구분선 소유권 규칙은 모듈 docstring 참고(여기서 반복 안 함).
     trailing_sections = [
         idea_section,
         build_complexity_section(by_language),
         build_code_section(folder_path, by_language),
-        retro_section,
-        reference_section,
     ]
     # 맨 끝에도 "---"를 하나 더 둠 — 이건 어느 섹션에도 안 딸린, 문서 끝을 표시하는
     # 독립적인 구분선이라 회고/참고를 지워도 영향 안 받음(항상 마지막에 남음).

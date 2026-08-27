@@ -23,7 +23,7 @@ python3 <이 스킬의 base directory>/scripts/sync_code.py
 python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 파일 절대경로>
 ```
 
-예: `python3 .claude/skills/sync/scripts/sync_code.py "_posts/2026-08-14-Programmers 258705 산 모양 타일링.md"`
+예: `python3 .claude/skills/sync/scripts/sync_code.py "_posts/programmers/2026-08-22-Programmers 42898 등굣길.md"`
 
 이미 `_posts/`로 옮겨진 발행 포스트 등 배치 스캔 범위(`_drafts/`) 밖의 파일을 지정할 때, 또는 배치에서 에러/수동확인이 뜬 특정 포스트 하나만 다시 돌려보고 싶을 때 씀. 이 모드는 배치와 달리 실패하면 즉시 예외를 그대로 띄움(콕 집어 지정했으니 조용히 넘어가지 않음).
 
@@ -54,3 +54,4 @@ python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 파�
 
 - PS 레포 원본 파일은 절대 건드리지 않음(읽기 전용)
 - 단일 포스트 모드는 실패하면(front matter 파싱 실패, PS 레포에 대응 폴더 없음 등) 이유가 담긴 예외를 그대로 보고 — 임의 보정 하지 말 것. 배치 모드는 포스트 하나의 실패가 나머지를 막지 않도록 그 포스트만 에러로 보고하고 계속 진행(위 "동작 방식" 참고)
+- **결과 보고 시 판단을 얹지 않음** — "수동 확인 필요"/"에러"가 나와도 "무시해도 될 듯"/"괜찮아 보인다" 같은 평가를 섞지 말고 스크립트가 뱉은 사실만 그대로 전달. 결정론적 스킬이라 판단은 전적으로 사람 몫(`ps`와 동일 원칙)

@@ -2,8 +2,8 @@
 title: "[Codeforces] #2148A - Sublime Sequence [Java][C++][Python]"
 date: 2026-08-22
 categories: [PS, Codeforces]
-tags: ["warm up"]
-description: "x와 -x를 번갈아 나열한 길이 n 수열의 합을 n의 홀짝만으로 구하는 워밍업 문제."
+tags: ["math"]
+description: "x와 -x를 번갈아 나열한 길이 n 수열의 합을 n의 홀짝만으로 구하는 문제."
 slug: codeforces-2148a
 media_subpath: /assets/img/posts/codeforces-2148a/
 math: true

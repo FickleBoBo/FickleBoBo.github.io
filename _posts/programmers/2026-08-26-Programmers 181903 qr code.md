@@ -2,8 +2,8 @@
 title: "[Programmers] #181903 - qr code [Java][C++][Python]"
 date: 2026-08-26
 categories: [PS, Programmers]
-tags: ["warm up"]
-description: "인덱스를 q로 나눈 나머지가 r인 위치의 문자를 앞에서부터 이어 붙이는 워밍업 문제."
+tags: ["string"]
+description: "인덱스를 q로 나눈 나머지가 r인 위치의 문자를 앞에서부터 이어 붙이는 문제."
 slug: programmers-181903
 media_subpath: /assets/img/posts/programmers-181903/
 math: true

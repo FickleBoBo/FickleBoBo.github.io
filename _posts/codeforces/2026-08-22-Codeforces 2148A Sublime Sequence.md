@@ -1,9 +1,9 @@
 ---
-title: "[Codeforces] #2148A - Sublime Sequence [Java][C++][Python]"
+title: "[Codeforces] #2148A - Sublime Sequence [C++]"
 date: 2026-08-22
 categories: [PS, Codeforces]
-tags: ["math"]
-description: "x와 -x를 번갈아 나열한 길이 n 수열의 합을 n의 홀짝만으로 구하는 문제."
+tags: ["warm up"]
+description: "x, -x, x, -x, … 순으로 길이 n인 수열을 만든 뒤 전체 원소의 합을 구하는 워밍업 문제."
 slug: codeforces-2148a
 media_subpath: /assets/img/posts/codeforces-2148a/
 math: true
@@ -18,7 +18,7 @@ mermaid: false
 
 ## 1. 아이디어
 
-정수 `x`로 시작해 `x`와 `-x`를 번갈아가며 길이 `n`인 수열을 만들 때, 수열 전체의 합을 구하면 되는 문제다. `x`와 `-x`는 짝을 이룰 때마다 서로 상쇄되므로, `n`이 짝수면 정확히 절반씩 상쇄되어 합은 0이고, `n`이 홀수면 상쇄되지 않은 마지막 `x` 하나가 남아 합은 `x`가 된다. 즉 각 테스트 케이스마다 `n`의 홀짝만 판별하면 답이 나온다.
+수열은 홀수 번째 항이 $X$, 짝수 번째 항이 $-X$로 채워진다. 인접한 두 항 $X$와 $-X$를 더하면 0이 되므로, 항을 앞에서부터 둘씩 묶으면 각 묶음의 합이 0이다. 따라서 $N$이 짝수면 모든 항이 짝을 이뤄 전체 합이 0이고, $N$이 홀수면 마지막 한 항 $X$만 짝 없이 남아 전체 합이 $X$다. 수열을 실제로 구성할 필요 없이 $N$의 홀짝만으로 답이 정해진다.
 
 ---
 
@@ -26,43 +26,28 @@ mermaid: false
 
 | 접근 | 시간   | 공간   |
 | ---- | ------ | ------ |
-| 풀이 | $O(T)$ | $O(1)$ |
-
-($T$ = 테스트 케이스의 개수)
+| 풀이 | $O(1)$ | $O(1)$ |
 
 ---
 
 ## 3. 코드
 
-### 풀이 [Java][C++][Python]
-
-```java
-import java.io.*;
-import java.util.*;
-
-public class Main {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        int t = Integer.parseInt(br.readLine());
-        while (t-- > 0) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int n = Integer.parseInt(st.nextToken());
-
-            if (n % 2 == 1) {
-                System.out.println(x);
-            } else {
-                System.out.println(0);
-            }
-        }
-    }
-}
-```
+### 풀이 [C++]
 
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
+
+void solve() {
+    int x, n;
+    cin >> x >> n;
+
+    if (n % 2) {
+        cout << x << '\n';
+    } else {
+        cout << 0 << '\n';
+    }
+}
 
 int main() {
     ios::sync_with_stdio(0);
@@ -71,32 +56,8 @@ int main() {
     int t;
     cin >> t;
 
-    while (t--) {
-        int x, n;
-        cin >> x >> n;
-
-        if (n % 2) {
-            cout << x << '\n';
-        } else {
-            cout << 0 << '\n';
-        }
-    }
+    while (t--) solve();
 }
-```
-
-```python
-import sys
-
-input = sys.stdin.readline
-
-t = int(input())
-for _ in range(t):
-    x, n = map(int, input().split())
-
-    if n % 2:
-        print(x)
-    else:
-        print(0)
 ```
 
 ---

@@ -202,15 +202,22 @@ def get_title_url_leetcode(number):
     raise ValueError(f"LeetCode {number}번을 목록에서 못 찾음")
 
 
+@functools.lru_cache(maxsize=1)
+def _fetch_codeforces_problems():
+    # problemset 전체를 받는 큰 응답이라 프로세스당 한 번만 캐시 — 배치 모드에서
+    # Codeforces 문제가 여러 개일 때 같은 목록을 중복 다운로드하지 않게
+    # (_fetch_leetcode_problems와 동일한 이유).
+    body = fetch("https://codeforces.com/api/problemset.problems")
+    return json.loads(body)["result"]["problems"]
+
+
 def get_title_url_codeforces(number):
     # 폴더명 형식이 "{contestId}{Index}"(예: 1553A)라고 가정함 — 실제 사용 사례로 검증된 적 없음.
     m = re.match(r"(\d+)([A-Za-z]\d*)$", number)
     if not m:
         raise ValueError(f"Codeforces 번호 형식이 예상과 다름(예: 1553A): {number}")
     contest_id, index = m.groups()
-    body = fetch("https://codeforces.com/api/problemset.problems")
-    data = json.loads(body)
-    for p in data["result"]["problems"]:
+    for p in _fetch_codeforces_problems():
         if str(p["contestId"]) == contest_id and p["index"] == index.upper():
             url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
             return p["name"], url

@@ -121,16 +121,24 @@ def description_filled(text):
     return bool(desc and desc.strip())
 
 
+def _section_body(text, heading):
+    """`{heading}`("## " 포함한 전체 헤딩 문자열) 다음부터 다음 `## ` 헤딩 전까지의
+    본문 텍스트. 헤딩이 없으면 None."""
+    m = re.search(
+        rf"^{re.escape(heading)}\s*\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
+    )
+    return m.group(1) if m else None
+
+
 def section_is_filled(text, heading):
-    """`{heading}`(예: `## 1. 아이디어` — "## " 포함한 전체 헤딩 문자열) 다음, 다음
-    `## ` 헤딩 전까지 본문에 HTML 주석/구분선(---) 빼고 실제 텍스트가 있는지. ps
-    스킬이 생성한 스캐폴드는 이 heading이 항상 존재한다는 전제(핵심 섹션이라 사람이
-    통째로 안 지움) — 없으면 스켈레톤이 훼손된 것으로 보고 미완료 취급."""
-    pattern = rf"^{re.escape(heading)}\s*\n(.*?)(?=^## |\Z)"
-    m = re.search(pattern, text, re.MULTILINE | re.DOTALL)
-    if not m:
+    """`{heading}`(예: `## 1. 아이디어`) 섹션 본문에 HTML 주석/구분선(---)을 뺀 실제
+    텍스트가 있는지. ps 스킬이 생성한 스캐폴드는 이 heading이 항상 존재한다는 전제
+    (핵심 섹션이라 사람이 통째로 안 지움) — 없으면 스켈레톤이 훼손된 것으로 보고
+    미완료 취급."""
+    body = _section_body(text, heading)
+    if body is None:
         return False
-    body = re.sub(r"<!--.*?-->", "", m.group(1), flags=re.DOTALL)
+    body = re.sub(r"<!--.*?-->", "", body, flags=re.DOTALL)
     body = "\n".join(line for line in body.splitlines() if line.strip() != "---")
     return bool(body.strip())
 
@@ -139,13 +147,10 @@ def complexity_table_filled(text):
     """`## 2. 복잡도` 표의 모든 데이터 행(헤더/구분줄 제외)에서 시간·공간 셀이 둘 다
     채워졌는지. 행 개수 자체는 검사 안 함(ps가 이미 접근법 수만큼 정확히 만들어둠) —
     있는 행이 다 채워졌는지만 봄."""
-    pattern = rf"^{re.escape(COMPLEXITY_HEADING)}\s*\n(.*?)(?=^## |\Z)"
-    m = re.search(pattern, text, re.MULTILINE | re.DOTALL)
-    if not m:
+    body = _section_body(text, COMPLEXITY_HEADING)
+    if body is None:
         return False
-    rows = [
-        line.strip() for line in m.group(1).splitlines() if line.strip().startswith("|")
-    ]
+    rows = [line.strip() for line in body.splitlines() if line.strip().startswith("|")]
     data_rows = rows[2:]  # 헤더 행 + `|---|---|---|` 구분 행 제외
     if not data_rows:
         return False

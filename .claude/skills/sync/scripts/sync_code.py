@@ -37,9 +37,10 @@ Prettier IAL 버그 등)은 전부 `ps/SKILL.md`에 문서화돼있음 — 여�
 
 사용법:
     python3 sync_code.py
-        인자 없이 실행 — 배치 모드. `_drafts/` 아래 모든 포스트(.md)를 스캔해서 전부
-        동기화. 포스트 하나가 실패해도(PS 레포에 대응 폴더가 없는 등) 그 포스트만
-        에러로 보고하고 나머지는 계속 처리함.
+        인자 없이 실행 — 배치 모드. `_drafts/{platform}/`(platform ∈ PLATFORM_MAP)
+        아래 포스트(.md)를 전부 스캔해서 동기화(publish와 동일한 스코핑). 포스트 하나가
+        실패해도(PS 레포에 대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는
+        계속 처리함.
 
     python3 sync_code.py <포스트 .md 파일 절대경로>
         포스트 하나만 지정해서 동기화. 이 경우엔 실패하면 즉시 예외를 그대로 띄움
@@ -216,8 +217,10 @@ def find_stale_blocks(post_text, by_language):
 STATUS_LABELS = {
     "updated": "갱신함",
     "unchanged": "변경 없음",
-    "not_found": "포스트에서 코드 블록을 못 찾음 — 수동 확인 필요"
-    "(코드 블록이 다른 섹션으로 옮겨졌거나 fence 언어 표시가 깨졌을 수 있음)",
+    "not_found": (
+        "포스트에서 코드 블록을 못 찾음 — 수동 확인 필요"
+        "(코드 블록이 다른 섹션으로 옮겨졌거나 fence 언어 표시가 깨졌을 수 있음)"
+    ),
 }
 
 
@@ -271,15 +274,18 @@ def run_single(post_path):
 
 
 def discover_draft_files():
-    """`_drafts/` 아래 모든 포스트(.md)를 경로순으로 찾아 반환. `ps`의
-    `discover_problem_folders`와 마찬가지로 대상 발견 로직 자체가 결정론적."""
-    if not os.path.isdir(DRAFTS_DIR):
-        return []
+    """`_drafts/{platform}/`(platform ∈ PLATFORM_MAP) 아래 포스트(.md)를 경로순으로
+    찾아 반환. `_drafts/` 바로 밑이나 PS 아닌 서브폴더는 안 봄 — `publish`의 배치
+    스코핑(`discover_ready_drafts`)과 동일하게, 블로그에 PS 아닌 드래프트가 생겨도
+    안 건드리기 위함."""
     paths = []
-    for dirpath, _, filenames in os.walk(DRAFTS_DIR):
-        for fname in filenames:
+    for platform_dir in sorted({v.lower() for v in PLATFORM_MAP.values()}):
+        dir_path = os.path.join(DRAFTS_DIR, platform_dir)
+        if not os.path.isdir(dir_path):
+            continue
+        for fname in sorted(os.listdir(dir_path)):
             if fname.endswith(".md"):
-                paths.append(os.path.join(dirpath, fname))
+                paths.append(os.path.join(dir_path, fname))
     return sorted(paths)
 
 

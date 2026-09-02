@@ -3,7 +3,6 @@ title: "[Programmers] #181933 - flag에 따라 다른 값 반환하기 [Java][C+
 date: 2026-08-23
 categories: [PS, Programmers]
 tags: ["warm up"]
-description: "flag가 true면 두 정수의 합을, false면 차를 반환하는 워밍업 문제."
 slug: programmers-181933
 media_subpath: /assets/img/posts/programmers-181933/
 math: true

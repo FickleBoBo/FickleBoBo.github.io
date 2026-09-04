@@ -19,7 +19,6 @@ python3 <이 스킬의 base directory>/scripts/publish.py [경로 ...]
 
 드래프트 파일 하나가 "발행 준비 완료"인지는 순수 내용 검사로 결정 — 별도로 `ready: true` 같은 플래그를 사람이 켜줄 필요 없음:
 
-- front matter `description`이 비어있지 않음
 - `## 1. 아이디어` 섹션 본문(HTML 주석·구분선 제외)이 비어있지 않음
 - `## 2. 복잡도` 표의 모든 행(접근법별)에서 시간/공간 셀이 둘 다 채워짐
 
@@ -30,7 +29,7 @@ python3 <이 스킬의 base directory>/scripts/publish.py [경로 ...]
 1. front matter의 `date`/`slug`로 PS 레포 원본 폴더를 재구성 + 존재 검증(`sync` 스킬의 `resolve_source_folder` 재사용). **여기서 실패하면 블로그 레포는 아직 아무것도 안 건드린 상태**라 그 건만 에러 보고하고 다음 드래프트로 넘어감.
 2. `_drafts/{platform}/{파일명}` → `_posts/{platform}/{파일명}`로 이동(플랫폼 서브폴더 유지 — Jekyll은 `_posts/` 하위 폴더 구조와 무관하게 다 수집함).
 3. 이동한 포스트 파일 + (있으면) `assets/img/posts/{slug}/` 에셋 디렉토리 전체를 블로그 레포에 `git add` 후 커밋. 메시지: `feat: {title 필드 그대로}` (예: `feat: [Programmers] #154538 - 숫자 변환하기 [Java][C++]`).
-4. PS 레포에서 그 문제 폴더 전체를 `git add` 후 커밋. 메시지는 블로그 커밋과 완전히 동일(`feat: {title 필드 그대로}`, 예: `feat: [Programmers] #154538 - 숫자 변환하기 [Java][C++]`) — 과거 PS 레포 커밋들은 `154538번` 형식이었지만, 이 블로그를 중심으로 커스텀해나가는 흐름이라 PS 레포도 여기 컨벤션에 맞춤. 이후 PS 레포 로그는 이 시점부터 새 포맷으로 바뀜(과거 커밋까지 소급 변경은 안 함).
+4. PS 레포에서 그 문제 폴더 전체를 `git add` 후 커밋. 메시지는 블로그 커밋과 완전히 동일 — 과거 PS 레포 커밋들은 `154538번` 형식이었지만, 이 블로그를 중심으로 커스텀해나가는 흐름이라 PS 레포도 여기 컨벤션에 맞춤. 이후 PS 레포 로그는 이 시점부터 새 포맷으로 바뀜(과거 커밋까지 소급 변경은 안 함).
 5. 두 커밋 다 `Co-Authored-By: Claude <noreply@anthropic.com>` 트레일러를 붙임 — 과거 PS 레포 커밋 컨벤션과 동일한 형태로, 모델 버전을 안 박아둬서 나중에 모델이 바뀌어도 stale 안 해짐.
 6. **push는 안 함** — 로컬 커밋까지만. 실제 배포(GitHub Pages 빌드 트리거)로 이어지는 push는 사람이 직접.
 

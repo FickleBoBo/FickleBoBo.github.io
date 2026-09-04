@@ -89,13 +89,12 @@ def commit(repo_dir, paths, message):
 
 def yaml_scalar_value(front_matter_text, field):
     """front matter에서 `{field}: ...` 값을 뽑음. YAML은 큰따옴표 없는 스칼라도
-    유효해서(`description: 그냥 이렇게`) 따옴표 유무 둘 다 처리 — 사람이 프로즈 채울 때
-    따옴표를 안 쓰거나 실수로 지워도 "비어있음"으로 오판하지 않게 하기 위함. 필드
-    자체가 없으면 None, 값이 빈 문자열이면 ""을 반환.
+    유효해서(`title: 그냥 이렇게`) 따옴표 유무 둘 다 처리한다. 필드 자체가 없으면
+    None, 값이 빈 문자열이면 ""을 반환.
 
-    전제: 값은 항상 한 줄(정규식이 그 줄만 읽음) — `ps` 스킬이 생성하는 `description`은
-    항상 한 줄 문자열이라 지금까지는 문제없었지만, 사람이 `description: |`처럼 여러 줄
-    블록 스칼라로 바꾸면 첫 줄만 읽고 나머지는 조용히 무시됨(YAML 파서 미사용). 이 정도
+    전제: 값은 항상 한 줄(정규식이 그 줄만 읽음) — `ps` 스킬이 생성하는 필드는 전부
+    한 줄 스칼라라 지금까지는 문제없었지만, 사람이 `title: |`처럼 여러 줄 블록
+    스칼라로 바꾸면 첫 줄만 읽고 나머지는 조용히 무시됨(YAML 파서 미사용). 이 정도
     엣지케이스에 YAML 라이브러리를 끌어오는 건 이 프로젝트 규모에 과함 — 실제로 발생하면
     그때 재검토."""
     m = re.search(rf"^{field}:\s*(.*)$", front_matter_text, re.MULTILINE)
@@ -114,11 +113,6 @@ def extract_title(text):
     if title is None:
         raise ValueError("front matter에 title이 없음")
     return title
-
-
-def description_filled(text):
-    desc = yaml_scalar_value(front_matter_block(text), "description")
-    return bool(desc and desc.strip())
 
 
 def _section_body(text, heading):
@@ -164,8 +158,6 @@ def complexity_table_filled(text):
 def is_ready(text):
     """드래프트 하나가 "발행 준비 완료"인지 (bool, 미완료 사유) 반환. 판정 기준
     자체의 설계 이유는 SKILL.md 참고 — 여기선 각 검사만 순서대로 호출."""
-    if not description_filled(text):
-        return False, "description이 비어있음"
     if not section_is_filled(text, IDEA_HEADING):
         return False, "'1. 아이디어' 섹션이 비어있음"
     if not complexity_table_filled(text):

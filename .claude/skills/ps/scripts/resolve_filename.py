@@ -4,11 +4,10 @@ PS 레포 문제 폴더 경로를 받아서, 이 블로그의 포스트 파일�
 본문 스켈레톤을 결정론적으로 생성한다. LLM 판단 없음 — 정규식/API 응답 파싱/
 파일 스캔/문자열 치환만 함.
 
-**본문 스켈레톤 구조와 그 설계 이유(챕터 번호, 구분선 소유권, 문제/접근 역할
-분담, 코드 라벨을 안 쓰는 이유 등)는 전부 `ps/SKILL.md`에 문서화돼있음 —
-여기서 다시 설명 안 함.** 여기 docstring은 사용법 + 코드를 고칠 때 바로 옆
-코드만 봐선 안 보이는 것만 남겨둠(SKILL.md와 내용이 겹치면 둘 중 하나가 stale
-해지기 쉬워서 분리함).
+**섹션 구성·챕터 번호 같은 스켈레톤 '구조'는 `ps/SKILL.md`가 정본.** 여기 docstring은
+사용법 + 코드를 고칠 때 바로 옆 코드만 봐선 안 보이는 '왜'(구분선 소유권, IAL 회피
+등 — 아래 "코드를 고칠 때 알아야 할 것")만 남겨둠. 겹쳐 쓰면 둘 중 하나가 stale해져서
+분리함.
 
 지원 플랫폼: Programmers/LeetCode/Codeforces(`PLATFORM_MAP`). BOJ/SWEA는
 `UNSUPPORTED_PLATFORMS`로 보류 중 — 이유는 SKILL.md 참고. 컷오프
@@ -37,18 +36,15 @@ PS 레포 문제 폴더 경로를 받아서, 이 블로그의 포스트 파일�
         개별 폴더가 실패해도(네트워크/파싱 에러 등) 그 폴더만 보고하고 나머지는 계속함.
 
     python3 resolve_filename.py <PS레포 문제 폴더 경로> [--force]
-        폴더 하나만 지정해서 처리 — 특정 문제를 다시 만들고 싶을 때(스켈레톤 구조가
-        바뀌어서 재생성하는 등) 씀.
+        폴더 하나만 지정해서 처리 — Claude가 특정 문제만 선별 생성하거나(사람이
+        "이것만" 지목), 스켈레톤 구조가 바뀌어서 재생성할 때(--force) 씀. 사람은
+        평소 무인자 배치로만 부른다(이 스크립트의 기본 사용 패턴).
         예: python3 resolve_filename.py /Users/mwzz6/Desktop/github/PS/2026-08/src/day_14/prms_258705
 
-동작: 이 레포의 _drafts/{platform}/ 밑에 파일을 실제로 씀. platform 디렉토리명은
-소문자(예: programmers, leetcode, codeforces). _posts/가 아니라 _drafts/에 두는
-이유: 사람이 문제/접근/회고 등을 다 채워서 "발행 준비 완료"로 판단하기 전까진
-아직 초안이라, publish 단계(별도 스킬)에서 _posts/로 옮기기 전까지는 사이트에
-노출되면 안 됨.
-두 모드 다 이미 같은 이름의 파일이 있으면 기본적으로 거부(사람이 이미 프로즈를
-채워넣었을 수 있어서 임의로 덮어쓰지 않음) — 단일 폴더 모드에서만 --force로
-의도적으로 다시 생성 가능(배치 모드는 --force 자체를 안 받음, 위 참고).
+동작: 이 레포의 _drafts/{platform}/(소문자: programmers/leetcode/codeforces)에 파일을
+실제로 씀 — _posts/가 아님. publish(별도 스킬)가 옮기기 전까진 초안이라 사이트에
+노출되면 안 됨. 같은 이름 파일이 있으면 거부(사람이 채운 프로즈 보호), 단일 폴더
+모드만 --force로 재생성(배치는 --force 자체를 안 받음).
 """
 
 import functools
@@ -109,7 +105,7 @@ UNSUPPORTED_PLATFORMS = {"boj", "swea"}
 
 # 파일명 금지 문자 -> 육안 구별 어려운 유니코드 대체
 # 출처: laggner.info "Replacing Forbidden File System Characters with Unicode Alternatives"
-# 주의: 이 치환은 파일명에만 적용. front matter의 title/description은 원문 그대로 씀.
+# 주의: 이 치환은 파일명에만 적용. front matter의 title은 원문 그대로 씀.
 FILENAME_ESCAPES = {
     "/": "⁄",  # FRACTION SLASH
     ":": "∶",  # RATIO
@@ -279,7 +275,6 @@ def build_front_matter(date, platform, number, title, languages):
         f"date: {date}",
         f"categories: [PS, {platform}]",
         "tags: []",
-        'description: ""',
         f"slug: {slug}",
         f"media_subpath: {media_subpath}",
         "math: true",
@@ -307,8 +302,14 @@ def group_by_approach(by_language):
     return groups
 
 
-def approach_label(num):
-    return "풀이" if num == 1 else f"풀이 {num}"
+def approach_label(num, total):
+    """접근법 헤딩 라벨 — ps(스캐폴드 생성)와 sync(경고 메시지)가 같은 규칙을 써야
+    헤딩 라벨이 서로 어긋나지 않는다. 접근이 2개 이상이면 첫 접근도 '풀이 1'로 번호를
+    붙이고(STYLE.md '다중 접근 — 접근 이름'), 하나뿐이면 번호 없이 '풀이'.
+    total(group_by_approach로 센 전체 접근 수)은 필수 — sync도 이 값을 넘긴다."""
+    if total <= 1 and num == 1:
+        return "풀이"
+    return f"풀이 {num}"
 
 
 def build_complexity_section(by_language):
@@ -318,7 +319,7 @@ def build_complexity_section(by_language):
     groups = group_by_approach(by_language)
     lines = [COMPLEXITY_HEADING, "", "| 접근 | 시간 | 공간 |", "|---|---|---|"]
     for num in sorted(groups):
-        lines.append(f"| {approach_label(num)} | | |")
+        lines.append(f"| {approach_label(num, len(groups))} | | |")
     return "\n".join(lines)
 
 
@@ -329,7 +330,7 @@ def build_code_section(folder_path, by_language):
     for i, num in enumerate(nums):
         if i > 0:
             lines.extend(["---", ""])
-        label = approach_label(num)
+        label = approach_label(num, len(nums))
         langs_present = [lang for lang in LANGUAGE_DISPLAY_ORDER if lang in groups[num]]
         brackets = "".join(f"[{lang}]" for lang in langs_present)
         lines.append(f"### {label} {brackets}")

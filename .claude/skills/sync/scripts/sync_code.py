@@ -4,10 +4,9 @@
 코드만 건드림 — 프로즈(문제/접근/회고 등 사람이 쓴 글)는 절대 건드리지 않음.
 `ps` 스킬과 마찬가지로 완전 결정론적, LLM 판단 없음.
 
-**코드 블록 포맷(라벨 없는 순수 fence를 쓰는 이유, `### 풀이 N` 헤딩 구조,
-Prettier IAL 버그 등)은 전부 `ps/SKILL.md`에 문서화돼있음 — 여기서 다시 설명
-안 함.** 여기 docstring은 사용법 + 코드를 고칠 때 바로 옆 코드만 봐선 안 보이는
-것만 남겨둠(SKILL.md와 내용이 겹치면 둘 중 하나가 stale해지기 쉬워서 분리함).
+**코드 블록 포맷의 '왜'(라벨 없는 순수 fence, `### 풀이 N` 헤딩 구조, Prettier IAL
+버그 회피)는 `ps` 스킬 쪽에 있음 — `ps/SKILL.md` + `resolve_filename.py` docstring
+참고. 여기 docstring은 사용법 + sync 코드를 고칠 때 바로 옆만 봐선 안 보이는 것만.**
 
 코드를 고칠 때 알아야 할 것 (SKILL.md에 없는, 이 파일 안에서만 유효한 정보):
 - front matter의 date/slug만으로 PS 레포 원본 폴더 경로를 재구성함(파일명이 바뀌어도
@@ -17,9 +16,12 @@ Prettier IAL 버그 등)은 전부 `ps/SKILL.md`에 문서화돼있음 — 여�
   `ps/scripts`를 직접 끌어옴) — "PS 레포 코드 → 블로그용 코드" 변환 로직이 두 스킬
   사이에서 갈라지면 안 되기 때문. `ps`의 본문 스켈레톤 구조(챕터 번호, 코드 블록
   포맷)가 바뀌면 여기 코드 블록 탐지 로직(`segment_by_approach`/
-  `APPROACH_HEADING_RE`)도 같이 손봐야 함. review/publish 스킬까지 생겨서 공유
-  로직이 더 늘어나면 이 sys.path 직접 import 방식은 별도 공유 패키지로 빼는 게
-  나을 수 있음(아직은 안 함).
+  `APPROACH_HEADING_RE`)도 같이 손봐야 함. 현재 `resolve_filename.py`를 이런
+  sys.path 방식으로 끌어쓰는 스킬은 sync/publish/review-code까지 4개 — 원래
+  "더 늘어나면 별도 공유 패키지로" 예고했던 임계점은 이미 넘었지만, 해킹이
+  스킬당 1~2줄이고 `resolve_filename.py`가 `PS_REPO`/`PLATFORM_MAP`/`DRAFTS_DIR`
+  단일 소스라 아직 추출 안 함. 5번째 소비자가 생기거나 import 목록이 더 불어나면
+  그때 `_shared/`로 뺄 것.
 - 코드 블록을 헤딩 구간으로 스코핑하는 이유는 `segment_by_approach` docstring 참고.
 - 배치 모드(인자 없음)는 `ps`의 `run_batch`/`discover_problem_folders` 패턴을 그대로
   따름: 개별 포스트 실패가 배치 전체를 막지 않고 그 포스트만 에러로 보고, 나머지는
@@ -37,14 +39,16 @@ Prettier IAL 버그 등)은 전부 `ps/SKILL.md`에 문서화돼있음 — 여�
 
 사용법:
     python3 sync_code.py
-        인자 없이 실행 — 배치 모드. `_drafts/{platform}/`(platform ∈ PLATFORM_MAP)
-        아래 포스트(.md)를 전부 스캔해서 동기화(publish와 동일한 스코핑). 포스트 하나가
-        실패해도(PS 레포에 대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는
-        계속 처리함.
+        인자 없이 실행 — 배치 모드. 사람이 평소 부르는 기본 사용 패턴.
+        `_drafts/{platform}/`(platform ∈ PLATFORM_MAP) 아래 포스트(.md)를 전부
+        스캔해서 동기화(publish와 동일한 스코핑). 포스트 하나가 실패해도(PS 레포에
+        대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는 계속 처리함.
 
     python3 sync_code.py <포스트 .md 파일 절대경로>
-        포스트 하나만 지정해서 동기화. 이 경우엔 실패하면 즉시 예외를 그대로 띄움
-        (배치와 달리 콕 집어 지정했으니 조용히 넘어가지 않음).
+        포스트 하나만 지정해서 동기화 — Claude가 특정 포스트만 선별할 때(사람이
+        "이것만" 지목), 또는 이미 `_posts/`로 옮겨진 발행분처럼 배치 스코프 밖의
+        파일을 다시 싱크할 때. 실패하면 즉시 예외를 그대로 띄움(배치와 달리 콕
+        집어 지정했으니 조용히 넘어가지 않음).
 
 출력: 파일별로 "갱신함" / "변경 없음" / "코드 블록을 못 찾음(수동 확인 필요)" 보고.
 배치 모드는 포스트별로 한 줄 요약("변경 없음") 또는 세부 내역 + 맨 끝에 총계 한 줄.
@@ -169,7 +173,7 @@ def sync_files(post_text, folder, by_language):
     # 충돌(같은 접근법에 같은 언어 파일이 2개 이상)만 있으면 여기서 ValueError로
     # 막음. 이 검증 없이 진행하면 아래 루프가 by_language를 직접 순회하므로 충돌
     # 시 같은 헤딩 구간을 두 번 건드려 먼저 처리된 파일 내용이 조용히 덮어써짐.
-    group_by_approach(by_language)
+    total_approaches = len(group_by_approach(by_language))
 
     body = post_text
     report = []
@@ -181,7 +185,13 @@ def sync_files(post_text, folder, by_language):
                 body
             )  # 교체할 때마다 오프셋이 어긋나므로 매번 재계산
             if approach_num not in spans:
-                report.append((fname, "heading_missing", approach_label(approach_num)))
+                report.append(
+                    (
+                        fname,
+                        "heading_missing",
+                        approach_label(approach_num, total_approaches),
+                    )
+                )
                 continue
             start, end = spans[approach_num]
             with open(os.path.join(folder, fname), encoding="utf-8") as f:
@@ -198,11 +208,9 @@ def find_stale_blocks(post_text, by_language):
     """PS 레포엔 더 이상 없는데 포스트엔 남아있는 (접근법, 언어) 코드 블록을 찾아
     "{언어} 코드({풀이 라벨})" 문자열 리스트로 반환. sync 시작 시점의 헤딩 구간
     (post_text 원본)을 기준으로 함 — 원본 언어-접근법 매칭 스냅샷."""
-    current_pairs = {
-        (num, lang)
-        for num, slot in group_by_approach(by_language).items()
-        for lang in slot
-    }
+    groups = group_by_approach(by_language)
+    total_approaches = len(groups)
+    current_pairs = {(num, lang) for num, slot in groups.items() for lang in slot}
     stale = []
     for num, (start, end) in segment_by_approach(post_text).items():
         for fence_lang in re.findall(r"```([^\s`]+)\n", post_text[start:end]):
@@ -210,7 +218,7 @@ def find_stale_blocks(post_text, by_language):
                 continue  # Java/C++/Python이 아닌 펜스(예시로 넣은 ```bash 등) — 대상 아님
             lang = REVERSE_FENCE_LANG[fence_lang]
             if (num, lang) not in current_pairs:
-                stale.append(f"{lang} 코드({approach_label(num)})")
+                stale.append(f"{lang} 코드({approach_label(num, total_approaches)})")
     return stale
 
 

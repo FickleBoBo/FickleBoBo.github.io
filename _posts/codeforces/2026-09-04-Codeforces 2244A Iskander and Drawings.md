@@ -27,7 +27,7 @@ mermaid: false
 | ---- | ------ | ------ |
 | 풀이 | $O(N)$ | $O(1)$ |
 
-($N$ = 모든 테스트 케이스에 걸친 문자열 길이의 총합. `stringstream` 버퍼는 문자열 길이에 비례하지만 그 길이가 10 이하라 상수)
+($N$ = 모든 테스트 케이스에 걸친 문자열 길이의 총합)
 
 ---
 
@@ -44,11 +44,15 @@ void solve() {
     string s;
     cin >> n >> s;
 
-    stringstream ss(s);
-    string token;
-    int mx = 0;
-    while (getline(ss, token, '*')) {
-        mx = max(mx, ((int)token.size() + 1) / 2);
+    int mx = 0, cnt = 0;
+    for (char c : s) {
+        if (c == '#') {
+            cnt++;
+        } else {
+            cnt = 0;
+        }
+
+        mx = max(mx, (cnt + 1) / 2);
     }
 
     cout << mx << '\n';

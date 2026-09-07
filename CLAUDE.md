@@ -19,6 +19,16 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트 자동화가 핵심.
 생길 때마다 개별로 파이프라인에 태운다 — `review-post`는 지목된 포스트 하나를
 그날그날 처리하는 게 기본이고, 인자 없는 전체 배치는 초기용이다.
 
+### 대회 후기 (별도 장르)
+
+대회 참여 기록은 `Contest` 카테고리의 독립 장르 — PS 파이프라인 밖이다. `contest`
+스킬이 CF API에서 성적·순위·레이팅을 받고 페널티를 계산해 `_drafts/contest/`에 후기
+스켈레톤을 생성하고(`scaffold_contest.py`), 서술·라이브 코드·총평은 사람이 채운다.
+발행은 같은 스킬의 `publish_contest.py` — `_drafts/contest/` → `_posts/contest/` 이동
+후 블로그 레포(포스트 + 에셋)와 PS 레포(그 대회의 `live_{contestId}*` 폴더)에 각각
+커밋(완료 게이트 없음, 한 번에 하나, push 안 함). `sync`/`review-*`/`publish`는 전부
+`_drafts/{platform}/`만 보므로 `_drafts/contest/`를 건드리지 않는다.
+
 ## 커밋 · 브랜치
 
 - 포스트·스킬·인프라 커밋 전부 `main`에 직접 — 이 레포는 PR 플로우가 없고 `publish`도
@@ -33,19 +43,26 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트 자동화가 핵심.
 | ------------------ | ------------------------------------------------ | --------------------------------------------------------- |
 | `publish` 산출물   | `feat: [Platform] #번호 - 제목 [langs]`          | `Co-Authored-By: Claude <noreply@anthropic.com>`          |
 | 발행 포스트 손수정 | `fix: [Platform] #번호 - <한 일>` (제목 생략)    | `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` |
+| 대회 후기 발행     | `feat: [Contest] {CF API 대회명} 후기`           | `Co-Authored-By: Claude <noreply@anthropic.com>`          |
+| 대회 후기 손수정   | `fix: [Contest] {CF API 대회명} - <한 일>`       | `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` |
 | 스킬 정의 변경     | `<type>: [Claude Skill] {스킬명} - <요약>`       | 〃                                                        |
 | 블로그 인프라      | `<type>: <요약>` (`_config`·README·CLAUDE.md·CI) | 〃                                                        |
 
-- `<type>` ∈ `feat`/`fix`/`docs`/`refactor`/`chore` — 변경 성격에 맞게 고른다. 포스트
-  커밋만 `feat`(publish)/`fix`(손수정) 고정.
+- `<type>` ∈ `feat`/`fix`/`docs`/`refactor`/`chore` — 변경 성격에 맞게 고른다. 포스트·후기
+  커밋만 `feat`(발행)/`fix`(손수정) 고정.
+- 대회 후기의 `{CF API 대회명}`은 `contest.list`·`contest.standings`의 `name`을 그대로
+  쓴다(정규화·브래킷 접두어 없음, 포스트 `title`과 동일) — `Codeforces Round 1119 (Div. 3)`
+  처럼 "Codeforces"가 이미 들어 있어도 손대지 않는다. Educational/Global 등 비표준 라운드명도
+  안 깨진다.
 - **트레일러 모델명 규칙**: 커밋 시점에 버전을 알 수 없는 주체(정적 스크립트 —
-  `publish`)가 커밋하면 모델명 없이 `Co-Authored-By: Claude <noreply@anthropic.com>`.
+  `publish`·`publish_contest`)가 커밋하면 모델명 없이 `Co-Authored-By: Claude <noreply@anthropic.com>`.
   Claude가 직접 커밋해 현재 버전을 아는 경우는 그 버전을 넣어
   `Co-Authored-By: Claude {현재 모델명} <noreply@anthropic.com>`(예: 이 세션은
   `Claude Sonnet 5`). 모델명은 **이름 부분**에 넣고 이메일 슬롯(`<>`)은 하나만 —
   구 `Claude <claude-sonnet-5> <noreply@...>` 이중 `<>` 형식은 폐기.
+  → 그래서 대회 후기 **발행**(스크립트)은 모델명 없음, **손수정**(Claude 직접)만 모델명.
 - 두 레포(블로그·PS) 메시지는 동일 문구 재사용(PS에서 지은 걸 블로그에도 — 블로그쪽은
-  프로즈 변경분 접미어 허용).
+  프로즈 변경분 접미어 허용). `publish`·`publish_contest`도 두 레포에 같은 메시지로 커밋.
 - `rework:` 프리픽스는 2026-09 기발행분 재작업 1회성 — 종료, 더 쓰지 않는다.
 
 ## 실행 스타일

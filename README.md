@@ -19,6 +19,8 @@
 | `review-post` | 포스트 완성도(설명·복잡도·컨벤션)를 리뷰하고 빈 필드를 채움                  |
 | `publish`     | 완료된 드래프트를 발행하고 블로그/PS 레포 양쪽에 커밋                        |
 
+대회 참여 기록(`Contest` 카테고리)은 별도 장르다 — `contest` 스킬이 Codeforces API에서 성적·순위·레이팅 변동을 받고 페널티를 계산해 후기 스켈레톤을 생성하고(`scaffold_contest.py`), 완성된 후기를 블로그·PS 레포에 커밋한다(`publish_contest.py`). PS 파이프라인과는 분리돼 있다.
+
 ## License
 
 This work is published under [MIT][mit] License.

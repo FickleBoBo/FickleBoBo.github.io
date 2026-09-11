@@ -96,6 +96,7 @@ class Solution {
 ```python
 class Solution:
     def search(self, nums: list[int], target: int) -> int:
+
         def binarySearch(nums, target):
             lo, hi = 0, len(nums) - 1
 

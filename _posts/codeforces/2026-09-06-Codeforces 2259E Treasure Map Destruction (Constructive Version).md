@@ -2,7 +2,7 @@
 title: "[Codeforces] #2259E - Treasure Map Destruction (Constructive Version) [C++]"
 date: 2026-09-06
 categories: [PS, Codeforces]
-tags: ["difference array", "greedy", "constructive"]
+tags: ["constructive", "difference array", "greedy"]
 slug: codeforces-2259e
 media_subpath: /assets/img/posts/codeforces-2259e/
 math: true

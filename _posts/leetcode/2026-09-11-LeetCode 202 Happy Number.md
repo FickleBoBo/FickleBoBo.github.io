@@ -2,7 +2,7 @@
 title: "[LeetCode] #202 - Happy Number [Java][C++][Python]"
 date: 2026-09-11
 categories: [PS, LeetCode]
-tags: ["hash table", "data structure", "floyd's cycle detection"]
+tags: ["data structure", "hash table", "floyd's cycle detection"]
 slug: leetcode-202
 media_subpath: /assets/img/posts/leetcode-202/
 math: true

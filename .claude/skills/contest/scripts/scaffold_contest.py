@@ -81,8 +81,9 @@ REPO_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
 )
 CONTEST_DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts", "contest")
-# 정제된 개별 문제 풀이 포스트가 사는 곳 — 여기 파일이 실재할 때만 서브섹션에
-# "> 풀이 → [[...]]" 팁 링크를 단다(_drafts/는 안 봄, 아직 미발행이므로).
+# 정제된 개별 문제 풀이 포스트가 사는 곳. AC·업솔빙 서브섹션은 실재 여부와 무관하게
+# 팁 링크를 달지만(어차피 나중에 만들 것이므로), 미해결 서브섹션은 이 디렉터리에
+# 파일이 실재할 때만 예외적으로 단다(_drafts/는 안 봄, 아직 미발행이므로).
 CODEFORCES_POSTS_DIR = os.path.join(REPO_ROOT, "_posts", "codeforces")
 
 CF_API = "https://codeforces.com/api"
@@ -410,7 +411,10 @@ def build_problem_subsection(by_index, p, contest_id):
         "// 라이브 코드",
         "```",
     ]
-    if has_solution_post(contest_id, idx):
+    # AC·업솔빙은 어차피 나중에 풀이 포스트를 만들 것이므로 실재 여부를 안 따지고
+    # 무조건 링크를 단다(대회 직후엔 아직 _drafts/에도 없는 게 정상). 미해결은
+    # 포스트가 생길 보장이 없으니 실재할 때만(has_solution_post) 예외적으로 단다.
+    if result in ("AC", "업솔빙") or has_solution_post(contest_id, idx):
         num = f"{contest_id}{idx}"  # 텍스트: 대문자 인덱스
         post_slug = f"codeforces-{contest_id}{idx}".lower()  # URL 슬러그: 소문자
         parts += [
@@ -482,10 +486,12 @@ def scaffold(contest_id, force):
     else:
         participation = "공식 (rated)"
 
-    # tags: 플랫폼 + (있으면) 디비전. "(Div. N)" 정확 매칭만 — Educational/Global 등
-    # 비표준 라운드명은 태그 없이 두고 사람이 추가.
+    # tags: 플랫폼 + (있으면) 디비전. "(Div. N)" 또는 Educational 라운드의
+    # "(Rated for Div. N)" 정확 매칭만 — 둘 다 디비전이 명확한 단일 값이라 안전.
+    # "(Div. 1 + Div. 2)"류 통합 라운드·Global/Hello 등 비표준 라운드명은
+    # 매칭 안 되므로 태그 없이 두고 사람이 추가.
     tags = ["codeforces"]
-    m = re.search(r"\(Div\.\s*(\d+)\)", contest["name"])
+    m = re.search(r"\((?:Rated for )?Div\.\s*(\d+)\)", contest["name"])
     if m:
         tags.append(f"div {m.group(1)}")
 

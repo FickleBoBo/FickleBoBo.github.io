@@ -2,7 +2,7 @@
 title: "[LeetCode] #242 - Valid Anagram [Java][C++][Python]"
 date: 2026-09-11
 categories: [PS, LeetCode]
-tags: ["string", "hash table", "data structure"]
+tags: ["data structure", "hash table", "string"]
 slug: leetcode-242
 media_subpath: /assets/img/posts/leetcode-242/
 math: true

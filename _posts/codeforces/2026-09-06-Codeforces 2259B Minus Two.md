@@ -2,7 +2,7 @@
 title: "[Codeforces] #2259B - Minus Two [C++]"
 date: 2026-09-06
 categories: [PS, Codeforces]
-tags: ["number theory", "math"]
+tags: ["math", "number theory"]
 slug: codeforces-2259b
 media_subpath: /assets/img/posts/codeforces-2259b/
 math: true

@@ -2,7 +2,7 @@
 title: "[LeetCode] #20 - Valid Parentheses [Java][C++][Python]"
 date: 2026-09-11
 categories: [PS, LeetCode]
-tags: ["stack", "data structure"]
+tags: ["data structure", "stack"]
 slug: leetcode-20
 media_subpath: /assets/img/posts/leetcode-20/
 math: true

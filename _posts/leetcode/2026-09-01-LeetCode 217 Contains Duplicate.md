@@ -2,7 +2,7 @@
 title: "[LeetCode] #217 - Contains Duplicate [Java][C++][Python]"
 date: 2026-09-01
 categories: [PS, LeetCode]
-tags: ["hash table", "data structure"]
+tags: ["data structure", "hash table"]
 slug: leetcode-217
 media_subpath: /assets/img/posts/leetcode-217/
 math: true

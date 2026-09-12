@@ -2,7 +2,7 @@
 title: "[LeetCode] #1 - Two Sum [Java][C++][Python]"
 date: 2026-09-05
 categories: [PS, LeetCode]
-tags: ["brute force", "hash table", "data structure"]
+tags: ["brute force", "data structure", "hash table"]
 slug: leetcode-1
 media_subpath: /assets/img/posts/leetcode-1/
 math: true

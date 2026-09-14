@@ -207,6 +207,17 @@ def _fetch_codeforces_problems():
     return json.loads(body)["result"]["problems"]
 
 
+@functools.cache
+def _fetch_codeforces_contest_problems(contest_id):
+    # Div1+Div2 통합 대회는 공유 문제가 problemset.problems엔 한쪽 contestId로만
+    # 정본화되어 있음(실측: 2263 C1/C2가 problemset.problems엔 없고 2262 A1/A2로만
+    # 등록됨) — 이럴 때 그 대회 응시 시점 문제 목록(contest.standings)으로
+    # 재조회한다. /problemset/problem/{contest_id}/{index} 링크는 이 경우에도
+    # 살아있음(2026-09-14 확인).
+    body = fetch(f"https://codeforces.com/api/contest.standings?contestId={contest_id}")
+    return json.loads(body)["result"]["problems"]
+
+
 def get_title_url_codeforces(number):
     # 폴더명 형식이 "{contestId}{Index}"(예: 1553A)라고 가정함 — 실제 사용 사례로 검증된 적 없음.
     m = re.match(r"(\d+)([A-Za-z]\d*)$", number)
@@ -215,6 +226,10 @@ def get_title_url_codeforces(number):
     contest_id, index = m.groups()
     for p in _fetch_codeforces_problems():
         if str(p["contestId"]) == contest_id and p["index"] == index.upper():
+            url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
+            return p["name"], url
+    for p in _fetch_codeforces_contest_problems(contest_id):
+        if p["index"] == index.upper():
             url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
             return p["name"], url
     raise ValueError(f"Codeforces {number}번을 목록에서 못 찾음")

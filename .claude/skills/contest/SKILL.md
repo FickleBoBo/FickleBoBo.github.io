@@ -32,7 +32,8 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 - 배치 모드 없음 — 대회는 한 번에 하나씩, 대회 끝나고 실행한다.
 - 핸들은 스크립트 상수(`HANDLE = "FickleBoBo"`). 인자로 안 받는다.
 - `_drafts/contest/{파일명}`이 이미 있으면 거부(사람이 채운 서술·라이브 코드 보호). 재생성은 `--force`.
-- 성공 시 stdout엔 쓴 파일의 절대경로만. **stderr**엔 페널티·순위·레이팅 요약(눈 대조용).
+- `assets/img/posts/{slug}/` 폴더도 같이 만든다(레이팅 그래프 스크린샷 자리 — 매 후기 100% 쓰이므로).
+- 성공 시 stdout엔 쓴 파일의 절대경로만. **stderr**엔 페널티·순위·레이팅 요약 + 그래프 저장 경로(눈 대조·안내용).
 - 필수 인자(대회 ID/URL)가 없으면 평문으로 요청하고 기다린다 — `AskUserQuestion` 같은 선택지 UI로 후보를 골라주지 않는다(`ps`와 동일).
 
 ## CF API 조회 (contestId + 핸들, 전부 익명 GET)
@@ -77,7 +78,7 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 1. 각 `### {index}` 서브섹션에 대회 중 흐름 서술 + 라이브/WIP 코드 붙여넣기(PS 레포에 있지만 `sync`가 contest 포스트를 안 본다 — 손으로). 컴파일 안 되는 미완 코드도 그대로.
 2. 필요하면 `## 3` 표·결과 라벨의 수동 뉘앙스 조정(`업솔빙` → `미완 · 업솔빙` 등).
 3. `## 총평` 작성.
-4. 레이팅 그래프 이미지: Chrome DevTools → 그래프 노드 선택 → `Cmd+Shift+P` → "Capture node screenshot" → `assets/img/posts/{slug}/rating-graph.png`. 첫 대회는 점 1개라 가치 낮음(줄 지워도 됨).
+4. 레이팅 그래프 이미지: Chrome DevTools → 그래프 노드 선택 → `Cmd+Shift+P` → "Capture node screenshot" → `assets/img/posts/{slug}/rating-graph.png`(폴더는 스캐폴드 단계에서 이미 만들어져 있음 — stderr에 경로 출력됨). 첫 대회는 점 1개라 가치 낮음(줄 지워도 됨).
 5. 발행 전 `/contest/{id}/standings`에서 페널티·순위 눈 대조.
 6. 발행: `publish_contest.py` 실행 (아래).
 

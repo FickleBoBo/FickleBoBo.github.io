@@ -505,6 +505,13 @@ def scaffold(contest_id, force):
             f"{target}\n다시 생성하려면 --force."
         )
 
+    # 레이팅 그래프는 매 후기 100% 들어가므로(`## 2. 결과` 표 아래 `rating-graph.png`
+    # 참조가 build_result에서 무조건 박힘) 스캐폴드 시점에 자리를 미리 만들어둔다 —
+    # 사람이 DevTools 스크린샷을 이 폴더에 바로 떨어뜨릴 수 있게. 이미 있으면(재생성
+    # 시 기존 스크린샷) 손대지 않음.
+    assets_dir = os.path.join(REPO_ROOT, "assets", "img", "posts", slug)
+    os.makedirs(assets_dir, exist_ok=True)
+
     front_matter = build_front_matter(contest, start_kst, slug, tags)
     body = build_body(
         contest,
@@ -551,6 +558,7 @@ def scaffold(contest_id, force):
         f"  ⚠ 발행 전 /contest/{contest_id}/standings 페이지에서 페널티·순위 눈 대조",
         file=sys.stderr,
     )
+    print(f"  레이팅 그래프 자리: {assets_dir}/rating-graph.png", file=sys.stderr)
 
     return target
 

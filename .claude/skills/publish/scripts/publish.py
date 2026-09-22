@@ -17,9 +17,8 @@ LLM 판단 없음.
   *전에* 먼저 함(`publish_one` 맨 앞) — 실패 시 아무 상태도 안 남기고 깨끗하게
   에러 보고하기 위함. 이 순서를 바꾸면(먼저 옮기고 나중에 검증) 실패했을 때
   파일만 옮겨진 애매한 상태가 남음.
-- `os.rename` 이후부터는 실패해도 파일을 원래 자리로 되돌리지 않음(자동 롤백
-  없음) — 각 예외 메시지에 "어디까지 진행됐는지"를 명시해서 사람이 정확히 뭘
-  마저 처리해야 하는지 알 수 있게 하는 쪽으로 설계함.
+- `os.rename` 이후부터는 자동 롤백 없음 — 이유·각 실패 케이스별 대응은
+  `SKILL.md`의 "실패 처리" 참고.
 
 사용법:
     python3 publish.py [경로 ...]
@@ -138,6 +137,20 @@ def section_is_filled(text, heading):
     return bool(body.strip())
 
 
+def is_sql_only_title(title):
+    """title 끝의 연속된 언어 브래킷이 `SQL_ONLY_LANGUAGES`(ps 스킬,
+    resolve_filename.py)와 정확히 일치하는지 — SQL 전용 포스트 판정. `## 2. 복잡도`
+    헤딩 부재 자체로 판정하지 않는 이유는 `SKILL.md`의 "완료 판정" 참고.
+    is_ready(text)는 raw 텍스트만 받아 by_language 딕셔너리가 없어서 title의
+    언어 브래킷을 정규식으로 뽑아 값만 SQL_ONLY_LANGUAGES와 대조함(값은 단일
+    소스, 추출 로직만 여기 별도)."""
+    m = re.search(r"((?:\[[^\[\]]*\])+)\s*$", title)
+    if not m:
+        return False
+    langs = set(re.findall(r"\[([^\[\]]*)\]", m.group(1)))
+    return langs == SQL_ONLY_LANGUAGES
+
+
 def complexity_table_filled(text):
     """`## 2. 복잡도` 표의 모든 데이터 행(헤더/구분줄 제외)에서 시간·공간 셀이 둘 다
     채워졌는지. 행 개수 자체는 검사 안 함(ps가 이미 접근법 수만큼 정확히 만들어둠) —
@@ -154,20 +167,6 @@ def complexity_table_filled(text):
         if len(cells) < 3 or not cells[1] or not cells[2]:
             return False
     return True
-
-
-def is_sql_only_title(title):
-    """title 끝의 연속된 언어 브래킷이 `SQL_ONLY_LANGUAGES`(ps 스킬,
-    resolve_filename.py)와 정확히 일치하는지 — SQL 전용 포스트 판정. `## 2. 복잡도`
-    헤딩 부재 자체로 판정하지 않는 이유는 `SKILL.md`의 "완료 판정" 참고.
-    is_ready(text)는 raw 텍스트만 받아 by_language 딕셔너리가 없어서 title의
-    언어 브래킷을 정규식으로 뽑아 값만 SQL_ONLY_LANGUAGES와 대조함(값은 단일
-    소스, 추출 로직만 여기 별도)."""
-    m = re.search(r"((?:\[[^\[\]]*\])+)\s*$", title)
-    if not m:
-        return False
-    langs = set(re.findall(r"\[([^\[\]]*)\]", m.group(1)))
-    return langs == SQL_ONLY_LANGUAGES
 
 
 def is_ready(text):

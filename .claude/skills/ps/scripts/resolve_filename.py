@@ -81,17 +81,30 @@ PLATFORM_MAP = {
 }
 
 # 언어 브라켓 표시 순서 및 확장자 매핑
-LANGUAGE_DISPLAY_ORDER = ["Java", "C++", "Python"]
+# MySQL(프로그래머스 SQL 문제)은 항상 폴더에 Solution.sql 하나뿐 —
+# Java/C++/Python과 동시 존재하지 않음(PS 레포 ps-new-problem 스킬 규칙).
+LANGUAGE_DISPLAY_ORDER = ["Java", "C++", "Python", "MySQL"]
 EXT_TO_LANGUAGE = {
     ".java": "Java",
     ".cpp": "C++",
     ".py": "Python",
+    ".sql": "MySQL",
 }
 FENCE_LANG = {
     "Java": "java",
     "C++": "c++",
     "Python": "python",
+    # 표시명은 MySQL이지만 실제 코드펜스는 "sql" — 이 레포에 설치된 Rouge(4.7.0)엔
+    # mysql 전용 렉서가 없고 sql/plsql만 있음(확인함). ```mysql로 쓰면 하이라이팅
+    # 없이 렌더링됨.
+    "MySQL": "sql",
 }
+# MySQL은 항상 단독 생성이라 이 집합과 일치하면 "SQL 전용 포스트"로 판정
+# (build_body의 복잡도 섹션 스킵에서 씀). publish.py도 이 상수를 그대로 import해서
+# 같은 판정을 함(is_sql_only_title) — is_ready(text)는 raw 텍스트만 받아
+# by_language 딕셔너리가 없으므로, title의 언어 브래킷을 정규식으로 뽑아 이 값과
+# 대조하는 방식만 그쪽에서 별도로 구현함(값 자체는 여기 하나뿐).
+SQL_ONLY_LANGUAGES = {"MySQL"}
 
 # 본문 섹션 헤딩 — publish 스킬의 완료 판정(`publish.py`)이 이 문자열을 그대로
 # 찾아서 씀. 여기서 챕터 번호/제목을 바꾸면 publish의 완료 판정도 반드시 같이
@@ -338,10 +351,12 @@ def build_complexity_section(by_language):
     return "\n".join(lines)
 
 
-def build_code_section(folder_path, by_language):
+def build_code_section(folder_path, by_language, heading_num=3):
+    """heading_num: 이 섹션의 챕터 번호. SQL 전용 포스트는 앞의 `## 2. 복잡도`가
+    통째로 빠지므로 코드 섹션이 2번으로 한 칸 당겨짐(build_body에서 결정)."""
     groups = group_by_approach(by_language)
     nums = sorted(groups)
-    lines = ["## 3. 코드", ""]
+    lines = [f"## {heading_num}. 코드", ""]
     for i, num in enumerate(nums):
         if i > 0:
             lines.extend(["---", ""])
@@ -378,12 +393,19 @@ def build_body(problem_url, folder_path, by_language):
     # 사람이 "## 회고"/"## 참고" 헤딩을 직접 추가. 빈 헤딩만 미리 깔아두면 안 쓰는 경우가
     # 대부분이라 대부분의 포스트에서 그대로 방치되는 보일러플레이트가 됨.
 
+    # 복잡도(Big-O) 섹션은 SQL 전용 포스트에서 통째로 뺌 — 시간/공간복잡도가
+    # 이 문제 성격에 안 맞는 형식이라(2026-09-22 확정). publish.py의 완료 판정도
+    # 같은 SQL_ONLY_LANGUAGES 조건으로 이 섹션 부재를 예외 처리해야 함.
+    is_sql_only = set(by_language) == SQL_ONLY_LANGUAGES
+
     # 구분선 소유권 규칙은 모듈 docstring 참고(여기서 반복 안 함).
-    trailing_sections = [
-        idea_section,
-        build_complexity_section(by_language),
-        build_code_section(folder_path, by_language),
-    ]
+    trailing_sections = [idea_section]
+    if not is_sql_only:
+        trailing_sections.append(build_complexity_section(by_language))
+    code_heading_num = 2 if is_sql_only else 3
+    trailing_sections.append(
+        build_code_section(folder_path, by_language, heading_num=code_heading_num)
+    )
     # 맨 끝에도 "---"를 하나 더 둠 — 이건 어느 섹션에도 안 딸린, 문서 끝을 표시하는
     # 독립적인 구분선이라 회고/참고를 지워도 영향 안 받음(항상 마지막에 남음).
     return "\n\n".join(

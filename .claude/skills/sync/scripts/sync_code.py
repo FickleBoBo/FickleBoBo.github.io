@@ -12,16 +12,21 @@
 - front matter의 date/slug만으로 PS 레포 원본 폴더 경로를 재구성함(파일명이 바뀌어도
   영향 없음 — front matter만 신뢰). date="YYYY-MM-DD" + slug="{platform}-{번호}" →
   {PS_REPO}/{YYYY-MM}/src/day_{DD}/{prefix}_{번호}.
+- 위에서 재구성한 폴더명은 실제 디렉토리 목록과 대소문자 무시로 매칭한 뒤 실제
+  엔트리명으로 교체해서 씀(`resolve_source_folder`) — macOS(APFS)가 대소문자를
+  구분 안 해서 `os.path.isdir`가 재구성한 이름의 대소문자가 실제와 달라도(예:
+  `cofo_2148A`로 재구성했는데 실제 폴더는 `cofo_2148a`) 통과시켜버리고, git은
+  대소문자를 구분해서 이 어긋난 경로로 git 명령을 돌리면 대상이 조용히 안 걸림 —
+  실제로 있었던 사고(2026-08-22, Codeforces #2148A: PS 레포 커밋이 스킵됐는데
+  publish는 성공으로 보고).
 - `ps` 스킬의 `clean_code.py`/`resolve_filename.py`를 그대로 import해서 씀(sys.path로
   `ps/scripts`를 직접 끌어옴) — "PS 레포 코드 → 블로그용 코드" 변환 로직이 두 스킬
   사이에서 갈라지면 안 되기 때문. `ps`의 본문 스켈레톤 구조(챕터 번호, 코드 블록
   포맷)가 바뀌면 여기 코드 블록 탐지 로직(`segment_by_approach`/
-  `APPROACH_HEADING_RE`)도 같이 손봐야 함. 현재 `resolve_filename.py`를 이런
-  sys.path 방식으로 끌어쓰는 스킬은 sync/publish/review-code까지 4개 — 원래
-  "더 늘어나면 별도 공유 패키지로" 예고했던 임계점은 이미 넘었지만, 해킹이
-  스킬당 1~2줄이고 `resolve_filename.py`가 `PS_REPO`/`PLATFORM_MAP`/`DRAFTS_DIR`
-  단일 소스라 아직 추출 안 함. 5번째 소비자가 생기거나 import 목록이 더 불어나면
-  그때 `_shared/`로 뺄 것.
+  `APPROACH_HEADING_RE`)도 같이 손봐야 함. `resolve_filename.py`를 이런 sys.path
+  방식으로 끌어쓰는 스킬 수·"몇 개 넘으면 공유 패키지로 뺄지" 임계점 얘기는
+  `resolve_filename.py` docstring에서만 추적함(여기 다시 세면 갱신 안 하고 stale해질
+  위험).
 - 코드 블록을 헤딩 구간으로 스코핑하는 이유는 `segment_by_approach` docstring 참고.
 - 배치 모드(인자 없음)는 `ps`의 `run_batch`/`discover_problem_folders` 패턴을 그대로
   따름: 개별 포스트 실패가 배치 전체를 막지 않고 그 포스트만 에러로 보고, 나머지는
@@ -50,8 +55,7 @@
         파일을 다시 싱크할 때. 실패하면 즉시 예외를 그대로 띄움(배치와 달리 콕
         집어 지정했으니 조용히 넘어가지 않음).
 
-출력: 파일별로 "갱신함" / "변경 없음" / "코드 블록을 못 찾음(수동 확인 필요)" 보고.
-배치 모드는 포스트별로 한 줄 요약("변경 없음") 또는 세부 내역 + 맨 끝에 총계 한 줄.
+출력 상태 종류(5개)와 배치 모드 축약 방식은 `sync/SKILL.md`의 `## 출력` 참고.
 """
 
 import os
@@ -115,15 +119,8 @@ def resolve_source_folder(date, slug):
     folder = os.path.join(day_dir, folder_name)
     if not os.path.isdir(folder):
         raise ValueError(f"PS 레포에 해당 폴더가 없음(경로 재구성 결과): {folder}")
-    # macOS(APFS)는 기본적으로 대소문자를 구분 안 해서 os.path.isdir는 재구성한
-    # 이름의 대소문자가 실제 폴더명과 달라도(예: cofo_2148A로 재구성했는데 실제
-    # 폴더는 cofo_2148a) 통과시켜버림. git은 대소문자를 구분하므로 이 어긋난
-    # 경로로 git 명령을 돌리면(예: publish의 has_pending_changes) 대상이 조용히
-    # 안 걸려서 "이미 커밋됨"으로 오판 — 실제로 있었던 사고(2026-08-22, Codeforces
-    # #2148A: PS 레포 커밋이 스킵됐는데 publish는 성공으로 보고함). 재구성한
-    # 이름을 그대로 믿지 않고, 디렉토리 목록에서 대소문자 무시로 매칭한 뒤 실제
-    # 엔트리명으로 교체해서 반환 — PS 레포 폴더명에 특정 대소문자 관례를 강제하지
-    # 않으면서도 이후 git 명령이 항상 실제 경로를 정확히 가리키게 함.
+    # 재구성한 이름의 대소문자를 그대로 믿지 않고 실제 엔트리명으로 교체 —
+    # 이유(APFS 대소문자 무시 + 2026-08-22 사고)는 파일 상단 docstring 참고.
     actual_name = next(
         (e for e in os.listdir(day_dir) if e.lower() == folder_name.lower()), None
     )
@@ -225,10 +222,8 @@ def find_stale_blocks(post_text, by_language):
 STATUS_LABELS = {
     "updated": "갱신함",
     "unchanged": "변경 없음",
-    "not_found": (
-        "포스트에서 코드 블록을 못 찾음 — 수동 확인 필요"
-        "(코드 블록이 다른 섹션으로 옮겨졌거나 fence 언어 표시가 깨졌을 수 있음)"
-    ),
+    # 원인 설명은 SKILL.md `## 출력`이 담당 — 여기서 다시 안 풂(중복 시 어긋날 여지).
+    "not_found": "포스트에서 코드 블록을 못 찾음 — 수동 확인 필요",
 }
 
 

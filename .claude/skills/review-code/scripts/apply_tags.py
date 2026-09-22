@@ -91,7 +91,16 @@ def load_tag_parents():
 
         m = _LINE_RE.match(raw_line)
         if not m:
-            continue
+            # 여기서 조용히 넘어가지 않음 — tags.yaml의 태그 정의는 전부 이 정규식이
+            # 매칭하는 한 줄짜리 flow 스타일이라, 형식이 바뀌어 일부 줄만 매칭 안 되면
+            # 해당 태그가 parents_map에서 조용히 빠지고, 그 태그가 실제로 쓰일 때만
+            # (leaf 또는 누군가의 parent로) 뒤늦게 "오타 확인" 에러로 잘못 드러난다.
+            # 파싱 시점에 바로 잡아서 원인을 명확히 한다.
+            raise ValueError(
+                f"tags.yaml 파싱 실패 — 'tags:' 블록의 이 줄이 태그 정의 패턴과 "
+                f"안 맞음: {raw_line!r}\n형식이 바뀌었으면 이 파일의 _LINE_RE도 "
+                "같이 고칠 것."
+            )
 
         name = m.group(1) if m.group(1) is not None else m.group(2)
         parents_raw = m.group(3).strip()

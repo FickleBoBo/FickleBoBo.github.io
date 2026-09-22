@@ -9,7 +9,7 @@ description: _drafts/의 PS 포스트에 임베드된 코드를 정확성/최선
 
 ## 오케스트레이터 (서브에이전트는 이 절을 건너뜀)
 
-1. `python3 <이 스킬의 base directory>/scripts/chunk_drafts.py --mode code [경로 ...]`로 대상 드래프트를 청크로 분할. 사용자가 특정 포스트를 지목하면 `_drafts/{platform}/`에서 매칭해 절대경로로 넘기고, 안 지목하면 인자 없이 호출(전체 배치).
+1. `python3 <이 스킬의 base directory>/scripts/chunk_drafts.py [경로 ...]`로 대상 드래프트를 청크로 분할. 사용자가 특정 포스트를 지목하면 `_drafts/{platform}/`에서 매칭해 절대경로로 넘기고, 안 지목하면 인자 없이 호출(전체 배치).
 2. 청크마다 백그라운드 서브에이전트 하나씩 dispatch: Agent 도구, `subagent_type` 생략(= general-purpose), `run_in_background: true`. 프롬프트엔 **이 `SKILL.md` 경로 + `## 체크 항목`·`## 출력 형식`을 따르라는 지시 + 그 청크에 배정된 드래프트 절대경로 목록**만. 체크리스트 텍스트를 프롬프트에 옮겨적지 않음(이 파일이 유일한 출처, 안 그러면 갈라짐).
 3. 모든 서브에이전트 종료 후 취합: 드래프트별 표 + 배치 요약표. 취합 전:
    - **`git status`/`git diff`로 실제 파일 변경을 대조 확인** — 서브에이전트가 "제안만 했다"고 보고하고 드래프트 `.md` 프로즈를 몰래 Edit한 사례 있었음.
@@ -73,7 +73,7 @@ description: _drafts/의 PS 포스트에 임베드된 코드를 정확성/최선
 **정본은 `<이 스킬의 base directory>/tags.yaml` — 어휘집 + 헤더 주석(사용법 0~6)과 `boundary_notes`를 읽고 그대로 따른다.** 자유 태그 생성 금지, 후보만 언급. 요지:
 
 - 코드가 실제 쓰는 기법에 가장 구체적인 태그 → `parents` 재귀로 조상까지 후보(다중부모면 양쪽 라인 다, `contextual`이면 그 판단 기준까지).
-- `math`/`implementation`은 핵심 난이도일 때만(tags.yaml 0 — `string`/`geometry` 같은 도메인 태그는 이 바 없이 도메인에 속하면 붙임). 이 바를 통과하는 기법 태그가 하나도 안 남을 때만 `constructive`/`ad hoc`/`warm up`, 판단은 접근 단위.
+- `math`/`implementation`/`warm up` 경계는 `tags.yaml`의 `boundary_notes`(`[implementation, math, warm up]` 항목)가 판정 기준 정본 — 여기서 요약하지 않고 그 항목을 직접 읽는다.
 - 다중 접근이면 접근별로 나눠 제시(`풀이1: warm up / 풀이2: math`), front matter엔 합집합.
 - **파일엔 안 씀** — 후보 언급까지만 여기(Claude) 판단 영역. 사용자가 "태그 달아줘"라고 확정 leaf 태그를 명시하면, 그 뒤 "조상 펼치기 + front matter 치환"은 판단 여지가 없는 순수 트리 lookup이라 손으로 Edit하지 않고 반드시 `scripts/apply_tags.py <드래프트 .md 경로> <leaf 태그> [<leaf 태그> ...]`로 기계적으로 적용한다(조상 빠뜨리는 실수 방지, 2026-09-13 도입 — 조상 펼치기를 손으로 하다가 실제로 빠뜨린 사례 있었음).
 

@@ -8,25 +8,24 @@ review-code/review-post가 처리할 드래프트 목록을 찾아서 청크(서
 **청크 크기 기준: 드래프트 최대 4개 / 총 줄수 약 1200줄 중 먼저 도달하는
 조건에서 그룹을 끊는 그리디 패킹. 개수 상한은 LLM이 한 번에 너무 많은 항목을
 보면 뒤로 갈수록 대충 보는 경향 때문, 줄수 상한은 긴 드래프트 하나가 낀 그룹만
-유독 무거워지는 걸 막기 위함. 숫자는 근거 있는 절대치가 아니라 보수적 시작값.
-`--mode code`/`--mode post`는 지금은 동작이 동일(둘 다 필터 없이 전체 대상) —
-review-post가 예전엔 '2. 접근' 비어있는 드래프트를 스킵했었는데, 이제 비어있으면
-review-post가 직접 채우는 게 정상 동작이라 필터 자체를 없앰. 모드 구분은 향후
-다시 갈릴 가능성을 열어두려고 인터페이스만 유지.**
+유독 무거워지는 걸 막기 위함. 숫자는 근거 있는 절대치가 아니라 보수적 시작값.**
 
 코드를 고칠 때 알아야 할 것:
 - `resolve_filename.py`(`ps`)의 `PLATFORM_MAP`/`DRAFTS_DIR`를 그대로
   import해서 씀 — 드래프트 스캔 범위가 다른 스킬과 갈라지면 안 되기 때문.
-- 이 스크립트는 review-code 스킬 소유지만 review-post도 `--mode post`로 그대로
-  가져다 씀(파일 복제 안 함) — sync가 ps의 스크립트를, publish가 sync/ps의
-  스크립트를 그대로 가져다 쓰는 것과 같은 패턴.
+- 이 스크립트는 review-code 스킬 소유지만 review-post도 그대로 가져다
+  씀(파일 복제 안 함) — sync가 ps의 스크립트를, publish가 sync/ps의 스크립트를
+  그대로 가져다 쓰는 것과 같은 패턴. 예전엔 `--mode {code,post}`로 두 소비자를
+  구분해 review-post만 '2. 접근' 비어있는 드래프트를 스킵했는데, 그 필터가
+  없어지면서(비어있으면 review-post가 직접 채우는 게 정상 동작) 두 모드가 완전히
+  동일해져 인자 자체를 없앰(2026-09-22) — 다시 갈릴 일이 생기면 그때 호출부에서
+  다시 구분.
 
 사용법:
-    python3 chunk_drafts.py --mode code [경로 ...]
-    python3 chunk_drafts.py --mode post [경로 ...]
+    python3 chunk_drafts.py [경로 ...]
         경로를 안 주면 _drafts/{platform}/ 전체가 대상(전체 배치), 하나 이상 주면
         그 드래프트들만 대상(사용자가 특정 포스트를 지목했을 때 — 존재하지 않는
-        경로가 섞여 있으면 즉시 에러). 두 모드 다 필터 없이 그대로 청크로 나눔.
+        경로가 섞여 있으면 즉시 에러).
 
 출력: "CHUNK N:" 헤더 아래 그 청크에 속한 드래프트 절대경로들, 마지막에 총계 한 줄.
 """
@@ -92,14 +91,7 @@ def chunk_by_size(paths, max_count=MAX_DRAFTS_PER_CHUNK, max_lines=MAX_LINES_PER
 
 
 def main():
-    if (
-        len(sys.argv) < 3
-        or sys.argv[1] != "--mode"
-        or sys.argv[2] not in ("code", "post")
-    ):
-        print(__doc__)
-        sys.exit(1)
-    explicit_paths = sys.argv[3:] or None
+    explicit_paths = sys.argv[1:] or None
 
     paths = discover_all_drafts(explicit_paths)
     chunks = chunk_by_size(paths)

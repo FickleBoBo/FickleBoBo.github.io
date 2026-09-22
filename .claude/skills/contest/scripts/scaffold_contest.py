@@ -70,16 +70,21 @@ import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+_SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(_SKILLS_DIR, "ps", "scripts"))
+
+# REPO_ROOT/sanitize_filename/yaml_dq는 ps 스킬(resolve_filename.py) 걸 그대로
+# 가져다 씀 — 파일명 이스케이프 표·YAML 이스케이프 로직이 두 스킬에서 갈라지면
+# 안 되기 때문(publish_contest.py가 REPO_ROOT를 같은 방식으로 가져다 쓰는 것과
+# 동일 패턴).
+from resolve_filename import REPO_ROOT, sanitize_filename, yaml_dq
+
 # ── 상수 ──────────────────────────────────────────────────────────────────────
 
 HANDLE = "FickleBoBo"
 
 KST = timezone(timedelta(hours=9))
 
-# 이 스크립트(.claude/skills/contest/scripts/scaffold_contest.py) 기준 블로그 레포 루트
-REPO_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-)
 CONTEST_DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts", "contest")
 # 정제된 개별 문제 풀이 포스트가 사는 곳. AC·업솔빙 서브섹션은 실재 여부와 무관하게
 # 팁 링크를 달지만(어차피 나중에 만들 것이므로), 미해결 서브섹션은 이 디렉터리에
@@ -87,20 +92,6 @@ CONTEST_DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts", "contest")
 CODEFORCES_POSTS_DIR = os.path.join(REPO_ROOT, "_posts", "codeforces")
 
 CF_API = "https://codeforces.com/api"
-
-# 파일명 금지 문자 -> 육안 구별 어려운 유니코드 대체 (ps/resolve_filename.py와 동일 표).
-# CF 대회명은 보통 이 문자를 안 쓰지만(괄호·마침표는 허용) 스폰서 라운드명 등에 대비.
-FILENAME_ESCAPES = {
-    "/": "⁄",  # FRACTION SLASH
-    ":": "∶",  # RATIO
-    "?": "？",  # FULLWIDTH QUESTION MARK
-    "*": "⁎",  # LOW ASTERISK
-    '"': "＂",  # FULLWIDTH QUOTATION MARK
-    "<": "‹",  # SINGLE LEFT-POINTING ANGLE QUOTATION MARK
-    ">": "›",  # SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
-    "\\": "∖",  # SET MINUS
-    "|": "｜",  # FULLWIDTH VERTICAL LINE
-}
 
 # (하한 레이팅, 등급명, hex) — rating >= 하한인 마지막 튜플이 그 등급.
 # 2026-09-07 CF community.css 실측.
@@ -271,16 +262,6 @@ def rating_span(rating):
 
 def signed(n):
     return f"+{n}" if n >= 0 else str(n)
-
-
-def sanitize_filename(name):
-    for bad, good in FILENAME_ESCAPES.items():
-        name = name.replace(bad, good)
-    return name
-
-
-def yaml_dq(s):
-    return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def has_solution_post(contest_id, index):
@@ -464,6 +445,32 @@ def build_body(
 # ── 엔트리포인트 ──────────────────────────────────────────────────────────────
 
 
+def determine_participation(mine, submissions):
+    """rated 응시 여부(`mine`, load_rating_change의 반환값)와 제출 로그로 참가 형태
+    문자열을 판정한다. rated 성적이 있으면 확정 공식 참가고, 없으면 제출 로그의
+    participantType으로 오픈/가상 참가를 구분한다 — 셋 다 아니면(제출이 전혀 없거나
+    참관만 함) rated 성적 없는 기본값으로 공식 참가 처리."""
+    if mine:
+        return "공식 (rated)"
+    if any(s["author"]["participantType"] == "CONTESTANT" for s in submissions):
+        return "오픈 (공식 시간, unrated)"
+    if any(s["author"]["participantType"] == "VIRTUAL" for s in submissions):
+        return "가상 (virtual, unrated)"
+    return "공식 (rated)"
+
+
+def determine_div_tags(contest_name):
+    """대회명에서 디비전 태그를 뽑는다. "(Div. N)" 또는 Educational 라운드의
+    "(Rated for Div. N)" 정확 매칭만 — 둘 다 디비전이 명확한 단일 값이라 안전.
+    "(Div. 1 + Div. 2)"류 통합 라운드·Global/Hello 등 비표준 라운드명은 매칭 안 되므로
+    태그 없이 두고 사람이 추가."""
+    tags = ["codeforces"]
+    m = re.search(r"\((?:Rated for )?Div\.\s*(\d+)\)", contest_name)
+    if m:
+        tags.append(f"div {m.group(1)}")
+    return tags
+
+
 def scaffold(contest_id, force):
     contest, problems = load_contest(contest_id)
     rank_count, mine = load_rating_change(contest_id)
@@ -476,24 +483,8 @@ def scaffold(contest_id, force):
     by_index = classify_problems(problems, submissions, contest["durationSeconds"])
     penalty = compute_penalty(by_index)
 
-    # 참가 형태
-    if mine:
-        participation = "공식 (rated)"
-    elif any(s["author"]["participantType"] == "CONTESTANT" for s in submissions):
-        participation = "오픈 (공식 시간, unrated)"
-    elif any(s["author"]["participantType"] == "VIRTUAL" for s in submissions):
-        participation = "가상 (virtual, unrated)"
-    else:
-        participation = "공식 (rated)"
-
-    # tags: 플랫폼 + (있으면) 디비전. "(Div. N)" 또는 Educational 라운드의
-    # "(Rated for Div. N)" 정확 매칭만 — 둘 다 디비전이 명확한 단일 값이라 안전.
-    # "(Div. 1 + Div. 2)"류 통합 라운드·Global/Hello 등 비표준 라운드명은
-    # 매칭 안 되므로 태그 없이 두고 사람이 추가.
-    tags = ["codeforces"]
-    m = re.search(r"\((?:Rated for )?Div\.\s*(\d+)\)", contest["name"])
-    if m:
-        tags.append(f"div {m.group(1)}")
+    participation = determine_participation(mine, submissions)
+    tags = determine_div_tags(contest["name"])
 
     slug = f"codeforces-{contest_id}"
     filename = f"{start_kst:%Y-%m-%d}-{sanitize_filename(contest['name'])}.md"

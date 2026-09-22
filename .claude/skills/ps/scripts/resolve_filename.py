@@ -13,6 +13,10 @@ PS 레포 문제 폴더 경로를 받아서, 이 블로그의 포스트 파일�
 `UNSUPPORTED_PLATFORMS`로 보류 중 — 이유는 SKILL.md 참고. 컷오프
 (`BLOG_CREATION_DATE`) 이전 폴더는 전부 무시.
 
+문제 번호로 제목/URL을 조회하는 네트워크 I/O 함수들은 `problem_lookup.py`로
+분리돼 있음(이 파일은 `get_title_and_url`만 가져다 씀) — 나머지가 전부 순수
+문자열 조작인 것과 관심사가 달라서(2026-09-22 분리).
+
 코드를 고칠 때 알아야 할 것 (SKILL.md에 없는, 이 파일 안에서만 유효한 정보):
 - `build_body`의 "---" 구분선은 항상 **뒤 섹션이 자기 앞에 다는 것**으로 소유
   (섹션 사이 접착제가 아님) — 회고/참고 같은 선택 섹션을 통째로 지울 때 그
@@ -24,37 +28,27 @@ PS 레포 문제 폴더 경로를 받아서, 이 블로그의 포스트 파일�
   피함. 지금 IAL이 남은 곳은 blockquote(prompt-info)뿐이고 거긴
   `<!-- prettier-ignore -->` 하나로 안전하게 보호됨. 코드펜스에 IAL을 다시
   붙이는 방향으로 바꾸면 이 문제가 재발함.
-- `sync` 스킬(`../../sync/scripts/sync_code.py`)이 이 파일의 `PLATFORM_MAP`/
-  `FENCE_LANG`/`PS_REPO`/`group_by_approach`/`approach_label`을 그대로
-  import해서 씀 — 여기서 이름을 바꾸거나 동작을 바꾸면 sync도 같이 깨짐.
+- 이 파일은 4개 스킬(`sync`/`publish`/`review-code`/`contest`), **파일 기준으로는
+  5곳**(`sync_code.py`/`publish.py`/`chunk_drafts.py`/`publish_contest.py`/
+  `scaffold_contest.py` — `contest`만 스크립트 2개가 각각 끌어씀)이 sys.path로
+  끌어와 여러 심볼을 그대로 import해서 씀 — 정확한 목록은 매번 각 파일의 import문
+  직접 확인(여기 나열해두면 소비자가 늘 때마다 목록이 stale해지기 쉬움 — 실제로
+  한 번 벌어졌던 일). 이름을 바꾸거나 동작을 바꾸면 그 소비자들도 같이 깨짐.
+  원래 예고했던 "5번째 소비자가 생기면 별도 공유 패키지(`_shared/`)로 뺀다"는
+  임계점을 파일 기준으로는 이미 넘김(2026-09-22, `scaffold_contest.py` 추가로) —
+  심볼 몇 개짜리 훅이 파일당 1~2줄이라 당장 안 뺐지만, 다음에 손볼 때는 "아직
+  안 뺐다"가 아니라 "왜 아직 안 뺐는지"를 재검토할 시점.
 
-사용법:
-    python3 resolve_filename.py
-        인자 없이 실행 — 배치 모드. PS_REPO 전체를 스캔해서 블로그 개설일
-        (BLOG_CREATION_DATE) 이후 존재하는 풀이 중 이 블로그에 아직 포스트/드래프트가
-        없는 것 전부를 스캐폴드로 생성. 이미 있는 건 절대 안 건드림(--force 없음),
-        개별 폴더가 실패해도(네트워크/파싱 에러 등) 그 폴더만 보고하고 나머지는 계속함.
-
-    python3 resolve_filename.py <PS레포 문제 폴더 경로> [--force]
-        폴더 하나만 지정해서 처리 — Claude가 특정 문제만 선별 생성하거나(사람이
-        "이것만" 지목), 스켈레톤 구조가 바뀌어서 재생성할 때(--force) 씀. 사람은
-        평소 무인자 배치로만 부른다(이 스크립트의 기본 사용 패턴).
-        예: python3 resolve_filename.py /Users/mwzz6/Desktop/github/PS/2026-08/src/day_14/prms_258705
-
-동작: 이 레포의 _drafts/{platform}/(소문자: programmers/leetcode/codeforces)에 파일을
-실제로 씀 — _posts/가 아님. publish(별도 스킬)가 옮기기 전까진 초안이라 사이트에
-노출되면 안 됨. 같은 이름 파일이 있으면 거부(사람이 채운 프로즈 보호), 단일 폴더
-모드만 --force로 재생성(배치는 --force 자체를 안 받음).
+사용법·동작은 `ps/SKILL.md`의 `## 실행`이 정본 — 명령줄 문법만: `resolve_filename.py`
+(인자 없음, 배치) 또는 `resolve_filename.py <PS레포 문제 폴더 경로> [--force]`(단일 폴더).
 """
 
-import functools
-import json
 import os
 import re
 import sys
-import urllib.request
 
 from clean_code import clean_code, split_approach_suffix
+from problem_lookup import get_title_and_url
 
 BLOG_CREATION_DATE = "2026-08-17"
 
@@ -132,12 +126,6 @@ FILENAME_ESCAPES = {
 }
 
 
-def fetch(url, headers=None):
-    req = urllib.request.Request(url, headers=headers or {"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return resp.read().decode("utf-8")
-
-
 def parse_folder(path):
     """PS 레포 경로에서 {year}-{month}/day_{DD}/{prefix}_{번호} 추출"""
     m = re.search(
@@ -169,83 +157,6 @@ def get_platform(prefix):
             f"{PLATFORM_MAP[prefix]}는 아직 제목 자동조회 미구현(보류 상태) — 수동 처리 필요"
         )
     return PLATFORM_MAP[prefix]
-
-
-def get_title_and_url(prefix, number):
-    """(제목, 문제 URL) 튜플을 반환. URL은 본문의 prompt-info 박스에 그대로 씀."""
-    if prefix == "prms":
-        return get_title_url_programmers(number)
-    if prefix == "leet":
-        return get_title_url_leetcode(number)
-    if prefix == "cofo":
-        return get_title_url_codeforces(number)
-    raise NotImplementedError(f"{prefix} 제목 조회 미구현")
-
-
-def get_title_url_programmers(number):
-    url = f"https://school.programmers.co.kr/learn/courses/30/lessons/{number}"
-    html = fetch(url)
-    m = re.search(r"<title>코딩테스트 연습 - (.+?) \| 프로그래머스 스쿨</title>", html)
-    if not m:
-        raise ValueError(
-            f"Programmers {number}번 title 태그 패턴이 안 맞음 — 사이트 구조가 바뀌었을 수 있음"
-        )
-    return m.group(1), url
-
-
-@functools.lru_cache(maxsize=1)
-def _fetch_leetcode_problems():
-    # 레거시 엔드포인트 — 언젠가 죽을 수 있음. 죽으면 GraphQL questionList 쪽으로 교체 필요.
-    # 응답이 꽤 큰 전체 문제 목록이라 프로세스당 한 번만 받아오게 캐시함 — 안 그러면
-    # 배치 모드에서 LeetCode 문제가 여러 개일 때 같은 목록을 문제 수만큼 중복 다운로드함.
-    body = fetch("https://leetcode.com/api/problems/all/")
-    return json.loads(body)["stat_status_pairs"]
-
-
-def get_title_url_leetcode(number):
-    for item in _fetch_leetcode_problems():
-        if str(item["stat"]["frontend_question_id"]) == str(number):
-            title = item["stat"]["question__title"]
-            slug = item["stat"]["question__title_slug"]
-            return title, f"https://leetcode.com/problems/{slug}/"
-    raise ValueError(f"LeetCode {number}번을 목록에서 못 찾음")
-
-
-@functools.lru_cache(maxsize=1)
-def _fetch_codeforces_problems():
-    # problemset 전체를 받는 큰 응답이라 프로세스당 한 번만 캐시 — 배치 모드에서
-    # Codeforces 문제가 여러 개일 때 같은 목록을 중복 다운로드하지 않게
-    # (_fetch_leetcode_problems와 동일한 이유).
-    body = fetch("https://codeforces.com/api/problemset.problems")
-    return json.loads(body)["result"]["problems"]
-
-
-@functools.cache
-def _fetch_codeforces_contest_problems(contest_id):
-    # Div1+Div2 통합 대회는 공유 문제가 problemset.problems엔 한쪽 contestId로만
-    # 정본화되어 있음(실측: 2263 C1/C2가 problemset.problems엔 없고 2262 A1/A2로만
-    # 등록됨) — 이럴 때 그 대회 응시 시점 문제 목록(contest.standings)으로
-    # 재조회한다. /problemset/problem/{contest_id}/{index} 링크는 이 경우에도
-    # 살아있음(2026-09-14 확인).
-    body = fetch(f"https://codeforces.com/api/contest.standings?contestId={contest_id}")
-    return json.loads(body)["result"]["problems"]
-
-
-def get_title_url_codeforces(number):
-    # 폴더명 형식이 "{contestId}{Index}"(예: 1553A)라고 가정함 — 실제 사용 사례로 검증된 적 없음.
-    m = re.match(r"(\d+)([A-Za-z]\d*)$", number)
-    if not m:
-        raise ValueError(f"Codeforces 번호 형식이 예상과 다름(예: 1553A): {number}")
-    contest_id, index = m.groups()
-    for p in _fetch_codeforces_problems():
-        if str(p["contestId"]) == contest_id and p["index"] == index.upper():
-            url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
-            return p["name"], url
-    for p in _fetch_codeforces_contest_problems(contest_id):
-        if p["index"] == index.upper():
-            url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
-            return p["name"], url
-    raise ValueError(f"Codeforces {number}번을 목록에서 못 찾음")
 
 
 def find_source_files(folder_path):
@@ -422,8 +333,8 @@ def generate_one(folder_path, force):
     if prefix == "cofo":
         # PS 레포 폴더명 케이스가 들쭉날쭉함(cofo_2148a vs cofo_2148A) — Codeforces
         # 공식 표기(contestId+Index)는 Index가 대문자라 title/filename/slug 전부
-        # 대문자로 통일. get_title_url_codeforces는 이미 index.upper()로 API를
-        # 매칭하니 입력 케이스가 뭐든 상관없이 안전.
+        # 대문자로 통일. get_title_url_codeforces(problem_lookup.py)는 이미
+        # index.upper()로 API를 매칭하니 입력 케이스가 뭐든 상관없이 안전.
         number = number.upper()
     title, problem_url = get_title_and_url(prefix, number)
     by_language = find_source_files(folder_path)

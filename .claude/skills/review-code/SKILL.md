@@ -35,7 +35,7 @@ description: _drafts/의 PS 포스트에 임베드된 코드를 정확성/최선
 - **LeetCode**: WebFetch는 403 → GraphQL이 통과. `curl -s https://leetcode.com/graphql -H 'Content-Type: application/json' --data '{"query":"query q($t:String!){question(titleSlug:$t){title difficulty content}}","variables":{"t":"<slug>"}}'` (slug은 URL의 `/problems/<slug>/`).
 - **Codeforces**: 지문 텍스트는 이 환경에서 전부 실패(WebFetch·curl 403, 미러도 안티봇 챌린지) → 사용자에게 복사/`! curl`로 요청. `curl -s https://codeforces.com/api/problemset.problems`는 통과하지만 이름·CF 공식태그·레이팅만 주고 지문은 없다(공식태그는 우리 택소노미와 별개라 그대로 옮기지 말 것).
 
-대상은 각 드래프트의 `## 3. 코드` 섹션(`### 풀이`/`### 풀이 N`별 그룹).
+대상은 각 드래프트의 `## 3. 코드` 섹션(`### 풀이`/`### 풀이 N`별 그룹). SQL 전용 포스트는 `## 2. 쿼리`(헤딩 텍스트·번호가 다름, `ps/SKILL.md` 참고) — 같은 절차 적용.
 
 ### 정확성
 

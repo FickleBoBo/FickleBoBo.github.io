@@ -262,12 +262,14 @@ def build_complexity_section(by_language):
     return "\n".join(lines)
 
 
-def build_code_section(folder_path, by_language, heading_num=3):
+def build_code_section(folder_path, by_language, heading_num=3, heading_text="코드"):
     """heading_num: 이 섹션의 챕터 번호. SQL 전용 포스트는 앞의 `## 2. 복잡도`가
-    통째로 빠지므로 코드 섹션이 2번으로 한 칸 당겨짐(build_body에서 결정)."""
+    통째로 빠지므로 코드 섹션이 2번으로 한 칸 당겨짐(build_body에서 결정).
+    heading_text: SQL 전용 포스트는 "코드" 대신 "쿼리"(언어가 MySQL 하나뿐이라
+    "코드"보다 정확한 지칭, 2026-09-22 확정) — build_body에서 결정."""
     groups = group_by_approach(by_language)
     nums = sorted(groups)
-    lines = [f"## {heading_num}. 코드", ""]
+    lines = [f"## {heading_num}. {heading_text}", ""]
     for i, num in enumerate(nums):
         if i > 0:
             lines.extend(["---", ""])
@@ -314,8 +316,14 @@ def build_body(problem_url, folder_path, by_language):
     if not is_sql_only:
         trailing_sections.append(build_complexity_section(by_language))
     code_heading_num = 2 if is_sql_only else 3
+    code_heading_text = "쿼리" if is_sql_only else "코드"
     trailing_sections.append(
-        build_code_section(folder_path, by_language, heading_num=code_heading_num)
+        build_code_section(
+            folder_path,
+            by_language,
+            heading_num=code_heading_num,
+            heading_text=code_heading_text,
+        )
     )
     # 맨 끝에도 "---"를 하나 더 둠 — 이건 어느 섹션에도 안 딸린, 문서 끝을 표시하는
     # 독립적인 구분선이라 회고/참고를 지워도 영향 안 받음(항상 마지막에 남음).

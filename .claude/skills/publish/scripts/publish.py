@@ -46,6 +46,7 @@ from resolve_filename import (
     POSTS_DIR,
     PS_REPO,
     REPO_ROOT,
+    SQL_ONLY_LANGUAGES,
 )
 from sync_code import (
     front_matter_block,
@@ -155,12 +156,28 @@ def complexity_table_filled(text):
     return True
 
 
+def is_sql_only_title(title):
+    """title 끝의 연속된 언어 브래킷이 `SQL_ONLY_LANGUAGES`(ps 스킬,
+    resolve_filename.py)와 정확히 일치하는지 — SQL 전용 포스트 판정. `## 2. 복잡도`
+    헤딩 부재 자체로 판정하지 않는 이유는 `SKILL.md`의 "완료 판정" 참고.
+    is_ready(text)는 raw 텍스트만 받아 by_language 딕셔너리가 없어서 title의
+    언어 브래킷을 정규식으로 뽑아 값만 SQL_ONLY_LANGUAGES와 대조함(값은 단일
+    소스, 추출 로직만 여기 별도)."""
+    m = re.search(r"((?:\[[^\[\]]*\])+)\s*$", title)
+    if not m:
+        return False
+    langs = set(re.findall(r"\[([^\[\]]*)\]", m.group(1)))
+    return langs == SQL_ONLY_LANGUAGES
+
+
 def is_ready(text):
     """드래프트 하나가 "발행 준비 완료"인지 (bool, 미완료 사유) 반환. 판정 기준
     자체의 설계 이유는 SKILL.md 참고 — 여기선 각 검사만 순서대로 호출."""
     if not section_is_filled(text, IDEA_HEADING):
         return False, "'1. 아이디어' 섹션이 비어있음"
-    if not complexity_table_filled(text):
+    # SQL 전용 포스트는 ps 스킬이 복잡도 섹션 자체를 안 만듦(2026-09-22 확정) —
+    # 아래 검사를 건너뜀.
+    if not is_sql_only_title(extract_title(text)) and not complexity_table_filled(text):
         return False, "'2. 복잡도' 표가 안 채워짐"
     return True, None
 

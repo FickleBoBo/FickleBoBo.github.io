@@ -5,6 +5,8 @@ categories: [Contest]
 tags: ["codeforces", "div 2"]
 slug: codeforces-2263
 media_subpath: /assets/img/posts/codeforces-2263/
+image:
+  path: preview.png
 math: true
 mermaid: false
 ---

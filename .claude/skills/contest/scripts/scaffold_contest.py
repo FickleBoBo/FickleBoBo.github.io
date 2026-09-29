@@ -51,7 +51,7 @@ front matter + 본문 스켈레톤을 결정론적으로 생성한다. LLM 판�
   grandmaster(3000+)의 "첫 글자 검정"은 v1 미구현(이 핸들이 도달할 일이 수년간 없음).
 
 사용법:
-    python3 scaffold_contest.py <대회 ID 또는 URL> [--force]
+    python3 scaffold_contest.py <대회 ID 또는 URL> [--force | --card-only]
 
     예:
         python3 scaffold_contest.py 2259
@@ -59,6 +59,11 @@ front matter + 본문 스켈레톤을 결정론적으로 생성한다. LLM 판�
 
     핸들은 이 파일 상수(HANDLE). 같은 이름 파일이 `_drafts/contest/`에 이미 있으면
     거부(사람이 채운 서술·라이브 코드 보호) — 재생성은 --force.
+
+    스켈레톤과 함께 프리뷰 카드(`assets/img/posts/{slug}/preview.png`)를 렌더하고
+    front matter에 `image:`를 넣는다(렌더러는 `render_card.py`). Chrome이 없으면 카드만
+    생략하고 계속. `--card-only`는 이미 있는 후기(드래프트·발행본)의 카드만 (재)생성하고
+    front matter에 image가 없으면 넣는다 — 서술·코드는 안 건드림.
 
     성공하면 stdout엔 쓴 파일의 절대경로만. stderr엔 페널티·순위 요약(눈 대조용).
 """
@@ -77,6 +82,7 @@ sys.path.insert(0, os.path.join(_SKILLS_DIR, "ps", "scripts"))
 # 가져다 씀 — 파일명 이스케이프 표·YAML 이스케이프 로직이 두 스킬에서 갈라지면
 # 안 되기 때문(publish_contest.py가 REPO_ROOT를 같은 방식으로 가져다 쓰는 것과
 # 동일 패턴).
+from render_card import ChromeNotFound, render_card
 from resolve_filename import REPO_ROOT, sanitize_filename, yaml_dq
 
 # ── 상수 ──────────────────────────────────────────────────────────────────────
@@ -92,6 +98,10 @@ CONTEST_DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts", "contest")
 CODEFORCES_POSTS_DIR = os.path.join(REPO_ROOT, "_posts", "codeforces")
 
 CF_API = "https://codeforces.com/api"
+
+CARD_NAME = (
+    "preview.png"  # assets/img/posts/{slug}/ 아래. front matter image.path가 가리킴
+)
 
 # (하한 레이팅, 등급명, hex) — rating >= 하한인 마지막 튜플이 그 등급.
 # 2026-09-07 CF community.css 실측.
@@ -282,10 +292,145 @@ def has_solution_post(contest_id, index):
     return False
 
 
+# ── 프리뷰 카드 ───────────────────────────────────────────────────────────────
+
+
+def load_rating_points(contest, mine):
+    """카드 그래프용 레이팅 이력(시작값 포함). 이 대회 '이전' 참가분 + (rated면) 이 대회.
+    ratingUpdateTimeSeconds < 대회 시작 시각인 항목이 이전 대회 — 재생성(과거 대회
+    소급) 때도 그 시점 그래프가 나온다. oldRating==0(첫 대회 센티넬)은 CF 표시대로 100."""
+    hist = cf_get("user.rating", handle=HANDLE)
+    prior = [
+        r for r in hist if r["ratingUpdateTimeSeconds"] < contest["startTimeSeconds"]
+    ]
+    entries = prior + ([mine] if mine else [])
+    if not entries:
+        return []
+    first = entries[0]["oldRating"] or 100
+    return [first] + [e["newRating"] for e in entries]
+
+
+def build_card_data(contest, start_kst, problems, by_index, penalty, rank_count, mine):
+    solved = sum(1 for v in by_index.values() if v["result"] == "AC")
+    data = {
+        "name": contest["name"],
+        "date": f"{start_kst:%Y.%m.%d}",
+        "solved": solved,
+        "total": len(problems),
+        "penalty": penalty,
+        "rank": None,
+        "rank_count": rank_count,
+        "pct": None,
+        "ratings": load_rating_points(contest, mine),
+        "delta": None,
+    }
+    if mine:
+        data["rank"] = mine["rank"]
+        data["pct"] = round(mine["rank"] / rank_count * 100, 1) if rank_count else 0
+        old = mine["oldRating"] or 100
+        data["delta"] = mine["newRating"] - old
+    return data
+
+
+def make_card(data, assets_dir):
+    """카드 PNG 생성. 성공하면 경로, Chrome 없음/렌더 실패면 None(경고만 — 스캐폴드는 계속)."""
+    out = os.path.join(assets_dir, CARD_NAME)
+    try:
+        render_card(data, out)
+    except ChromeNotFound as e:
+        print(f"  ⚠ 프리뷰 카드 생략: {e}", file=sys.stderr)
+        return None
+    except Exception as e:  # subprocess 실패·타임아웃 등
+        print(f"  ⚠ 프리뷰 카드 렌더 실패: {e}", file=sys.stderr)
+        return None
+    return out
+
+
+def find_post_by_slug(slug):
+    """_drafts/contest/ → _posts/contest/ 순으로 front matter slug가 일치하는 후기 파일."""
+    for d in (CONTEST_DRAFTS_DIR, os.path.join(REPO_ROOT, "_posts", "contest")):
+        if not os.path.isdir(d):
+            continue
+        for fname in sorted(os.listdir(d)):
+            if not fname.endswith(".md"):
+                continue
+            path = os.path.join(d, fname)
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            fm = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
+            if fm and re.search(
+                rf"^slug:\s*{re.escape(slug)}\s*$", fm.group(1), re.MULTILINE
+            ):
+                return path
+    return None
+
+
+def ensure_image_front_matter(post_path):
+    """front matter에 image 블록이 없으면 media_subpath 줄 뒤에 넣는다. 넣었으면 True."""
+    with open(post_path, encoding="utf-8") as f:
+        text = f.read()
+    fm = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
+    if not fm or re.search(r"^image:", fm.group(1), re.MULTILINE):
+        return False
+    block = "\n".join(image_front_matter())
+    new_fm = re.sub(
+        r"^(media_subpath:.*)$",
+        lambda m: f"{m.group(1)}\n{block}",
+        fm.group(1),
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if new_fm == fm.group(1):
+        return False
+    with open(post_path, "w", encoding="utf-8") as f:
+        f.write(f"---\n{new_fm}\n---\n" + text[fm.end() :])
+    return True
+
+
+def card_only(contest_id):
+    """기존 후기(드래프트·발행본)의 프리뷰 카드만 (재)생성하고 front matter에 image를 보장.
+    서술·코드는 안 건드림 — 과거 후기 소급·디자인 변경 후 재생성용."""
+    contest, problems = load_contest(contest_id)
+    rank_count, mine = load_rating_change(contest_id)
+    submissions = load_submissions(contest_id)
+    start_kst = datetime.fromtimestamp(
+        contest["startTimeSeconds"], tz=timezone.utc
+    ).astimezone(KST)
+    by_index = classify_problems(problems, submissions, contest["durationSeconds"])
+    penalty = compute_penalty(by_index)
+
+    slug = f"codeforces-{contest_id}"
+    post = find_post_by_slug(slug)
+    if not post:
+        raise FileNotFoundError(
+            f"slug {slug} 후기를 _drafts/contest·_posts/contest에서 못 찾음"
+        )
+    assets_dir = os.path.join(REPO_ROOT, "assets", "img", "posts", slug)
+    data = build_card_data(
+        contest, start_kst, problems, by_index, penalty, rank_count, mine
+    )
+    out = make_card(data, assets_dir)
+    if not out:
+        raise RuntimeError("카드 생성 실패")
+    added = ensure_image_front_matter(post)
+    print(
+        f"[contest] 카드 생성: {out}  front matter image: {'추가' if added else '이미 있음'}",
+        file=sys.stderr,
+    )
+    return post
+
+
 # ── 본문 조립 ─────────────────────────────────────────────────────────────────
 
 
-def build_front_matter(contest, start_kst, slug, tags):
+def image_front_matter():
+    """Chirpy 프리뷰 이미지 블록. path는 media_subpath 기준 상대경로.
+    ⚠ `alt`는 넣지 않는다 — Chirpy(post.html)가 alt를 이미지 밑 눈에 보이는 캡션으로
+    출력해서, 카드 안 제목과 같은 글이 한 번 더 나온다."""
+    return ["image:", f"  path: {CARD_NAME}"]
+
+
+def build_front_matter(contest, start_kst, slug, tags, has_card=False):
     tag_list = ", ".join(f'"{t}"' for t in tags)
     lines = [
         "---",
@@ -295,6 +440,7 @@ def build_front_matter(contest, start_kst, slug, tags):
         f"tags: [{tag_list}]",
         f"slug: {slug}",
         f"media_subpath: /assets/img/posts/{slug}/",
+        *(image_front_matter() if has_card else []),
         "math: true",
         "mermaid: false",
         "---",
@@ -503,7 +649,21 @@ def scaffold(contest_id, force):
     assets_dir = os.path.join(REPO_ROOT, "assets", "img", "posts", slug)
     os.makedirs(assets_dir, exist_ok=True)
 
-    front_matter = build_front_matter(contest, start_kst, slug, tags)
+    # 카드는 부가 기능 — 데이터 조회(user.rating API)·렌더 어느 쪽이 실패해도 스켈레톤은
+    # 살린다(--card-only는 명시 요청이라 예외를 그대로 올림).
+    card = None
+    try:
+        card_data = build_card_data(
+            contest, start_kst, problems, by_index, penalty, rank_count, mine
+        )
+    except Exception as e:
+        print(f"  ⚠ 프리뷰 카드 생략(레이팅 이력 조회 실패): {e}", file=sys.stderr)
+    else:
+        card = make_card(card_data, assets_dir)
+
+    front_matter = build_front_matter(
+        contest, start_kst, slug, tags, has_card=bool(card)
+    )
     body = build_body(
         contest,
         contest_id,
@@ -550,6 +710,8 @@ def scaffold(contest_id, force):
         file=sys.stderr,
     )
     print(f"  레이팅 그래프 자리: {assets_dir}/rating-graph.png", file=sys.stderr)
+    if card:
+        print(f"  프리뷰 카드: {card}", file=sys.stderr)
 
     return target
 
@@ -557,13 +719,14 @@ def scaffold(contest_id, force):
 def main():
     argv = sys.argv[1:]
     force = "--force" in argv
-    positional = [a for a in argv if a != "--force"]
+    only_card = "--card-only" in argv
+    positional = [a for a in argv if a not in ("--force", "--card-only")]
     if len(positional) != 1:
         print(__doc__)
         sys.exit(1)
 
     contest_id = parse_contest_id(positional[0])
-    target = scaffold(contest_id, force)
+    target = card_only(contest_id) if only_card else scaffold(contest_id, force)
     print(target)
 
 

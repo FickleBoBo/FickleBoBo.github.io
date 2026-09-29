@@ -9,9 +9,10 @@ description: Codeforces 대회 후기 포스트 장르(`Contest` 카테고리)�
 
 **파이프라인 밖 장르.** `ps`/`sync`/`review-code`/`review-post`/`publish`는 전부 문제 포스트 구조(`## 1. 아이디어` + `## 2. 복잡도`)를 전제한다 — 후기엔 안 맞는다. `_drafts/contest/`는 `publish.py`/`sync_code.py`의 `PLATFORM_MAP`(programmers/leetcode/codeforces)에 없어서 두 스킬이 통째로 무시한다(의도된 안전장치). 발행은 이 스킬의 `publish_contest.py`가 담당(아래 "발행").
 
-스크립트 2개:
+스크립트 3개:
 
-- `scaffold_contest.py` — CF API에서 후기 스켈레톤 생성 (아래 "스캐폴드 생성")
+- `scaffold_contest.py` — CF API에서 후기 스켈레톤 + 프리뷰 카드 생성 (아래 "스캐폴드 생성")
+- `render_card.py` — 프리뷰 카드(PNG) 렌더러. 데이터를 받아 HTML → 헤드리스 Chrome 스크린샷. 스캐폴드가 호출하는 헬퍼(직접 실행은 디버그용). 디자인 '양식'과 미래 변수 대응(Y축 동적 범위·점 개수·레이팅 하락·unrated 등)의 '왜'는 이 파일 docstring
 - `publish_contest.py` — 완성된 후기를 `_posts/contest/`로 옮기고 두 레포에 커밋 (아래 "발행")
 
 양식·규칙의 설계 근거 전체(순위/레이팅 소스 불일치, 등급 색 실측, CF API 함정, 나중으로 미룬 것들)는 프로젝트 메모리 `contest-recap-post-format.md`. 스켈레톤 '구조'를 바꿀 때 알아야 할 '왜'(구분선 소유권, 페널티 계산 규칙 등)는 `scripts/scaffold_contest.py` docstring. 여기 SKILL.md는 사용법 + 무엇이 채워지는지만.
@@ -19,7 +20,7 @@ description: Codeforces 대회 후기 포스트 장르(`Contest` 카테고리)�
 ## 스캐폴드 생성
 
 ```
-python3 <이 스킬의 base directory>/scripts/scaffold_contest.py <대회 ID 또는 URL> [--force]
+python3 <이 스킬의 base directory>/scripts/scaffold_contest.py <대회 ID 또는 URL> [--force | --card-only]
 ```
 
 예:
@@ -32,7 +33,8 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 - 배치 모드 없음 — 대회는 한 번에 하나씩, 대회 끝나고 실행한다.
 - 핸들은 스크립트 상수(`HANDLE = "FickleBoBo"`). 인자로 안 받는다.
 - `_drafts/contest/{파일명}`이 이미 있으면 거부(사람이 채운 서술·라이브 코드 보호). 재생성은 `--force`.
-- `assets/img/posts/{slug}/` 폴더도 같이 만든다(레이팅 그래프 스크린샷 자리 — 매 후기 100% 쓰이므로).
+- `assets/img/posts/{slug}/` 폴더도 같이 만든다(레이팅 그래프 스크린샷 자리 — 매 후기 100% 쓰이므로). 여기에 **프리뷰 카드 `preview.png`**(2400×1260)도 렌더하고 front matter에 `image:`를 넣는다. 로컬 Chrome 필요(`CHROME_BIN`으로 경로 지정 가능) — 없으면 카드만 생략하고 나머지는 정상 진행(경고 출력).
+- `--card-only`: 이미 있는 후기(`_drafts/contest`·`_posts/contest`, slug로 탐색)의 카드만 (재)생성하고 front matter에 `image:`가 없으면 넣는다. 서술·코드는 안 건드림. 과거 후기 소급·카드 디자인 변경 후 재생성용 — `--force`와 달리 덮어써도 안전.
 - 성공 시 stdout엔 쓴 파일의 절대경로만. **stderr**엔 페널티·순위·레이팅 요약 + 그래프 저장 경로(눈 대조·안내용).
 - 필수 인자(대회 ID/URL)가 없으면 평문으로 요청하고 기다린다 — `AskUserQuestion` 같은 선택지 UI로 후보를 골라주지 않는다(`ps`와 동일).
 
@@ -48,6 +50,8 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 
 대회 직후 실행해 `ratingChanges`가 아직 비어 있으면 순위·레이팅 행을 placeholder(HTML 주석)로 남기고 crash하지 않는다 — 확정 후 사람이 그 행만 채우거나 `--force`로 재생성.
 
+프리뷰 카드는 이 시점에 rated 성적 없이(순위 칩·델타 없음) 그려진다 — 확정 후 `--card-only`로 카드만 다시 만든다. 카드 데이터 조회(`user.rating`)·렌더가 실패해도 스켈레톤은 정상 생성되고(카드·`image:`만 빠짐, stderr 경고) 나중에 `--card-only`로 채운다.
+
 ## 무엇이 채워지는가
 
 | 자리                           | 채워지는 방식                                                                                                                                                                                                                                                                                                              |
@@ -58,6 +62,7 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 | front matter `categories`      | 항상 `[Contest]` — 평평한 최상위(PS 아래 아님, 플랫폼 2단 아님. 이유는 메모리)                                                                                                                                                                                                                                             |
 | front matter `tags`            | `["codeforces"]` + 대회명이 정확히 `(Div. N)` 또는 `(Rated for Div. N)` 꼴이면 `"div N"` 추가. `(Div. 1 + Div. 2)` 통합 라운드·Global/Hello 등은 태그 없이 두고 사람이 추가                                                                                                                                                |
 | front matter `slug`            | `codeforces-{contestId}` (개별 문제 포스트 `codeforces-{contestId}{index}`와 접두어로 묶임)                                                                                                                                                                                                                                |
+| front matter `image`           | `path: preview.png`(media_subpath 기준) — Chirpy 프리뷰(og:image 겸용). `alt`는 일부러 안 넣음: Chirpy가 이미지 밑에 눈에 보이는 캡션으로 출력함. 카드는 대회명·날짜·solved·penalty·순위(rated만)·레이팅 이력 그래프(이 대회 이전 참가분 + 이번 대회, 델타 라벨)                                                           |
 | `math` / `mermaid`             | `true` / `false` 고정                                                                                                                                                                                                                                                                                                      |
 | 상단 prompt-info               | `> [대회 링크](https://codeforces.com/contest/{id})`                                                                                                                                                                                                                                                                       |
 | `## 1. 대회 개요` 표           | 대회명 / 일시(KST) / 배정 시간 / 문제 수 / 참가 형태 — 전부 자동                                                                                                                                                                                                                                                           |

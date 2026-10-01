@@ -20,6 +20,15 @@
   // Stylint extension settings
   "stylelint.snippet": ["css", "scss"],
   "stylelint.validate": ["css", "scss"],
+  // Claude 스킬 스크립트가 sys.path로 서로 import하는 경로 (정적 분석기용)
+  "python.analysis.extraPaths": [
+    "./.claude/skills/_shared",
+    "./.claude/skills/ps/scripts",
+    "./.claude/skills/sync/scripts",
+    "./.claude/skills/publish/scripts",
+    "./.claude/skills/contest/scripts",
+    "./.claude/skills/review-code/scripts"
+  ],
   // Run tasks in macOS
   "terminal.integrated.profiles.osx": {
     "zsh": { "path": "/bin/zsh", "args": ["-l", "-i"] }

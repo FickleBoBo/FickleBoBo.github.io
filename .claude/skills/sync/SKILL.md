@@ -19,6 +19,14 @@ python3 <이 스킬의 base directory>/scripts/sync_code.py
 
 `_drafts/{platform}/`(platform ∈ 지원 플랫폼) 아래 포스트(.md)를 전부 스캔해서 PS 레포 최신 코드로 동기화함 — `_drafts/` 바로 밑이나 PS 아닌 서브폴더는 안 봄(`publish`와 동일한 스코핑). 포스트 하나가 실패해도(PS 레포에 대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는 계속 처리함(`ps`의 배치 모드와 동일한 fail-soft 방침).
 
+**발행분 전체(`--posts`):**
+
+```
+python3 <이 스킬의 base directory>/scripts/sync_code.py --posts
+```
+
+`_posts/{platform}/` 아래 발행 포스트를 전부 스캔함(`_posts/contest/`는 PS 파이프라인 밖이라 안 봄). 출력·fail-soft·총계 형식은 기본 배치와 같고 총계 줄만 `총 N개 발행 중 ...`. 갱신된 게 있으면 `fix: [Platform] #번호 - ...` 손수정 커밋 대상이므로 diff를 확인한 뒤 커밋.
+
 **특정 포스트 하나만:**
 
 ```

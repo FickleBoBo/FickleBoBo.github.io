@@ -23,14 +23,13 @@
   `ps/scripts`를 직접 끌어옴) — "PS 레포 코드 → 블로그용 코드" 변환 로직이 두 스킬
   사이에서 갈라지면 안 되기 때문. `ps`의 본문 스켈레톤 구조(챕터 번호, 코드 블록
   포맷)가 바뀌면 여기 코드 블록 탐지 로직(`segment_by_approach`/
-  `APPROACH_HEADING_RE`)도 같이 손봐야 함. `resolve_filename.py`를 이런 sys.path
-  방식으로 끌어쓰는 스킬 수·"몇 개 넘으면 공유 패키지로 뺄지" 임계점 얘기는
-  `resolve_filename.py` docstring에서만 추적함(여기 다시 세면 갱신 안 하고 stale해질
-  위험).
+  `APPROACH_HEADING_RE`)도 같이 손봐야 함. 레포 공용 상수·front matter 파서는
+  `_shared/blog_common.py`에서 가져옴(공유 모듈 분리 이력은 `resolve_filename.py`
+  docstring).
 - 코드 블록을 헤딩 구간으로 스코핑하는 이유는 `segment_by_approach` docstring 참고.
 - 배치 모드(인자 없음)는 `ps`의 `run_batch`/`discover_problem_folders` 패턴을 그대로
   따름: 개별 포스트 실패가 배치 전체를 막지 않고 그 포스트만 에러로 보고, 나머지는
-  계속 처리. `DRAFTS_DIR`/`REPO_ROOT`도 새로 정의하지 않고 `resolve_filename`에서
+  계속 처리. `DRAFTS_DIR`/`POSTS_DIR`/`REPO_ROOT`도 새로 정의하지 않고 `_shared/blog_common.py`에서
   그대로 가져옴(단일 진실 소스 유지).
 
 동작:
@@ -49,10 +48,14 @@
         스캔해서 동기화(publish와 동일한 스코핑). 포스트 하나가 실패해도(PS 레포에
         대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는 계속 처리함.
 
+    python3 sync_code.py --posts
+        발행분 배치 — `_posts/{platform}/` 아래 포스트 전부를 같은 방식으로
+        동기화(`_posts/contest/` 등 PS 아닌 폴더는 안 봄). 출력·fail-soft는 기본
+        배치와 동일, 총계 줄만 "발행" 라벨.
+
     python3 sync_code.py <포스트 .md 파일 절대경로>
         포스트 하나만 지정해서 동기화 — Claude가 특정 포스트만 선별할 때(사람이
-        "이것만" 지목), 또는 이미 `_posts/`로 옮겨진 발행분처럼 배치 스코프 밖의
-        파일을 다시 싱크할 때. 실패하면 즉시 예외를 그대로 띄움(배치와 달리 콕
+        "이것만" 지목), 또는 발행분 중 일부만 다시 싱크할 때. 실패하면 즉시 예외를 그대로 띄움(배치와 달리 콕
         집어 지정했으니 조용히 넘어가지 않음).
 
 출력 상태 종류(5개)와 배치 모드 축약 방식은 `sync/SKILL.md`의 `## 출력` 참고.
@@ -62,16 +65,21 @@ import os
 import re
 import sys
 
-_PS_SCRIPTS = os.path.join(os.path.dirname(__file__), "..", "..", "ps", "scripts")
-sys.path.insert(0, os.path.abspath(_PS_SCRIPTS))
-from clean_code import clean_code, split_approach_suffix
-from resolve_filename import (
+_SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
+sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "ps", "scripts")))
+sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "_shared")))
+from blog_common import (
     DRAFTS_DIR,
-    FENCE_LANG,
-    LANGUAGE_DISPLAY_ORDER,
     PLATFORM_MAP,
+    POSTS_DIR,
     PS_REPO,
     REPO_ROOT,
+    read_front_matter,
+)
+from clean_code import clean_code, split_approach_suffix
+from resolve_filename import (
+    FENCE_LANG,
+    LANGUAGE_DISPLAY_ORDER,
     approach_label,
     find_source_files,
     group_by_approach,
@@ -81,23 +89,6 @@ APPROACH_HEADING_RE = re.compile(r"^### 풀이(?: (\d+))?[^\n]*\n", re.MULTILINE
 
 REVERSE_PLATFORM_MAP = {v.lower(): k for k, v in PLATFORM_MAP.items()}
 REVERSE_FENCE_LANG = {v: k for k, v in FENCE_LANG.items()}
-
-
-def front_matter_block(post_text):
-    m = re.match(r"^---\n(.*?)\n---\n", post_text, re.DOTALL)
-    if not m:
-        raise ValueError("front matter(--- ~ ---) 블록을 못 찾음")
-    return m.group(1)
-
-
-def read_front_matter(post_text):
-    raw = front_matter_block(post_text)
-
-    date_m = re.search(r"^date:\s*(\S+)", raw, re.MULTILINE)
-    slug_m = re.search(r"^slug:\s*(\S+)", raw, re.MULTILINE)
-    if not date_m or not slug_m:
-        raise ValueError("front matter에 date 또는 slug가 없음")
-    return date_m.group(1), slug_m.group(1)
 
 
 def resolve_source_folder(date, slug):
@@ -276,14 +267,14 @@ def run_single(post_path):
         print(line)
 
 
-def discover_draft_files():
-    """`_drafts/{platform}/`(platform ∈ PLATFORM_MAP) 아래 포스트(.md)를 경로순으로
+def discover_post_files(base_dir):
+    """`base_dir/{platform}/`(platform ∈ PLATFORM_MAP) 아래 포스트(.md)를 경로순으로
     찾아 반환. `_drafts/` 바로 밑이나 PS 아닌 서브폴더는 안 봄 — `publish`의 배치
     스코핑(`discover_ready_drafts`)과 동일하게, 블로그에 PS 아닌 드래프트가 생겨도
     안 건드리기 위함."""
     paths = []
     for platform_dir in sorted({v.lower() for v in PLATFORM_MAP.values()}):
-        dir_path = os.path.join(DRAFTS_DIR, platform_dir)
+        dir_path = os.path.join(base_dir, platform_dir)
         if not os.path.isdir(dir_path):
             continue
         for fname in sorted(os.listdir(dir_path)):
@@ -292,12 +283,12 @@ def discover_draft_files():
     return sorted(paths)
 
 
-def run_batch():
-    """`_drafts/`의 모든 포스트를 동기화. 포스트 하나가 실패해도(PS 레포에 대응
+def run_batch(base_dir=DRAFTS_DIR, label="드래프트"):
+    """`base_dir`(기본 `_drafts/`, `--posts`면 `_posts/`)의 모든 포스트를 동기화. 포스트 하나가 실패해도(PS 레포에 대응
     폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는 계속 처리함(ps의
     run_batch와 동일한 fail-soft 방침) — 변경 없는 포스트는 한 줄로 축약해서
     출력 노이즈를 줄이고, 갱신/수동확인/에러가 있는 포스트만 세부 내역을 보임."""
-    paths = discover_draft_files()
+    paths = discover_post_files(base_dir)
     updated = unchanged = attention = errors = 0
 
     for path in paths:
@@ -323,7 +314,7 @@ def run_batch():
             print(f"{rel}: 변경 없음")
 
     print(
-        f"--- 총 {len(paths)}개 드래프트 중 {updated}개 갱신함, "
+        f"--- 총 {len(paths)}개 {label} 중 {updated}개 갱신함, "
         f"{unchanged}개 변경 없음, {attention}개 수동 확인 필요, {errors}개 에러 ---"
     )
 
@@ -331,6 +322,8 @@ def run_batch():
 def main():
     if len(sys.argv) == 1:
         run_batch()
+    elif sys.argv[1:] == ["--posts"]:
+        run_batch(POSTS_DIR, "발행")
     elif len(sys.argv) == 2:
         run_single(sys.argv[1])
     else:

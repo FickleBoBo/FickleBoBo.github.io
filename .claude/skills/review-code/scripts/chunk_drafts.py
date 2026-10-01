@@ -11,11 +11,11 @@ review-code/review-post가 처리할 드래프트 목록을 찾아서 청크(서
 유독 무거워지는 걸 막기 위함. 숫자는 근거 있는 절대치가 아니라 보수적 시작값.**
 
 코드를 고칠 때 알아야 할 것:
-- `resolve_filename.py`(`ps`)의 `PLATFORM_MAP`/`DRAFTS_DIR`를 그대로
+- `_shared/blog_common.py`의 `PLATFORM_MAP`/`DRAFTS_DIR`를 그대로
   import해서 씀 — 드래프트 스캔 범위가 다른 스킬과 갈라지면 안 되기 때문.
 - 이 스크립트는 review-code 스킬 소유지만 review-post도 그대로 가져다
   씀(파일 복제 안 함) — sync가 ps의 스크립트를, publish가 sync/ps의 스크립트를
-  그대로 가져다 쓰는 것과 같은 패턴. 예전엔 `--mode {code,post}`로 두 소비자를
+  그대로 가져다 쓰는 것과 같은 패턴(공용 상수는 `_shared/`에서). 예전엔 `--mode {code,post}`로 두 소비자를
   구분해 review-post만 '2. 접근' 비어있는 드래프트를 스킵했는데, 그 필터가
   없어지면서(비어있으면 review-post가 직접 채우는 게 정상 동작) 두 모드가 완전히
   동일해져 인자 자체를 없앰(2026-09-22) — 다시 갈릴 일이 생기면 그때 호출부에서
@@ -34,9 +34,9 @@ import os
 import sys
 
 _SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
-sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "ps", "scripts")))
+sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "_shared")))
 
-from resolve_filename import DRAFTS_DIR, PLATFORM_MAP
+from blog_common import DRAFTS_DIR, PLATFORM_MAP
 
 MAX_DRAFTS_PER_CHUNK = 4
 MAX_LINES_PER_CHUNK = 1200

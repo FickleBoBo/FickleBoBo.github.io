@@ -9,10 +9,11 @@ LLM 판단 없음.
 이유는 전부 `publish/SKILL.md`에 문서화돼있음 — 여기서 다시 설명 안 함.**
 
 코드를 고칠 때 알아야 할 것 (SKILL.md에 없는, 이 파일 안에서만 유효한 정보):
-- `ps`(`resolve_filename.py`)와 `sync`(`sync_code.py`)를 그대로 import해서 씀
-  (`read_front_matter`/`resolve_source_folder`/`front_matter_block`/
-  `PLATFORM_MAP`/`PS_REPO`/`DRAFTS_DIR`/`POSTS_DIR`/`REPO_ROOT`) — front matter
-  파싱 규칙이나 PS 레포 경로 재구성 로직이 세 스킬 사이에서 갈라지면 안 되기 때문.
+- 레포 상수·front matter 파서·git 커밋 헬퍼는 `_shared/blog_common.py`에서, 완료
+  판정에 쓰는 섹션 헤딩·SQL 전용 상수는 `ps`(`resolve_filename.py`)에서, PS 레포 폴더
+  역산(`resolve_source_folder`)은 `sync`(`sync_code.py`)에서 그대로 import해서 씀 —
+  front matter 파싱 규칙이나 PS 레포 경로 재구성 로직이 스킬 사이에서 갈라지면
+  안 되기 때문.
 - PS 레포 폴더 검증(`resolve_source_folder`)을 항상 블로그 레포를 건드리기
   *전에* 먼저 함(`publish_one` 맨 앞) — 실패 시 아무 상태도 안 남기고 깨끗하게
   에러 보고하기 위함. 이 순서를 바꾸면(먼저 옮기고 나중에 검증) 실패했을 때
@@ -30,89 +31,30 @@ LLM 판단 없음.
 
 import os
 import re
-import subprocess
 import sys
 
 _SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
+sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "_shared")))
 sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "ps", "scripts")))
 sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "sync", "scripts")))
 
-from resolve_filename import (
-    COMPLEXITY_HEADING,
+from blog_common import (
     DRAFTS_DIR,
-    IDEA_HEADING,
     PLATFORM_MAP,
     POSTS_DIR,
     PS_REPO,
     REPO_ROOT,
+    commit,
+    extract_title,
+    has_pending_changes,
+    read_front_matter,
+)
+from resolve_filename import (
+    COMPLEXITY_HEADING,
+    IDEA_HEADING,
     SQL_ONLY_LANGUAGES,
 )
-from sync_code import (
-    front_matter_block,
-    read_front_matter,
-    resolve_source_folder,
-)
-
-COMMIT_TRAILER = "Co-Authored-By: Claude <noreply@anthropic.com>"
-
-
-def run_git(repo_dir, args):
-    result = subprocess.run(
-        ["git", "-C", repo_dir] + args, capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"git {' '.join(args)} 실패({repo_dir}): {result.stderr.strip()}"
-        )
-    return result.stdout
-
-
-def has_pending_changes(repo_dir, paths):
-    """paths(pathspec 리스트) 중 하나라도 변경사항 있으면 True. 커밋할 실제 범위와
-    항상 동일한 인자로 불러야 함 — 일부만 넘기면(예: 에셋 디렉토리 빠짐) 그 경로만
-    변경됐을 때 조용히 스킵될 수 있음."""
-    return bool(run_git(repo_dir, ["status", "--porcelain", "--"] + paths).strip())
-
-
-def commit(repo_dir, paths, message):
-    """add로 스테이징한 뒤 commit에도 동일한 paths를 pathspec으로 넘김 — commit에
-    pathspec이 없으면 그 시점 인덱스 전체가 커밋에 실려서, 이 발행 작업과 무관하게
-    이미 staged된 변경사항이 있을 때 조용히 같이 커밋될 수 있음(레포에 다른 작업으로
-    이미 add된 파일이 있는 경우). `git commit -- <pathspec>`은 인덱스의 다른 파일은
-    안 건드리고 지정한 경로 변경사항만 커밋하므로 이 위험을 원천 차단함."""
-    run_git(repo_dir, ["add", "--"] + paths)
-    run_git(
-        repo_dir,
-        ["commit", "-m", f"{message}\n\n{COMMIT_TRAILER}", "--"] + paths,
-    )
-
-
-def yaml_scalar_value(front_matter_text, field):
-    """front matter에서 `{field}: ...` 값을 뽑음. YAML은 큰따옴표 없는 스칼라도
-    유효해서(`title: 그냥 이렇게`) 따옴표 유무 둘 다 처리한다. 필드 자체가 없으면
-    None, 값이 빈 문자열이면 ""을 반환.
-
-    전제: 값은 항상 한 줄(정규식이 그 줄만 읽음) — `ps` 스킬이 생성하는 필드는 전부
-    한 줄 스칼라라 지금까지는 문제없었지만, 사람이 `title: |`처럼 여러 줄 블록
-    스칼라로 바꾸면 첫 줄만 읽고 나머지는 조용히 무시됨(YAML 파서 미사용). 이 정도
-    엣지케이스에 YAML 라이브러리를 끌어오는 건 이 프로젝트 규모에 과함 — 실제로 발생하면
-    그때 재검토."""
-    m = re.search(rf"^{field}:\s*(.*)$", front_matter_text, re.MULTILINE)
-    if not m:
-        return None
-    raw = m.group(1).strip()
-    if len(raw) >= 2 and raw[0] == raw[-1] == '"':
-        return raw[1:-1].replace('\\"', '"').replace("\\\\", "\\")
-    if len(raw) >= 2 and raw[0] == raw[-1] == "'":
-        return raw[1:-1].replace("''", "'")
-    return raw
-
-
-def extract_title(text):
-    title = yaml_scalar_value(front_matter_block(text), "title")
-    if title is None:
-        raise ValueError("front matter에 title이 없음")
-    return title
+from sync_code import resolve_source_folder
 
 
 def _section_body(text, heading):

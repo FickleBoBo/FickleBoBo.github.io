@@ -15,7 +15,8 @@
 #      (예: `lazy propagation`을 고르면 `segment tree`, `data structure`도 같이 추천)
 #   3. parents가 2개인 태그(다중부모, 아래 전부 `# 다중부모`로 표시됨)는 두 조상 라인을 각각 따라간다.
 #   4. `contextual`이 있는 태그는 구조적 부모가 아니라 "이 문제가 그 성격이면 같이 추천"하는 판단 기준이다.
-#      trie 하나뿐이며, 문자열 문제에서 trie를 쓰면 string도 같이 추천할지 판단한다.
+#      trie, lcs 둘뿐이며, 문자열 문제에서 trie를 쓰거나 문자열에 대한 lcs(수열 lcs는 해당 없음)면
+#      string도 같이 추천할지 판단한다.
 #   5. `exception: true` 태그(constructive/ad hoc/warm up) 중 constructive/ad hoc는 "기법은
 #      아니지만 뚜렷한 문제 성격(창의적 구성/임기응변)"이 있을 때, warm up은 그런 성격조차
 #      없이 그냥 쉬운/사소한 문제일 때 쓴다. 셋 다 0번 기준까지 통과하는 기법 태그가 실질적으로
@@ -115,7 +116,7 @@ tags:
   bitmask dp: { parents: [dynamic programming] }
   interval dp: { parents: [dynamic programming] }
   lis: { parents: [dynamic programming] }
-  lcs: { parents: [dynamic programming] }
+  lcs: { parents: [dynamic programming], contextual: [string] }
   "kadane's algorithm": { parents: [dynamic programming] }
   # tree dp는 위 tree 섹션에서 정의(다중부모라 여기서 중복 정의 안 함)
   dp optimization: { parents: [dynamic programming] }

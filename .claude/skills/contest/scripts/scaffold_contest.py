@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Codeforces 대회 ID(또는 URL)를 받아서, 이 블로그의 대회 후기 포스트 파일명 +
 front matter + 본문 스켈레톤을 결정론적으로 생성한다. LLM 판단 없음 — CF API 응답

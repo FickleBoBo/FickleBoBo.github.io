@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 대회 후기 드래프트 하나(`_drafts/contest/{파일}.md`)를 `_posts/contest/`로 옮기고,
 이 블로그 레포 + PS 레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함 — 로컬

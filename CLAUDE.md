@@ -15,19 +15,19 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트 자동화가 핵심.
 `.claude/skills/review-post/STYLE.md`. `_drafts/` 작성 중 → `_posts/` 발행.
 발행본 손수정도 가능.
 
+스킬 스크립트가 공유하는 레포 상수·front matter 파서·git 커밋 헬퍼는 스킬이 아닌
+`.claude/skills/_shared/blog_common.py`에 있다(SKILL.md 없음).
+
 초기 대량 처리(기발행분 전면 재작업 포함)는 2026-09에 끝났다. 지금은 포스트가
 생길 때마다 개별로 파이프라인에 태운다 — `review-post`는 지목된 포스트 하나를
 그날그날 처리하는 게 기본이고, 인자 없는 전체 배치는 초기용이다.
 
 ### 대회 후기 (별도 장르)
 
-대회 참여 기록은 `Contest` 카테고리의 독립 장르 — PS 파이프라인 밖이다. `contest`
-스킬이 CF API에서 성적·순위·레이팅을 받고 페널티를 계산해 `_drafts/contest/`에 후기
-스켈레톤을 생성하고(`scaffold_contest.py`), 서술·라이브 코드·총평은 사람이 채운다.
-발행은 같은 스킬의 `publish_contest.py` — `_drafts/contest/` → `_posts/contest/` 이동
-후 블로그 레포(포스트 + 에셋)와 PS 레포(그 대회의 `live_{contestId}*` 폴더)에 각각
-커밋(완료 게이트 없음, 한 번에 하나, push 안 함). `sync`/`review-*`/`publish`는 전부
-`_drafts/{platform}/`만 보므로 `_drafts/contest/`를 건드리지 않는다.
+대회 참여 기록은 `Contest` 카테고리의 독립 장르 — PS 파이프라인 밖이다. `contest` 스킬이
+스캐폴드(`scaffold_contest.py`)와 발행(`publish_contest.py`)을 맡고, 서술·라이브 코드·총평은
+사람이 채운다. 동작·발행 절차는 `.claude/skills/contest/SKILL.md`. `sync`/`review-*`/`publish`는
+전부 `_drafts/{platform}/`만 보므로 `_drafts/contest/`를 건드리지 않는다.
 
 ## 커밋 · 브랜치
 
@@ -39,14 +39,14 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트 자동화가 핵심.
 
 ### 커밋 종류
 
-| 종류               | 제목                                             | 트레일러                                                  |
-| ------------------ | ------------------------------------------------ | --------------------------------------------------------- |
-| `publish` 산출물   | `feat: [Platform] #번호 - 제목 [langs]`          | `Co-Authored-By: Claude <noreply@anthropic.com>`          |
-| 발행 포스트 손수정 | `fix: [Platform] #번호 - <한 일>` (제목 생략)    | `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` |
-| 대회 후기 발행     | `feat: [Contest] {CF API 대회명} 후기`           | `Co-Authored-By: Claude <noreply@anthropic.com>`          |
-| 대회 후기 손수정   | `fix: [Contest] {CF API 대회명} - <한 일>`       | `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` |
-| 스킬 정의 변경     | `<type>: [Claude Skill] {스킬명} - <요약>`       | 〃                                                        |
-| 블로그 인프라      | `<type>: <요약>` (`_config`·README·CLAUDE.md·CI) | 〃                                                        |
+| 종류               | 제목                                             | 트레일러                                                       |
+| ------------------ | ------------------------------------------------ | -------------------------------------------------------------- |
+| `publish` 산출물   | `feat: [Platform] #번호 - 제목 [langs]`          | `Co-Authored-By: Claude <noreply@anthropic.com>`               |
+| 발행 포스트 손수정 | `fix: [Platform] #번호 - <한 일>` (제목 생략)    | `Co-Authored-By: Claude {현재 모델명} <noreply@anthropic.com>` |
+| 대회 후기 발행     | `feat: [Contest] {CF API 대회명} 후기`           | `Co-Authored-By: Claude <noreply@anthropic.com>`               |
+| 대회 후기 손수정   | `fix: [Contest] {CF API 대회명} - <한 일>`       | `Co-Authored-By: Claude {현재 모델명} <noreply@anthropic.com>` |
+| 스킬 정의 변경     | `<type>: [Claude Skill] {스킬명} - <요약>`       | 〃                                                             |
+| 블로그 인프라      | `<type>: <요약>` (`_config`·README·CLAUDE.md·CI) | 〃                                                             |
 
 - `<type>` ∈ `feat`/`fix`/`docs`/`refactor`/`chore` — 변경 성격에 맞게 고른다. 포스트·후기
   커밋만 `feat`(발행)/`fix`(손수정) 고정.
@@ -57,8 +57,8 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트 자동화가 핵심.
 - **트레일러 모델명 규칙**: 커밋 시점에 버전을 알 수 없는 주체(정적 스크립트 —
   `publish`·`publish_contest`)가 커밋하면 모델명 없이 `Co-Authored-By: Claude <noreply@anthropic.com>`.
   Claude가 직접 커밋해 현재 버전을 아는 경우는 그 버전을 넣어
-  `Co-Authored-By: Claude {현재 모델명} <noreply@anthropic.com>`(예: 이 세션은
-  `Claude Sonnet 5`). 모델명은 **이름 부분**에 넣고 이메일 슬롯(`<>`)은 하나만 —
+  `Co-Authored-By: Claude {현재 모델명} <noreply@anthropic.com>`(예: 모델이
+  Sonnet 5.5면 `Claude Sonnet 5.5`). 모델명은 **이름 부분**에 넣고 이메일 슬롯(`<>`)은 하나만 —
   구 `Claude <claude-sonnet-5> <noreply@...>` 이중 `<>` 형식은 폐기.
   → 그래서 대회 후기 **발행**(스크립트)은 모델명 없음, **손수정**(Claude 직접)만 모델명.
 - 두 레포(블로그·PS) 메시지는 동일 문구 재사용(PS에서 지은 걸 블로그에도 — 블로그쪽은

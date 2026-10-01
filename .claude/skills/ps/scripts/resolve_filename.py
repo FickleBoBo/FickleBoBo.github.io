@@ -28,16 +28,16 @@ PS 레포 문제 폴더 경로를 받아서, 이 블로그의 포스트 파일�
   피함. 지금 IAL이 남은 곳은 blockquote(prompt-info)뿐이고 거긴
   `<!-- prettier-ignore -->` 하나로 안전하게 보호됨. 코드펜스에 IAL을 다시
   붙이는 방향으로 바꾸면 이 문제가 재발함.
-- 이 파일은 4개 스킬(`sync`/`publish`/`review-code`/`contest`), **파일 기준으로는
-  5곳**(`sync_code.py`/`publish.py`/`chunk_drafts.py`/`publish_contest.py`/
-  `scaffold_contest.py` — `contest`만 스크립트 2개가 각각 끌어씀)이 sys.path로
-  끌어와 여러 심볼을 그대로 import해서 씀 — 정확한 목록은 매번 각 파일의 import문
-  직접 확인(여기 나열해두면 소비자가 늘 때마다 목록이 stale해지기 쉬움 — 실제로
-  한 번 벌어졌던 일). 이름을 바꾸거나 동작을 바꾸면 그 소비자들도 같이 깨짐.
-  원래 예고했던 "5번째 소비자가 생기면 별도 공유 패키지(`_shared/`)로 뺀다"는
-  임계점을 파일 기준으로는 이미 넘김(2026-09-22, `scaffold_contest.py` 추가로) —
-  심볼 몇 개짜리 훅이 파일당 1~2줄이라 당장 안 뺐지만, 다음에 손볼 때는 "아직
-  안 뺐다"가 아니라 "왜 아직 안 뺐는지"를 재검토할 시점.
+- 레포 공용 상수(`REPO_ROOT`/`DRAFTS_DIR`/`POSTS_DIR`/`PS_REPO`/`PLATFORM_MAP`)와
+  front matter·git 헬퍼는 `_shared/blog_common.py`로 옮겼다(2026-10-02). 이 파일은
+  그 상수를 import만 해서 들고 있으므로 `from resolve_filename import DRAFTS_DIR`
+  같은 옛 경로도 계속 동작하지만, 새 코드는 `blog_common`에서 직접 가져온다.
+  스캐폴드 로직(`group_by_approach`/`sanitize_filename`/`yaml_dq`/섹션 헤딩 상수 등)은
+  여기가 정본이고 `sync`/`publish`/`contest`가 sys.path로 끌어다 쓰니, 이름·동작을
+  바꾸면 그 소비자들의 import문을 같이 확인할 것(목록은 여기 안 적음 — 소비자가
+  늘 때마다 stale해짐).
+- 공용 모듈 분리 검토 이력: 한때 "5번째 소비자가 생기면 `_shared/`로 뺀다"는 임계점을
+  넘긴 채 보류 중이었고, 2026-10-02에 위 범위만 분리했다.
 
 사용법·동작은 `ps/SKILL.md`의 `## 실행`이 정본 — 명령줄 문법만: `resolve_filename.py`
 (인자 없음, 배치) 또는 `resolve_filename.py <PS레포 문제 폴더 경로> [--force]`(단일 폴더).
@@ -47,32 +47,14 @@ import os
 import re
 import sys
 
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
+)
+from blog_common import DRAFTS_DIR, PLATFORM_MAP, POSTS_DIR, PS_REPO
 from clean_code import clean_code, split_approach_suffix
 from problem_lookup import get_title_and_url
 
 BLOG_CREATION_DATE = "2026-08-17"
-
-# 이 스크립트(.claude/skills/ps/scripts/resolve_filename.py) 기준 이 블로그 레포 루트
-REPO_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-)
-DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts")
-POSTS_DIR = os.path.join(REPO_ROOT, "_posts")
-
-# PS 레포(형제 디렉토리) 루트 — 인자 없이 실행하는 배치 스캔의 대상.
-# sync 스킬도 이 값을 그대로 가져다 씀(중복 정의 안 함).
-# ⚠️ 이 스크립트에서 유일하게 이 컴퓨터/사용자 전용으로 하드코딩된 값 — 다른 환경에서
-# 이 레포를 쓰려면(경로/사용자명이 다르면) 여기만 고치면 됨. 나머지는 전부 __file__
-# 기준 상대경로라 레포를 어디로 옮겨도 그대로 동작함.
-PS_REPO = "/Users/mwzz6/Desktop/github/PS"
-
-PLATFORM_MAP = {
-    "prms": "Programmers",
-    "leet": "LeetCode",
-    "boj": "BaekJoon",
-    "cofo": "Codeforces",
-    "swea": "SWEA",
-}
 
 # 언어 브라켓 표시 순서 및 확장자 매핑
 # MySQL(프로그래머스 SQL 문제)은 항상 폴더에 Solution.sql 하나뿐 —

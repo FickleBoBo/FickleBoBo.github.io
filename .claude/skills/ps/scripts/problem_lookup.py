@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Programmers/LeetCode/Codeforces 문제 번호로 (제목, 문제 URL)을 조회하는 함수들.
 `resolve_filename.py`의 `generate_one`에서만 씀 — sync/publish/review-code/contest

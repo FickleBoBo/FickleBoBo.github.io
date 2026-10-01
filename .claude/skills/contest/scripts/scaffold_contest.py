@@ -76,14 +76,15 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 _SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(_SKILLS_DIR, "_shared"))
 sys.path.insert(0, os.path.join(_SKILLS_DIR, "ps", "scripts"))
 
-# REPO_ROOT/sanitize_filename/yaml_dq는 ps 스킬(resolve_filename.py) 걸 그대로
-# 가져다 씀 — 파일명 이스케이프 표·YAML 이스케이프 로직이 두 스킬에서 갈라지면
-# 안 되기 때문(publish_contest.py가 REPO_ROOT를 같은 방식으로 가져다 쓰는 것과
-# 동일 패턴).
+# sanitize_filename/yaml_dq는 ps 스킬(resolve_filename.py) 걸 그대로 가져다 씀 —
+# 파일명 이스케이프 표·YAML 이스케이프 로직이 두 스킬에서 갈라지면 안 되기 때문.
+# REPO_ROOT는 레포 공용 상수라 _shared/blog_common.py에서.
+from blog_common import REPO_ROOT
 from render_card import ChromeNotFound, render_card
-from resolve_filename import REPO_ROOT, sanitize_filename, yaml_dq
+from resolve_filename import sanitize_filename, yaml_dq
 
 # ── 상수 ──────────────────────────────────────────────────────────────────────
 

@@ -14,9 +14,9 @@
 - **커밋 메시지**: `feat: [Contest] {CF API 대회명} 후기` (블로그·PS 레포 동일).
   대회명은 포스트 `title`에서 그대로 온다(front matter가 `"{대회명} 후기"`).
 
-`publish`의 헬퍼(`commit`/`has_pending_changes`/`extract_title`/`yaml_scalar_value`)와
-`sync`의 `read_front_matter`/`front_matter_block`을 그대로 import해서 세 스킬 사이에서
-커밋·파싱 방식이 갈라지지 않게 한다. 커밋 트레일러도 `publish`의 `commit`이 붙이는
+커밋·front matter 헬퍼(`commit`/`has_pending_changes`/`extract_title`/`yaml_scalar_value`/
+`read_front_matter`/`front_matter_block`)는 `publish`와 같은 `_shared/blog_common.py`에서
+import해서 두 스킬 사이에서 커밋·파싱 방식이 갈라지지 않게 한다. 커밋 트레일러도 `commit`이 붙이는
 `Co-Authored-By: Claude <noreply@anthropic.com>`(모델명 없음) 그대로 — 커밋 주체가
 정적 스크립트라 커밋 시점에 모델 버전을 모름(블로그 CLAUDE.md "트레일러 모델명 규칙").
 후기를 Claude가 손으로 커밋하는 경우(발행 후 손수정)만 모델명을 넣는다.
@@ -44,17 +44,20 @@ import re
 import sys
 
 _SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-for _p in ("ps/scripts", "sync/scripts", "publish/scripts"):
-    sys.path.insert(0, os.path.join(_SKILLS_DIR, *_p.split("/")))
+sys.path.insert(0, os.path.join(_SKILLS_DIR, "_shared"))
 
-from publish import (
+from blog_common import (
+    DRAFTS_DIR,
+    POSTS_DIR,
+    PS_REPO,
+    REPO_ROOT,
     commit,
     extract_title,
+    front_matter_block,
     has_pending_changes,
+    read_front_matter,
     yaml_scalar_value,
 )
-from resolve_filename import DRAFTS_DIR, POSTS_DIR, PS_REPO, REPO_ROOT
-from sync_code import front_matter_block, read_front_matter
 
 CONTEST_DRAFTS_DIR = os.path.join(DRAFTS_DIR, "contest")
 CONTEST_POSTS_DIR = os.path.join(POSTS_DIR, "contest")

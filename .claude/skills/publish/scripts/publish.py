@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 _drafts/{platform}/의 "발행 준비 완료"된 PS 포스트를 _posts/{platform}/로 옮기고,
 이 블로그 레포 + PS 레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함 — 로컬

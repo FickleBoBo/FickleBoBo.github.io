@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 review-code의 "태그 후보 추천"이 끝나고 사람이 최종 leaf 태그를 확정한 뒤,
 그 태그를 드래프트 front matter에 실제로 써넣는 단계 — 순수 결정론적. LLM 판단

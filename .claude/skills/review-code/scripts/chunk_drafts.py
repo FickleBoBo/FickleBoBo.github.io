@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 review-code/review-post가 처리할 드래프트 목록을 찾아서 청크(서브에이전트 배정
 단위)로 나눈다. 순수 결정론적 — discovery/필터링/그룹핑엔 LLM 판단이 전혀 없음.

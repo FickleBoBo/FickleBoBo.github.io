@@ -130,6 +130,11 @@ def check_cutoff(date):
         )
 
 
+def is_fail_folder(path):
+    """폴더명이 `_fail`로 끝나면 실패한 풀이 — PS 대상이 아님(대소문자 무시)."""
+    return os.path.basename(path.rstrip("/")).lower().endswith("_fail")
+
+
 def get_platform(prefix):
     if prefix not in PLATFORM_MAP:
         raise ValueError(f"알 수 없는 플랫폼 접두사: {prefix}")
@@ -318,6 +323,8 @@ def generate_one(folder_path, force):
     실패하면 예외를 그대로 던짐(호출자가 단일 모드인지 배치 모드인지에 따라 다르게 처리)."""
     date, prefix, number = parse_folder(folder_path)
     check_cutoff(date)
+    if is_fail_folder(folder_path):
+        raise ValueError(f"`_fail` 폴더는 대상이 아님(실패한 풀이): {folder_path}")
     platform = get_platform(prefix)
     if prefix == "cofo":
         # PS 레포 폴더명 케이스가 들쭉날쭉함(cofo_2148a vs cofo_2148A) — Codeforces
@@ -426,10 +433,13 @@ def run_batch():
 
     # 1차: 컷오프 통과 + 지원 플랫폼 + 아직 없는 슬러그인 후보만 슬러그별로 묶음.
     candidates_by_slug = {}
-    skipped_existing, skipped_unsupported = [], []
+    skipped_existing, skipped_unsupported, skipped_fail = [], [], []
     for folder_path in folders:
         date, prefix, number = parse_folder(folder_path)
         if date < BLOG_CREATION_DATE:
+            continue
+        if is_fail_folder(folder_path):
+            skipped_fail.append(folder_path)
             continue
         if prefix not in PLATFORM_MAP:
             continue  # 플랫폼 접두사를 못 알아보는 폴더 — 문제 폴더가 아닐 가능성이 높음
@@ -464,6 +474,7 @@ def run_batch():
     print(
         f"--- 총 {len(created)}개 생성, {len(skipped_existing)}개는 이미 있어서 스킵, "
         f"{len(skipped_unsupported)}개는 미지원 플랫폼(BOJ/SWEA)이라 스킵, "
+        f"{len(skipped_fail)}개는 `_fail` 폴더라 스킵, "
         f"{len(conflicts)}개는 중복 충돌이라 스킵, {len(errors)}개 에러 ---"
     )
 

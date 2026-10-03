@@ -43,7 +43,7 @@ Follow up은 $O(1)$의 공간복잡도와 $O(N)$의 시간복잡도로 해결해
 class Solution {
     public int missingNumber(int[] nums) {
         int n = nums.length;
-        boolean[] seen = new boolean[n + 1];
+        boolean[] seen = new boolean[1 + n];
         for (int x : nums) {
             seen[x] = true;
         }
@@ -65,7 +65,7 @@ class Solution {
    public:
     int missingNumber(vector<int>& nums) {
         int n = nums.size();
-        vector<bool> seen(n + 1);
+        vector<bool> seen(1 + n);
         for (int x : nums) seen[x] = true;
 
         for (int i = 0; i <= n; i++) {

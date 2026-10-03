@@ -47,12 +47,12 @@ class Solution {
         int n = nums.length;
         if (n == 1) return nums[0];
 
-        int case1 = solve(nums, 1, n - 1);
-        int case2 = solve(nums, 2, n);
+        int case1 = robRange(nums, 1, n - 1);
+        int case2 = robRange(nums, 2, n);
         return Math.max(case1, case2);
     }
 
-    static int solve(int[] nums, int l, int r) {
+    static int robRange(int[] nums, int l, int r) {
         int n = nums.length;
         int[] dp = new int[1 + n];
 
@@ -71,7 +71,7 @@ using namespace std;
 
 class Solution {
    public:
-    int solve(vector<int>& nums, int l, int r) {
+    int rob_range(vector<int>& nums, int l, int r) {
         int n = nums.size();
         vector<int> dp(1 + n);
 
@@ -86,8 +86,8 @@ class Solution {
         int n = nums.size();
         if (n == 1) return nums[0];
 
-        int case1 = solve(nums, 1, n - 1);
-        int case2 = solve(nums, 2, n);
+        int case1 = rob_range(nums, 1, n - 1);
+        int case2 = rob_range(nums, 2, n);
         return max(case1, case2);
     }
 };
@@ -100,15 +100,15 @@ class Solution:
         if n == 1:
             return nums[0]
 
-        def solve(l, r):
+        def rob_range(l, r):
             dp = [0] * (1 + n)
             for i in range(l, r + 1):
                 dp[i] = max(dp[i - 1], dp[i - 2] + nums[i - 1])
 
             return dp[r]
 
-        case1 = solve(1, n - 1)
-        case2 = solve(2, n)
+        case1 = rob_range(1, n - 1)
+        case2 = rob_range(2, n)
         return max(case1, case2)
 ```
 

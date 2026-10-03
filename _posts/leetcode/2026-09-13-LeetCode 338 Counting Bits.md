@@ -41,7 +41,7 @@ Follow up은 선형 시간으로 이 문제를 해결하는 것으로 다이나�
 ```java
 class Solution {
     public int[] countBits(int n) {
-        int[] ans = new int[1 + n];
+        int[] ans = new int[n + 1];
         for (int i = 1; i <= n; i++) {
             int x = i;
             int cnt = 0;
@@ -64,7 +64,7 @@ using namespace std;
 class Solution {
    public:
     vector<int> countBits(int n) {
-        vector<int> ans(1 + n);
+        vector<int> ans(n + 1);
         for (int i = 1; i <= n; i++) {
             int x = i;
             int cnt = 0;
@@ -83,7 +83,7 @@ class Solution {
 ```python
 class Solution:
     def countBits(self, n: int) -> list[int]:
-        ans = [0] * (1 + n)
+        ans = [0] * (n + 1)
         for i in range(1, n + 1):
             x = i
             cnt = 0
@@ -103,7 +103,7 @@ class Solution:
 ```java
 class Solution {
     public int[] countBits(int n) {
-        int[] ans = new int[1 + n];
+        int[] ans = new int[n + 1];
         for (int i = 1; i <= n; i++) {
             ans[i] = ans[i & (i - 1)] + 1;
         }
@@ -120,7 +120,7 @@ using namespace std;
 class Solution {
    public:
     vector<int> countBits(int n) {
-        vector<int> ans(1 + n);
+        vector<int> ans(n + 1);
         for (int i = 1; i <= n; i++) {
             ans[i] = ans[i & (i - 1)] + 1;
         }
@@ -133,7 +133,7 @@ class Solution {
 ```python
 class Solution:
     def countBits(self, n: int) -> list[int]:
-        ans = [0] * (1 + n)
+        ans = [0] * (n + 1)
         for i in range(1, n + 1):
             ans[i] = ans[i & (i - 1)] + 1
 

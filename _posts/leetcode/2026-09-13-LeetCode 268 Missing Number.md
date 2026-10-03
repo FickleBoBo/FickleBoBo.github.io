@@ -27,9 +27,9 @@ Follow up은 $O(1)$의 공간복잡도와 $O(N)$의 시간복잡도로 해결해
 
 | 접근             | 시간   | 공간   |
 | ---------------- | ------ | ------ |
-| 방문 배열        | $O(N)$ | $O(N)$ |
+| 방문 체크        | $O(N)$ | $O(N)$ |
 | 등차수열 합 공식 | $O(N)$ | $O(1)$ |
-| 비트 XOR         | $O(N)$ | $O(1)$ |
+| XOR 상쇄         | $O(N)$ | $O(1)$ |
 
 ($N$ = `nums`의 길이)
 
@@ -37,7 +37,7 @@ Follow up은 $O(1)$의 공간복잡도와 $O(N)$의 시간복잡도로 해결해
 
 ## 3. 코드
 
-### 풀이 1: 방문 배열 [Java][C++][Python]
+### 풀이 1: 방문 체크 [Java][C++][Python]
 
 ```java
 class Solution {
@@ -129,7 +129,7 @@ class Solution:
 
 ---
 
-### 풀이 3: 비트 XOR [Java][C++][Python]
+### 풀이 3: XOR 상쇄 [Java][C++][Python]
 
 ```java
 class Solution {

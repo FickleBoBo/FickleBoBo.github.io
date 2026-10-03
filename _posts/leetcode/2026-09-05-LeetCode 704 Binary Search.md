@@ -42,8 +42,7 @@ class Solution {
     }
 
     static int binarySearch(int[] arr, int target) {
-        int lo = 0;
-        int hi = arr.length - 1;
+        int lo = 0, hi = arr.length - 1;
 
         while (lo <= hi) {
             int mid = (lo + hi) / 2;
@@ -68,9 +67,8 @@ using namespace std;
 
 class Solution {
    public:
-    int binarySearch(vector<int>& v, int target) {
-        int lo = 0;
-        int hi = v.size() - 1;
+    int bin_search(vector<int>& v, int target) {
+        int lo = 0, hi = v.size() - 1;
 
         while (lo <= hi) {
             int mid = (lo + hi) / 2;
@@ -88,31 +86,30 @@ class Solution {
     }
 
     int search(vector<int>& nums, int target) {
-        return binarySearch(nums, target);
+        return bin_search(nums, target);
     }
 };
 ```
 
 ```python
 class Solution:
+    def binary_search(self, nums, target):
+        lo, hi = 0, len(nums) - 1
+
+        while lo <= hi:
+            mid = (lo + hi) // 2
+
+            if nums[mid] < target:
+                lo = mid + 1
+            elif nums[mid] > target:
+                hi = mid - 1
+            else:
+                return mid
+
+        return -1
+
     def search(self, nums: list[int], target: int) -> int:
-
-        def binarySearch(nums, target):
-            lo, hi = 0, len(nums) - 1
-
-            while lo <= hi:
-                mid = (lo + hi) // 2
-
-                if nums[mid] < target:
-                    lo = mid + 1
-                elif nums[mid] > target:
-                    hi = mid - 1
-                else:
-                    return mid
-
-            return -1
-
-        return binarySearch(nums, target)
+        return self.binary_search(nums, target)
 ```
 
 ---

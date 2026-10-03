@@ -112,8 +112,7 @@ class Solution:
 ```java
 class Solution {
     public boolean isHappy(int n) {
-        int slow = n;
-        int fast = step(n);
+        int slow = n, fast = step(n);
         while (slow != fast) {
             slow = step(slow);
             fast = step(step(fast));
@@ -153,8 +152,7 @@ class Solution {
     }
 
     bool isHappy(int n) {
-        int slow = n;
-        int fast = step(n);
+        int slow = n, fast = step(n);
         while (slow != fast) {
             slow = step(slow);
             fast = step(step(fast));
@@ -168,7 +166,6 @@ class Solution {
 ```python
 class Solution:
     def isHappy(self, n: int) -> bool:
-
         def step(x):
             return sum(int(d) ** 2 for d in str(x))
 

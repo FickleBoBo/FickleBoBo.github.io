@@ -27,7 +27,7 @@ Happy Number를 구하는 문제로 Happy Number는 각 자릿수의 제곱의 �
 
 | 접근                 | 시간   | 공간   |
 | -------------------- | ------ | ------ |
-| 해시 셋              | $O(D)$ | $O(D)$ |
+| 해시셋               | $O(D)$ | $O(D)$ |
 | 플로이드 사이클 탐지 | $O(D)$ | $O(1)$ |
 
 ($D$ = `n`의 자릿수 $\approx \log_{10} n$)
@@ -36,7 +36,7 @@ Happy Number를 구하는 문제로 Happy Number는 각 자릿수의 제곱의 �
 
 ## 3. 코드
 
-### 풀이 1: 해시 셋 [Java][C++][Python]
+### 풀이 1: 해시셋 [Java][C++][Python]
 
 ```java
 import java.util.*;

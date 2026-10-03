@@ -125,7 +125,7 @@ class Solution {
         for (char c : t) cnt[c]--;
 
         for (auto [_, v] : cnt) {
-            if (v) return false;
+            if (v != 0) return false;
         }
 
         return true;

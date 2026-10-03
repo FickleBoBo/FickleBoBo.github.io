@@ -113,8 +113,8 @@ class Solution {
             buckets[i] = new ArrayList<>();
         }
 
-        for (Map.Entry<Integer, Integer> entry : cnt.entrySet()) {
-            buckets[entry.getValue()].add(entry.getKey());
+        for (Map.Entry<Integer, Integer> e : cnt.entrySet()) {
+            buckets[e.getValue()].add(e.getKey());
         }
 
         List<Integer> list = new ArrayList<>();
@@ -139,7 +139,7 @@ class Solution {
 
         int len = nums.size();
         vector<vector<int>> buckets(1 + len);
-        for (auto& [x, c] : cnt) buckets[c].push_back(x);
+        for (auto [x, c] : cnt) buckets[c].push_back(x);
 
         vector<int> res;
         for (int i = len; i > 0; i--) {

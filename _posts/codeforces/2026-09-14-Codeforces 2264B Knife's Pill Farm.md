@@ -55,9 +55,9 @@ void solve() {
         sum += a[i];
     }
 
-    long long ans = -LLONG_MAX;
+    long long ans = LLONG_MIN;
     for (int i = m - 1; i < n; i++) {
-        ans = max(ans, (long long)m * a[i] - sum);
+        ans = max(ans, 1LL * m * a[i] - sum);
 
         if (!pq.empty() && pq.top() > a[i]) {
             sum -= pq.top();

@@ -50,12 +50,12 @@ void solve() {
         if (x != i + 1) v.push_back(x);
     }
 
-    bool ok = true;
+    bool flag = true;
     for (int i = 1; i < v.size(); i++) {
-        if (v[i - 1] < v[i]) ok = false;
+        if (v[i - 1] < v[i]) flag = false;
     }
 
-    cout << (ok ? "YES\n" : "NO\n");
+    cout << (flag ? "YES\n" : "NO\n");
 }
 
 int main() {

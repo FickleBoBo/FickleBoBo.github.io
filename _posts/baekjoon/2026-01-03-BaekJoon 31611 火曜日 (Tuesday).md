@@ -41,12 +41,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int x = Integer.parseInt(br.readLine());
-
-        if (x % 7 == 2) {
-            System.out.println(1);
-        } else {
-            System.out.println(0);
-        }
+        System.out.println(x % 7 == 2 ? 1 : 0);
     }
 }
 ```

@@ -52,17 +52,17 @@ void solve() {
         seen[s[0] - 'a'] = true;
     }
 
-    bool ok = true;
+    bool flag = true;
     while (m--) {
         string s;
         cin >> s;
 
         for (char c : s) {
-            if (!seen[c - 'A']) ok = false;
+            if (!seen[c - 'A']) flag = false;
         }
     }
 
-    cout << (ok ? "YES" : "NO") << '\n';
+    cout << (flag ? "YES" : "NO") << '\n';
 }
 
 int main() {

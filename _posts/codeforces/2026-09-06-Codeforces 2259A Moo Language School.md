@@ -46,12 +46,12 @@ void solve() {
 
     int cnt = 0;
     for (int i = 0; i < n; i += k) {
-        bool ok = false;
+        bool flag = false;
         for (int j = i; j < i + k; j++) {
-            if (s[j] == '0') ok = true;
+            if (s[j] == '0') flag = true;
         }
 
-        if (!ok) cnt++;
+        if (!flag) cnt++;
     }
 
     cout << cnt << '\n';

@@ -54,15 +54,9 @@ void solve() {
     int num = 1;
     int m = 2 * n - k;
 
-    for (int i = 0; i < m; i++) {
-        a[i][i] = num++;
-    }
-    for (int i = m; i < n; i++) {
-        a[m - 1][i] = num++;
-    }
-    for (int i = m; i < n; i++) {
-        a[i][n - 1] = num++;
-    }
+    for (int i = 0; i < m; i++) a[i][i] = num++;
+    for (int i = m; i < n; i++) a[m - 1][i] = num++;
+    for (int i = m; i < n; i++) a[i][n - 1] = num++;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {

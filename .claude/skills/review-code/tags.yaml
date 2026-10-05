@@ -1,44 +1,49 @@
 # PS 블로그 포스트 태그 매핑 — review-code의 "태그 후보" 추천이 참조하는 고정 어휘집.
 # 설계 배경/검증 이력은 사용자 메모리 `ps-tag-taxonomy`(claude memory, 이 레포 밖) 참고.
 #
-# 사용법(review-code용):
-#   0. 태그는 "기술적으로 해당되는지"가 아니라 "그 개념이 이 문제를 푸는 데 실질적으로
-#      중요한지"로 고른다. 덧셈을 했다고 math, 코드를 썼다고 implementation을 붙이지
-#      않는다 — 그 개념이 핵심 난이도일 때만 태그 자격이 있다. math/implementation은
-#      거의 모든 문제에 기술적으로 걸릴 수 있어 남용 위험이 특히 큼(아래 boundary_notes 참고).
-#      단, 이 "핵심 난이도" 바는 math/implementation처럼 아무 데나 걸리는 태그에만 건다.
-#      string/geometry 같은 도메인 태그는 문제가 그 도메인에 실제로 속하고 풀이가 그 도메인
-#      작업(글자 단위 처리·좌표/도형 판정 등)을 드러내면 난이도가 사소해도 붙인다 — 이 경우
-#      warm up은 병기하지 않고 뺀다(단일 접근 기준, 5번 참고). 판단 기준은 boundary_notes.
-#   1. 코드가 실제로 쓰는 기법에 가장 구체적인(leaf에 가까운) 태그를 고른다.
-#   2. 고른 태그의 parents를 재귀적으로 따라가 조상 태그를 전부 함께 후보로 낸다.
-#      (예: `lazy propagation`을 고르면 `segment tree`, `data structure`도 같이 추천)
-#   3. parents가 2개인 태그(다중부모, 아래 전부 `# 다중부모`로 표시됨)는 두 조상 라인을 각각 따라간다.
-#   4. `contextual`이 있는 태그는 구조적 부모가 아니라 "이 문제가 그 성격이면 같이 추천"하는 판단 기준이다.
-#      trie, lcs 둘뿐이며, 문자열 문제에서 trie를 쓰거나 문자열에 대한 lcs(수열 lcs는 해당 없음)면
-#      string도 같이 추천할지 판단한다.
-#   5. `exception: true` 태그(constructive/ad hoc/warm up) 중 constructive/ad hoc는 "기법은
-#      아니지만 뚜렷한 문제 성격(창의적 구성/임기응변)"이 있을 때, warm up은 그런 성격조차
-#      없이 그냥 쉬운/사소한 문제일 때 쓴다. 셋 다 0번 기준까지 통과하는 기법 태그가 실질적으로
-#      하나도 안 남는 경우의 최후 후보다(포스트에 태그 최소 1개 정책 때문에 존재) — "기술적으로는
-#      뭔가 걸리지만 의미가 없어서" 후보가 안 남은 경우도 포함(math/implementation 남용 방지).
-#      단, 이 "실질적으로 하나도 안 남는" 판단은 포스트 전체가 아니라 접근(`### 풀이`/`### 풀이 N`)
-#      단위로 함(2026-08-27 확정, #120831/#120836에서 최초로 다중 접근 포스트가 생기며 정식화) —
-#      한 포스트 안에 접근이 여러 개고 그 성격이 갈리면(하나는 사소한 완전탐색/사칙연산, 다른
-#      하나는 실제 기법 사용), exception 태그와 그 실제 기법 태그를 병기한다. 예: 풀이1이 단순
-#      순회, 풀이2가 등차수열 합공식이면 `warm up`+`math`. 풀이1이 브루트포스, 풀이2가 약수
-#      쌍 성질(수론)이면 둘 다 진짜 기법이라 exception 없이 `brute force`+`number theory`+`math`.
-#      뒤집어서: 접근이 하나뿐인데 거기에 기법/도메인 태그가 붙으면 warm up은 뺀다 — warm up은
-#      "달리 할 말이 없다"는 신호라 단일 접근에서 실태그와 공존할 이유가 없다. warm up+실태그
-#      병기는 오직 "warm up급 접근과 기법 접근이 한 포스트에 공존"할 때만(2026-08-28 확정).
-#      예외의 예외(2026-09-14): constructive/ad hoc는 단일 접근이어도 실기법 태그와 병기할 수 있다 —
-#      그 기법이 "왜 이 답이 정답인지"를 설명하면 기법 태그만, "어떻게 효율적으로 구현하는지"만
-#      설명하는 구현 수단이면(예: 금지구간을 표시하는 difference array, 핵심은 "여집합이 항상 안전한
-#      구성"이라는 증명) exception 태그를 병기한다. 이 판단 기준을 통과할 때만이고 무조건은 아니다.
-#   6. 후보는 언급만 하고 실제 front matter 적용은 사용자가 "태그 달아줘"라고 명시했을 때만.
-#      적용 시 태그는 예외 없이 전부 큰따옴표로 감쌀 것(아포스트로피 있는 태그만 따지지 않고 통일 —
-#      매번 아포스트로피 유무를 판단할 필요를 없애기 위함). 작은따옴표는 아포스트로피 있는 태그에서
-#      파싱이 깨지니 절대 쓰지 말 것. 예: `tags: ["mo's algorithm", "segment tree", "warm up"]`
+# 사용법(review-code용) — 포스트의 접근(`### 풀이`/`### 풀이 N`)마다 아래를 순서대로 적용한다.
+#   0. SQL 전용 포스트(언어 브래킷이 [MySQL] 하나뿐): `sql` 하나만 달고 끝낸다. 다른 태그와 병기하지
+#      않고 아래 단계도 거치지 않는다.
+#   1. 도메인 태그(`string`, `geometry`): 문제가 그 도메인에 속하고 풀이가 그 도메인 작업(글자 단위
+#      처리, 좌표/도형 판정 등)을 드러내면 난이도가 사소해도 붙인다. 아래 2번의 "핵심 난이도" 바를
+#      걸지 않는다. 판단 기준은 boundary_notes. 도메인 태그가 붙으면 warm up은 병기하지 않는다(5번).
+#   2. 기법 태그: 코드가 실제로 쓰는 기법 중 이 문제를 푸는 데 실질적으로 중요한 것을 고른다.
+#      - 가장 구체적인(leaf에 가까운) 태그를 고른다. 이름이 비슷하다고 고르지 않는다 — 코드가 그
+#        알고리즘/자료구조를 실제로 구현·사용할 때만(특히 고급 알고리즘).
+#      - "핵심 난이도" 바: 기술적으로 해당되는지가 아니라, 그 개념을 모르면 풀기 어렵거나 정확히
+#        구현하는 것 자체가 어려운지로 고른다. 덧셈을 했다고 math, 코드를 썼다고 implementation을
+#        붙이지 않는다. math/implementation은 거의 모든 문제에 기술적으로 걸릴 수 있어 남용 위험이
+#        특히 크다(boundary_notes `[implementation, math, warm up]`).
+#      - math는 수학적 아이디어나 관찰이 필요한 풀이에 붙인다(공식 유도, 규칙성 발견 포함). 지문이
+#        준 공식·판정 기준을 그대로 적용만 하면 붙이지 않는다. 난이도에 따라 경계가 애매할 수 있다.
+#      - 자료구조 태그(stack, queue, deque, priority queue, hash table, ordered set 등)는 그
+#        자료구조가 풀이의 핵심일 때만 붙인다. 이미 고른 알고리즘 태그가 그 자료구조를 암묵적으로
+#        포함하면 붙이지 않는다(bfs→queue, dijkstra→priority queue, kruskal→union find). 단 그 자료구조
+#        자체가 풀이의 핵심이면(예: 가중치 DSU, 롤백) 붙인다.
+#      - 시뮬레이션(상태가 시간에 따라 변하는 절차를 그대로 재현)은 별도 태그 없이 implementation이다.
+#   3. 조상 펼치기: 고른 태그의 parents를 재귀로 따라가 조상 태그를 전부 후보로 낸다(예: `lazy
+#      propagation` → `segment tree`, `data structure`). parents가 2개인 태그(`# 다중부모`)는 두
+#      라인을 각각 따라간다. 하위만 골라도 상위 모음 페이지에 모이게 하는 의도된 정책이다.
+#      `contextual`이 있는 태그(trie, lcs)는 구조적 부모가 아니라 판단 기준이다 — 문자열 문제에서
+#      trie를 쓰거나 문자열에 대한 lcs(수열 lcs는 해당 없음)면 string도 같이 추천할지 판단한다.
+#   4. 예외 태그(`exception: true`: constructive/ad hoc/warm up): 1~2번을 통과한 태그가 하나도
+#      안 남은 접근의 최후 후보다(포스트에 태그 최소 1개 정책 때문에 존재). "기술적으로는 뭔가
+#      걸리지만 의미가 없어서" 후보가 안 남은 경우도 포함. constructive/ad hoc는 기법은 아니지만
+#      뚜렷한 문제 성격(창의적 구성/임기응변)이 있을 때, warm up은 그런 성격조차 없이 그냥
+#      쉬운/사소한 문제일 때.
+#   5. 다중 접근과 병기: 접근마다 1~4번을 따로 판정하고 포스트 태그는 합집합이다.
+#      - warm up은 "달리 할 말이 없다"는 신호라, 접근이 하나뿐이면 기법/도메인 태그와 병기하지 않는다.
+#        병기는 warm up급 접근과 다른 태그(기법·도메인)가 붙을 접근이 한 포스트에 공존할 때만(예: 풀이1 단순 순회, 풀이2
+#        등차수열 합공식 → `warm up`+`math`). 둘 다 진짜 기법이면 exception 없이(예: 풀이1
+#        브루트포스, 풀이2 약수 쌍 성질 → `brute force`+`number theory`+`math`).
+#      - constructive/ad hoc는 단일 접근이어도 실기법 태그와 병기할 수 있다. 그 기법이 "왜 이 답이
+#        정답인지"를 설명하면 기법 태그만, "어떻게 효율적으로 구현하는지"만 설명하는 구현 수단이면
+#        병기한다(예: 금지구간을 표시하는 difference array — 핵심은 "여집합이 항상 안전한 구성"이라는
+#        증명). 이 기준을 통과할 때만이고 무조건은 아니다.
+#   6. `interactive`는 문제 형식 태그라 위 판정과 독립이다 — 인터랙티브 문제면 다른 태그와 함께 붙인다.
+#      다른 태그가 없어도 interactive가 최소 1개를 채우므로 warm up은 병기하지 않는다.
+#
+# 후보는 언급까지만 한다. 파일 적용·표기는 SKILL.md(`apply_tags.py`)가 맡는다.
 #
 # 표기 규칙: 소문자 + 띄어쓰기(케밥케이스 아님). 사람 이름이 실제로 소유격으로 쓰이는 경우만
 # 아포스트로피 유지(mo's algorithm, fermat's little theorem, knuth's optimization, pollard's rho,
@@ -57,7 +62,8 @@ tags:
   trie: { parents: [data structure], contextual: [string] }
   sparse table: { parents: [data structure] }
   hash table: { parents: [data structure] }
-  order statistic tree: { parents: [data structure] }
+  ordered set: { parents: [data structure] }
+  order statistic tree: { parents: [ordered set] }
   treap: { parents: [data structure] }
   stack: { parents: [data structure] }
   monotonic stack: { parents: [data structure] }
@@ -113,7 +119,7 @@ tags:
   dynamic programming: { parents: [] }
   knapsack: { parents: [dynamic programming] }
   digit dp: { parents: [dynamic programming] }
-  bitmask dp: { parents: [dynamic programming] }
+  bitmask dp: { parents: [dynamic programming, bitmask] } # 다중부모
   interval dp: { parents: [dynamic programming] }
   lis: { parents: [dynamic programming] }
   lcs: { parents: [dynamic programming], contextual: [string] }
@@ -191,51 +197,108 @@ tags:
   greedy: { parents: [] }
   sorting: { parents: [] }
   implementation: { parents: [] }
-  bitmask: { parents: [] }
+  bitmask: { parents: [bit manipulation] }
   two pointers: { parents: [] }
   "floyd's cycle detection": { parents: [] }
   sliding window: { parents: [] }
   coordinate compression: { parents: [] }
+
+  # ── 문제 형식 (풀이 판정과 독립, 사용법 6번) ───────────────────
+  interactive: { parents: [] }
 
   # ── 의도적 예외 (기법 아님 — 문제 성격/난이도 신호) ───────────
   constructive: { parents: [], exception: true }
   ad hoc: { parents: [], exception: true }
   warm up: { parents: [], exception: true }
 
+  # ── SQL 전용 포스트 (언어 브래킷이 [MySQL] 하나뿐인 포스트) ────
+  # 이 포스트는 기법 태그를 고르지 않고 `sql` 하나만 붙인다(사용법 0번).
+  sql: { parents: [] }
+
 # 경계가 애매한 태그 쌍 — 트리 구조만으로는 안 갈라져서 후보 고를 때 아래 기준으로 판단.
 boundary_notes:
   - pair: [bit manipulation, bitmask, bitmask dp]
     rule: >
-      bit manipulation은 XOR/AND/시프트 등 비트 자체의 수학적 성질을 이용하는 트릭.
-      bitmask는 부분집합을 정수 하나로 인코딩해서 다루는 표현 방식 그 자체(상태 자체가 목적).
-      bitmask dp는 그 bitmask를 DP 상태로 쓰는 경우 — dynamic programming 조상이 자동으로 붙으니
-      bitmask와 별개로 취급.
+      bit manipulation은 XOR/AND/시프트 등 비트 자체의 성질을 이용하는 트릭(비트 개수 세기, XOR 소거,
+      2의 거듭제곱 판정). bitmask는 부분집합을 정수 하나로 인코딩해 다루는 표현 방식 그 자체로,
+      bit manipulation이 조상으로 자동 붙는다. bitmask dp는 그 bitmask를 DP 상태로 쓰는 경우 —
+      dynamic programming과 bitmask(와 그 조상)가 함께 붙는다.
   - pair: [two pointers, sliding window]
     rule: >
-      two pointers는 정렬된/단조성 있는 배열에서 두 포인터가 각자 독립적으로(또는 서로 반대 방향으로)
-      이동하며 조건을 좁혀가는 경우. sliding window는 "연속된 구간"을 유지한 채 한쪽 끝을 늘리고
-      반대쪽을 줄이며 조건을 만족하는 구간을 찾는 경우. 구현이 비슷해 보여도 무엇을 유지하는지로 구분.
-  - pair: [implementation, math, warm up]
-    rule: >
-      implementation과 math는 사실상 모든 문제에 기술적으로 걸릴 수 있는 태그라 남용 위험이 제일 크다.
-      사칙연산 한 줄, 조건문 하나, 내장 함수 호출 정도로 끝나는 문제엔 둘 다 붙이지 않고 warm up으로
-      대체한다. "덧셈을 했으니 math", "코드를 썼으니 implementation"처럼 기술적 해당 여부만으로 고르지
-      말 것 — 그 개념이 문제의 핵심 난이도일 때만 붙인다(정수론적 성질을 실제로 이용해야 풀리면 math,
-      복잡한 상태를 놓치지 않고 정확히 구현해야 하면 implementation).
-      지문이 판정 기준·정리를 그대로 제시하고(예: "9로 나눈 나머지는 각 자리 숫자 합의 나머지,
-      이 사실을 이용하여") 남은 작업이 그걸 기계적으로 적용하는 수준이면 그 개념은 풀이의 crux가 아니라
-      주어진 조건이므로 math/number theory를 붙이지 않고 warm up. 단 지문이 기준은 주되 방법은 안
-      알려주면(예: 유한소수 판별 — 분모 소인수가 2·5뿐이라는 기준만 주고 기약분수화는 안 알려줌)
-      풀이가 가져온 기법(euclidean algorithm 등)과 그 조상은 그대로 단다. 개념 모르면 손도 못 대는
-      기초성 근거로 사용자가 math를 오버라이드할 수 있다(rule 0 바는 사용자 판단이 우선).
+      두 태그는 병렬이다(한쪽이 다른 쪽의 부모가 아님). two pointers는 정렬된/단조성 있는 배열에서 두
+      포인터가 각자 독립적으로(또는 서로 반대 방향으로) 이동하며 조건을 좁혀가는 경우. sliding window는
+      "연속된 구간"을 유지한 채 한쪽 끝을 늘리고 반대쪽을 줄이며 조건을 만족하는 구간을 찾는 경우.
+      구현이 비슷해 보여도 무엇을 유지하는지로 구분. prefix sum과는 별개 — 누적합 배열을 만들어
+      구간합을 질의하면 prefix sum, 윈도우 끝을 밀며 값을 갱신하면 sliding window.
   - pair: [two pointers, "floyd's cycle detection"]
     rule: >
-      two pointers는 정렬된/단조성 있는 배열에서 두 포인터가 조건을 좁혀가는 경우(위 항목).
-      floyd's cycle detection(토끼와 거북이)은 배열 인덱싱이 아니라 어떤 값에서 다음 값을
-      결정하는 함수(f(x))로 정의된 암묵적 연결 리스트/그래프 위에서, 서로 다른 속도(1스텝/2스텝)로
-      도는 두 포인터가 사이클에 들어서면 반드시 만난다는 성질로 사이클 여부·시작점을 찾는 기법이다.
-      "두 포인터"라는 표면적 유사성과 무관하게 배열이 아니라 함수형 시퀀스 위에서 동작한다는 게
-      구분 기준.
+      floyd's cycle detection(토끼와 거북이)은 배열 인덱싱이 아니라 어떤 값에서 다음 값을 결정하는
+      함수 f(x)로 정의된 암묵적 연결 리스트/그래프 위에서, 서로 다른 속도(1스텝/2스텝)로 도는 두
+      포인터가 사이클에 들어서면 반드시 만난다는 성질로 사이클 여부·시작점을 찾는 기법이다. "두 포인터"라는
+      표면적 유사성과 무관하게 배열이 아니라 함수형 시퀀스 위에서 동작한다는 게 구분 기준.
+  - pair: [implementation, math, warm up]
+    rule: >
+      implementation과 math는 거의 모든 문제에 기술적으로 걸릴 수 있어 남용 위험이 크다. math는 수학적
+      아이디어나 관찰이 필요할 때(예: 등차수열 합공식 유도, 규칙성 발견) 붙인다 — 한 줄 공식이어도
+      그 공식을 스스로 떠올려야 하면 math. number theory/combinatorics 등 하위 태그에 속하면 그
+      하위 태그를 고른다(math 조상은 자동으로 붙음). 하위 태그에 안 맞는 관찰이면 math 단독.
+      implementation은 풀이 아이디어는 분명한데 문제를 코드로 옮겨 풀어내는 것 자체가 핵심 난이도일 때
+      붙인다(규칙이 긴 시뮬레이션, 복잡한 상태·분기·엣지케이스 처리, 큰 수 직접 연산 등).
+      덧셈·비교·내장 함수 호출처럼 아이디어도 상태 관리도 필요 없으면 둘 다 붙이지 않고 warm up.
+      지문이 판정 기준·정리를 그대로 제시하고(예: "9로 나눈 나머지는 각 자리 숫자 합의 나머지,
+      이 사실을 이용하여") 남은 작업이 그걸 기계적으로 적용하는 수준이면 그 개념은 풀이의 crux가
+      아니라 주어진 조건이므로 math/number theory를 붙이지 않고 warm up. 단 지문이 기준은 주되
+      방법은 안 알려주면(예: 유한소수 판별 — 분모 소인수가 2·5뿐이라는 기준만 주고 기약분수화는
+      안 알려줌) 풀이가 가져온 기법(euclidean algorithm 등)과 그 조상은 그대로 단다.
+  - pair: [brute force, backtracking, warm up]
+    rule: >
+      brute force는 "이건 완전 탐색으로 푸는 문제구나"라는 인식 자체가 풀이의 아이디어일 때 — 탐색 공간
+      설계나 "범위가 작으니 다 해봐도 된다"는 판단이 풀이의 핵심. 지문이 시키는 대로 훑으며 계산·세기만
+      하면(이중 루프여도) 아이디어 없이 완전 탐색을 한 것이라 warm up. backtracking은 재귀로 상태를
+      쌓고 되돌리며(undo) 가지치기하는 경우 — 가지치기 없는 재귀 열거는 brute force. dfs/bfs가
+      붙으면 brute force는 중복이라 뺀다.
+  - pair: [dfs, bfs, flood fill, shortest path]
+    rule: >
+      dfs는 그래프·트리를 깊이 우선으로 순회하는 경우(visited 유무 무관, 조합 구성용 재귀는 아님).
+      bfs는 큐로 레벨 순회하는 경우 — 큐로 절차를 흉내 내는 시뮬레이션(프린터 등)은 bfs가 아니다.
+      격자 최단거리는 bfs만 붙이고, 가중치가 있어 최단경로 알고리즘(dijkstra 등)을 쓸 때만 shortest
+      path 계열. flood fill은 연결 영역을 칠하거나 세는 문제일 때만 bfs/dfs와 병기한다.
+  - pair: [greedy, dynamic programming, constructive, ad hoc]
+    rule: >
+      greedy는 매 단계 국소 최선을 고르고 그것이 전체 최적이 되는 근거(교환 논증 등)가 성립하는
+      접근일 때(정렬·우선순위 큐 기반 포함). 코드 구조만으로 안 가려지면 포스트의 아이디어 서술이
+      있는 경우 그 근거 서술까지 함께 보고 판단한다. dynamic programming은 부분문제 점화식(표/메모)이
+      있을 때 — prefix max를 한 번 스캔하는 정도는 dp가 아니다. constructive는 조건을 만족하는 답(배열·문자열 등)을 직접
+      만들어내고 그 구성의 정당성이 핵심일 때. ad hoc은 어느 정형 기법에도 안 속하고 관찰 하나로
+      풀릴 때. constructive와 ad hoc은 서로 무관한 축이라 한 문제에 둘 다 붙을 수 있다.
+  - pair: [sorting, greedy]
+    rule: >
+      sorting은 문제가 정렬 자체를 요구하거나(정렬 기준 설계 포함) 정렬이 풀이의 전제/아이디어
+      (정렬 후 인접 비교, sort+greedy, sort+two pointers)일 때. 출력 순서를 맞추려는 부수적 정렬은
+      태그하지 않는다.
+  - pair: [hash table, ordered set, string hashing]
+    rule: >
+      (자료구조 태그 일반 원칙은 사용법 2번: 풀이의 핵심일 때만, 알고리즘 태그가 암묵 포함하면 생략.
+      LeetCode의 자료구조 설계 문제(LRU 캐시 등)는 data structure와 핵심 구조 태그만 붙인다.)
+      hash table은 해시 기반 set/map(HashSet/HashMap, unordered_map, dict/set)을 아우르고, 조회·카운트·
+      존재 판정이 풀이의 핵심일 때만 붙인다 — 단순 기록용이면 태그하지 않는다. ordered set은 정렬된
+      set/map(TreeSet/TreeMap, std::set/map, PBDS)에서 순서 질의(lower_bound, floor/ceiling,
+      최솟값·최댓값 삭제)가 핵심일 때 — 단순 정렬·중복 제거 용도면 아니다. string hashing은 롤링
+      해시로 문자열을 비교하는 경우이고 set에 해시를 모으는 것만으론 hash table을 추가하지 않는다.
+  - pair: [tree, graph]
+    rule: >
+      tree는 graph의 자식이 아닌 독립 태그다. 입력이 트리여도 단순 순회(bfs/dfs)면 graph 계열,
+      조상·서브트리·트리 성질을 쓰면 tree 계열.
+  - pair: [divide and conquer, divide and conquer optimization]
+    rule: >
+      divide and conquer optimization은 DP 점화식의 최적 분할점 단조성을 이용하는 최적화(dp optimization
+      자식)다. 일반 분할 정복·병합 정렬형 풀이는 divide and conquer.
+  - pair: [geometry, pythagorean theorem, warm up]
+    rule: >
+      geometry는 좌표/도형에 대한 판정·계산(거리, 넓이, 방향, 삼각형 성립 판정, 겹침)이면 풀이가
+      사소해도 붙이고 warm up은 뺀다. 격자 이동·2차원 배열 조작은 geometry가 아니다. pythagorean
+      theorem은 정수 해/빗변 정수성 판정이 풀이의 핵심일 때 geometry와 함께 붙이고, 거리 공식 대입
+      수준이면 geometry만.
   - pair: [string, warm up]
     rule: >
       string은 math/implementation과 달리 "핵심 난이도" 바를 요구하지 않는 도메인 태그다 — 난이도 등급이
@@ -243,6 +306,6 @@ boundary_notes:
       warm up은 뺀다). 판단은 코드 길이가 아니라 문제의 본질로: 문제가 문자열을 들여다보거나 바꾸라고
       하나? → string. 구체적으로 (a) 들여다보기/바꾸기 = 필터·탐색·매칭·슬라이스·뒤집기·재배열·파싱·
       카운트·split·splice 중 하나라도면 string. (b) 문자열 출력만 = echo, 두 개 이어붙여 출력, n번 반복
-      같이 다른 로직이 없으면 warm up. (c) 문자열이 숫자를 만드는 도구일 뿐이고 문제의 핵심은 그 숫자면
-      (concat→parseInt 후 비교/연산) warm up. 2026-08-28 warm up 89개 전수 재검토로 확정 — 문자열
-      조작 문제가 대량인데 string 태그가 거의 안 붙어(발행 116개 중 1개) 네비게이션이 죽어 있던 걸 교정.
+      같이 다른 로직이 없으면 warm up. (c) 문자열↔숫자 통째 변환(parseInt/int(), toString/str())은 string 조작이
+      아니다 — 변환만 하고 핵심이 그 숫자의 비교/연산이면 string을 붙이지 않는다(warm up 등 다른 판정).
+      문자를 자르거나 들여다보는 순간부터는 (a)다.

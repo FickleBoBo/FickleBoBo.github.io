@@ -1,60 +1,26 @@
 """
-review-code의 "태그 후보 추천"이 끝나고 사람이 최종 leaf 태그를 확정한 뒤,
-그 태그를 드래프트 front matter에 실제로 써넣는 단계 — 순수 결정론적. LLM 판단
-없음.
-
-배경: leaf 태그 선정("이 개념이 이 문제의 핵심 난이도인가")은 tags.yaml 0번
-규칙대로 여전히 사람/에이전트 해석 영역이라 이 스크립트가 하지 않는다(자동화
-불가 — 문제 도메인 이해가 필요함). 하지만 leaf 태그가 확정된 뒤 "parents를
-재귀적으로 펼쳐서 조상까지 다 붙인다"(tags.yaml 2·3번)는 순수 트리 lookup이라
-해석 여지가 전혀 없는데, 이 단계를 에이전트가 손으로(Edit) 하다가 조상을
-빠뜨리는 실수가 실제로 발생함(2026-09-13, number theory 확정하고 parents인
-math를 "핵심 난이도 바를 또 넘어야 한다"며 잘못 제외 — 5번 규칙 예시에
-브루트포스+수론+math 병기가 정확히 반례로 박혀 있었는데 놓침). 그래서 이
-"확정된 leaf 태그 → 조상 펼치기 → front matter 치환"만 스크립트로 분리했다.
+확정된 leaf 태그를 드래프트 front matter에 쓴다 — 순수 결정론적, LLM 판단 없음.
+leaf 태그를 고르는 일은 `tags.yaml`의 사용법·`boundary_notes`대로 사람/에이전트 몫이고,
+이 스크립트는 확정 뒤의 "조상 펼치기 → 정렬 → `tags:` 줄 치환"만 한다(조상을 손으로
+펼치다 빠뜨리는 실수를 막기 위해 분리).
 
 사용법:
     python3 apply_tags.py <드래프트 .md 경로> <leaf 태그> [<leaf 태그> ...]
 
 동작:
-    1. tags.yaml을 파싱해 태그 → parents 매핑을 만든다(contextual/exception은
-       이 단계에서 안 씀 — 그것도 사람 판단 영역이라 이미 leaf 태그 목록에
-       반영된 걸로 취급).
-    2. 입력 leaf 태그마다 parents를 재귀적으로 펼쳐 조상까지 다 모은다
-       (다중부모면 두 라인 다, 중복 제거).
-    3. 최종 나열 순서(2026-09-13 확정, 사용자 지정): 태그 집합을 "체인"으로
-       묶는다 — 각 체인은 어떤 최상위 조상(parents가 빈 태그)에서 시작해 그
-       조상을 가진 하위 태그로 내려가는 한 줄기. 체인끼리는 그 **최상위
-       조상 이름의 알파벳 오름차순**으로 나열하고, 체인 내부는 항상 상위 →
-       하위 순으로 쓴다. 예: `bfs`+`bit manipulation` 추천 → `bfs`의 조상은
-       `graph`(최상위), `bit manipulation`은 조상 없어 자기 자신이 최상위 →
-       최상위끼리 정렬하면 `bit manipulation` < `graph` → 최종
-       `["bit manipulation", "graph", "bfs"]`. 한 조상 밑에 형제 태그가
-       여럿이면(같은 부모를 공유하는 하위 태그가 동시에 뽑힌 경우) 그
-       형제끼리도 알파벳 오름차순.
+    1. `tags.yaml`에서 태그 → parents 매핑을 읽고 정합성을 검증한다(중복 정의·정의 안 된
+       부모·순환은 에러). `contextual`·`exception`은 이 단계에서 안 씀 — 이미 leaf 목록에
+       반영된 것으로 취급.
+    2. leaf마다 parents를 재귀로 펼쳐 조상까지 모은다(다중부모면 두 라인 다, 중복 제거).
+    3. 최상위 조상(parents가 빈 태그) 이름의 알파벳 오름차순으로 "체인"을 나열하고, 체인
+       안은 상위 → 하위 순, 같은 부모 밑 형제는 알파벳순. 예: `bfs`+`bit manipulation`
+       → `["bit manipulation", "graph", "bfs"]`. 다중부모 태그(`tree dp`, `aho corasick`)는
+       `tags.yaml` parents 배열에서 먼저 나오는 부모의 체인에 속한다(배열 순서가 곧 확정된 분류).
+    4. 어휘집에 없는 태그는 즉시 에러(오타 방지). `sql`은 단독으로만 허용한다.
+    5. `tags:` 줄을 항상 큰따옴표로 감싼 배열로 치환한다. `tags:` 줄이 없거나 형식이 다르면
+       에러. 출력은 `기존 → 신규`를 같이 보여준다.
 
-       다중부모(`tree dp`의 `tree`+`dynamic programming`, `aho corasick`의
-       `string`+`trie`)처럼 한 태그가 두 체인에 걸치면, tags.yaml에 적힌
-       parents 순서상 먼저 나오는 조상을 그 태그가 속할 "주 체인"으로 삼는다.
-       이건 임의 타이브레이크가 아니라 이미 확정된 분류를 그대로 따르는
-       것 — 프로젝트 메모리 `ps-tag-taxonomy`의 확정 트리 다이어그램이
-       `tree dp`를 `tree` 섹션 밑에, `aho corasick`을 `string` 섹션 밑에
-       "본가"로 이미 그려뒀고, `tags.yaml`의 parents 배열 순서가 그 결정을
-       그대로 반영한다(예: `tree dp: { parents: [tree, dynamic programming] }`
-       — `tree`가 먼저). 부모 이름 알파벳순으로 바꾸면 오히려 `tree`와
-       `tree dp`가 떨어져 나와(→ `dynamic programming` 밑으로 감) 기존
-       분류와 어긋나므로 채택 안 함(2026-09-13 확정).
-    4. 어휘집에 없는 태그가 입력되면 즉시 에러(오타 방지, 조용히 넘어가지 않음).
-    5. 드래프트 front matter의 `tags:` 줄을 전부 큰따옴표로 감싼 배열로
-       치환한다(tags.yaml 6번 — 아포스트로피 유무 안 따지고 항상 큰따옴표).
-       `tags:` 줄이 front matter 안에 없거나 형식이 예상과 다르면 에러.
-
-이 스크립트가 하지 않는 것:
-    - leaf 태그가 이 문제에 적절한지 판단(그건 review-code 체크 항목 몫).
-    - contextual 태그를 자동으로 끼워 넣는 것(예: trie→string) — 그것도 문제
-      성격 판단이라 사람이 필요하다고 정하면 leaf 태그 인자에 직접 넣어서 준다.
-    - 여러 드래프트 배치 처리 — 한 번에 하나. 확정 태그는 드래프트마다 다르므로
-      배치화해봐야 인자 목록만 늘어날 뿐 이득이 없다.
+한 번에 한 포스트만 처리한다(확정 태그가 포스트마다 달라 배치화 이득이 없음).
 """
 
 import re
@@ -108,7 +74,31 @@ def load_tag_parents():
             if parents_raw
             else []
         )
+        if name in parents:
+            raise ValueError(f"tags.yaml 파싱 실패 — 태그가 중복 정의됨: {name!r}")
         parents[name] = parent_list
+
+    for name, parent_list in parents.items():
+        for parent in parent_list:
+            if parent not in parents:
+                raise ValueError(
+                    f"tags.yaml 파싱 실패 — {name!r}의 부모 {parent!r}가 정의되지 않음"
+                )
+
+    state = {}  # 1 = 탐색 중, 2 = 완료
+
+    def check_cycle(tag):
+        if state.get(tag) == 2:
+            return
+        if state.get(tag) == 1:
+            raise ValueError(f"tags.yaml 파싱 실패 — parents 순환: {tag!r}")
+        state[tag] = 1
+        for parent in parents[tag]:
+            check_cycle(parent)
+        state[tag] = 2
+
+    for name in parents:
+        check_cycle(name)
 
     return parents
 
@@ -194,10 +184,12 @@ def apply_to_draft(draft_path: Path, final_tags):
         )
         sys.exit(1)
 
+    old_line = tags_line_re.search(front_matter).group(0).strip()
     quoted = ", ".join(f'"{t}"' for t in final_tags)
     new_front_matter = tags_line_re.sub(f"tags: [{quoted}]", front_matter, count=1)
 
     draft_path.write_text(new_front_matter + rest, encoding="utf-8")
+    return old_line
 
 
 def main():
@@ -215,14 +207,21 @@ def main():
         print(f"에러: 파일이 없다: {draft_path}", file=sys.stderr)
         sys.exit(1)
 
+    if "sql" in leaf_tags and len(leaf_tags) > 1:
+        print(
+            "에러: `sql`은 다른 태그와 병기하지 않는다(SQL 전용 포스트).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     parents_map = load_tag_parents()
     expanded = expand_tags(leaf_tags, parents_map)
     final_tags = order_tags(expanded, parents_map)
 
-    apply_to_draft(draft_path, final_tags)
+    old_line = apply_to_draft(draft_path, final_tags)
 
     quoted = ", ".join(f'"{t}"' for t in final_tags)
-    print(f"{draft_path}: tags: [{quoted}]")
+    print(f"{draft_path}:\n  {old_line}\n  → tags: [{quoted}]")
 
 
 if __name__ == "__main__":

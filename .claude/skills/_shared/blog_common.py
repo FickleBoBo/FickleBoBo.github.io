@@ -1,22 +1,17 @@
 """
 스킬 스크립트들이 공유하는 레포 상수 + 순수 헬퍼. 스킬이 아니다(SKILL.md 없음) —
-`ps`/`sync`/`publish`/`review-code`/`contest` 스크립트가 `sys.path`로 이 디렉토리를
-끌어와 `from blog_common import ...`로 쓴다.
+각 스킬 스크립트가 `sys.path`로 이 디렉토리를 끌어와 `from blog_common import ...`로
+쓴다.
 
 여기엔 **어느 한 스킬의 도메인에도 안 속하는 것만** 둔다: 레포 경로 상수, PS 플랫폼
-접두사 맵, front matter 읽기, git 커밋 헬퍼. 스캐폴드 본문 생성·코드 블록 동기화·
-완료 판정처럼 한 스킬의 동작에 묶인 로직은 그 스킬에 남긴다(`sync`가 `ps`의
-`clean_code`를 쓰는 식의 도메인 재사용은 계속 스킬 간 직접 import).
-
-여기로 모은 이유(2026-10-02): `resolve_filename.py`(`ps`)에 공용 상수가, `sync_code.py`에
-front matter 파서가, `publish.py`에 git 헬퍼가 얹혀 있어 `contest → publish → sync → ps`
-식으로 스킬이 서로의 스크립트를 연쇄 import하고 있었다. 정의만 이 파일로 옮겼고 동작은
-그대로다. 기존 모듈(`resolve_filename`/`sync_code`/`publish`)도 이 이름들을 import해서
-들고 있어 옛 경로로 가져다 써도 깨지지 않는다.
+접두사 맵과 플랫폼 폴더 스캔, 파일명·YAML 문자열 이스케이프, front matter 읽기, PS 레포 폴더 역산,
+git 커밋 헬퍼. 스캐폴드 본문 생성, 코드 블록 동기화, 완료 판정처럼 한 스킬의 동작에
+묶인 로직은 그 스킬에 남긴다(`sync`가 `ps`의 `clean_code`를 쓰는 식의 도메인 재사용은
+계속 스킬 간 직접 import).
 
 코드를 고칠 때 알아야 할 것:
-- `PS_REPO`는 이 컴퓨터/사용자 전용으로 하드코딩된 유일한 값 — 다른 환경에서 쓰려면
-  여기만 고치면 된다. 나머지 경로는 전부 `__file__` 기준 상대경로.
+- 모든 경로는 `__file__` 기준 상대경로다. `PS_REPO`도 이 블로그 레포의 형제 디렉토리
+  `PS/`로 잡는다(다른 위치에 두려면 여기만 고친다).
 - `commit()`은 `git commit -- <pathspec>`으로 지정한 경로만 커밋한다(인덱스에 이미
   staged된 무관한 변경이 같이 실리는 걸 막기 위함) — `has_pending_changes()`는 커밋할
   실제 범위와 항상 같은 인자로 불러야 한다.
@@ -34,7 +29,7 @@ DRAFTS_DIR = os.path.join(REPO_ROOT, "_drafts")
 POSTS_DIR = os.path.join(REPO_ROOT, "_posts")
 
 # PS 레포(형제 디렉토리) 루트
-PS_REPO = "/Users/mwzz6/Desktop/github/PS"
+PS_REPO = os.path.abspath(os.path.join(REPO_ROOT, "..", "PS"))
 
 PLATFORM_MAP = {
     "prms": "Programmers",
@@ -44,7 +39,40 @@ PLATFORM_MAP = {
     "swea": "SWEA",
 }
 
+REVERSE_PLATFORM_MAP = {v.lower(): k for k, v in PLATFORM_MAP.items()}
+
+# `_drafts/`·`_posts/` 아래 PS 플랫폼 서브폴더 이름. 스킬의 스캔 범위는 이것으로 한정
+# 한다(PS가 아닌 폴더·양식의 포스트는 자동으로 범위 밖).
+PLATFORM_DIRS = sorted(REVERSE_PLATFORM_MAP)
+
 COMMIT_TRAILER = "Co-Authored-By: Claude <noreply@anthropic.com>"
+
+
+# 파일명 금지 문자 -> 육안 구별 어려운 유니코드 대체
+# 출처: laggner.info "Replacing Forbidden File System Characters with Unicode Alternatives"
+# 주의: 이 치환은 파일명에만 적용. front matter의 title은 원문 그대로 씀.
+FILENAME_ESCAPES = {
+    "/": "⁄",  # FRACTION SLASH
+    ":": "∶",  # RATIO
+    "?": "？",  # FULLWIDTH QUESTION MARK
+    "*": "⁎",  # LOW ASTERISK
+    '"': "＂",  # FULLWIDTH QUOTATION MARK
+    "<": "‹",  # SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+    ">": "›",  # SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+    "\\": "∖",  # SET MINUS
+    "|": "｜",  # FULLWIDTH VERTICAL LINE
+}
+
+
+def sanitize_filename(title):
+    for bad, good in FILENAME_ESCAPES.items():
+        title = title.replace(bad, good)
+    return title
+
+
+def yaml_dq(s):
+    """YAML 큰따옴표 문자열 안에 안전하게 넣기 위한 이스케이프."""
+    return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def front_matter_block(post_text):
@@ -90,6 +118,49 @@ def extract_title(text):
     if title is None:
         raise ValueError("front matter에 title이 없음")
     return title
+
+
+def resolve_source_folder(date, slug):
+    """포스트 front matter의 date/slug로 PS 레포 원본 폴더의 실제 경로를 역산하고
+    존재를 검증한다. 대소문자는 재구성한 이름을 믿지 않고 실제 디렉토리 엔트리명으로
+    교체한다 — macOS(APFS)가 대소문자를 구분 안 해 `os.path.isdir`가 틀린 대소문자도
+    통과시키는데 git은 구분해서, 어긋난 경로로 git을 돌리면 대상이 조용히 안 걸린다
+    (실사고: Codeforces #2148A에서 PS 레포 커밋이 스킵됐는데 publish는 성공 보고)."""
+    platform_lower, _, number = slug.partition("-")
+    prefix = REVERSE_PLATFORM_MAP.get(platform_lower)
+    if not prefix:
+        raise ValueError(f"slug의 플랫폼 부분을 못 알아봄: {slug}")
+
+    # slug는 항상 소문자라 Codeforces 인덱스 문자(예: 1553A)의 대문자 정보가 소실됨 —
+    # PS 레포 폴더명은 대문자를 쓰므로 여기서 복원. 다른 플랫폼은 번호가 숫자뿐이라 무해.
+    if prefix == "cofo":
+        number = number.upper()
+
+    day_dir = os.path.join(PS_REPO, date[:7], "src", f"day_{date[8:10]}")
+    folder_name = f"{prefix}_{number}"
+    folder = os.path.join(day_dir, folder_name)
+    if not os.path.isdir(folder):
+        raise ValueError(f"PS 레포에 해당 폴더가 없음(경로 재구성 결과): {folder}")
+    actual_name = next(
+        (e for e in os.listdir(day_dir) if e.lower() == folder_name.lower()), None
+    )
+    if actual_name is None:
+        raise ValueError(f"PS 레포에 해당 폴더가 없음(경로 재구성 결과): {folder}")
+    return os.path.join(day_dir, actual_name)
+
+
+def list_platform_posts(base_dir, platform=None):
+    """`base_dir/{platform}/*.md` 경로를 정렬해 반환. platform이 None이면
+    `PLATFORM_DIRS` 전체, 아니면 그 플랫폼 하나(소문자). 폴더가 없으면 건너뜀."""
+    paths = []
+    for platform_dir in [platform] if platform else PLATFORM_DIRS:
+        dir_path = os.path.join(base_dir, platform_dir)
+        if not os.path.isdir(dir_path):
+            continue
+        for fname in sorted(os.listdir(dir_path)):
+            if fname.endswith(".md"):
+                paths.append(os.path.join(dir_path, fname))
+    return paths
 
 
 def run_git(repo_dir, args):

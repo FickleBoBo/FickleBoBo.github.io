@@ -2,7 +2,7 @@
 title: "[LeetCode] #268 - Missing Number [Java][C++][Python]"
 date: 2026-09-13
 categories: [PS, LeetCode]
-tags: ["bit manipulation", "brute force", "math"]
+tags: ["bit manipulation", "math", "warm up"]
 slug: leetcode-268
 media_subpath: /assets/img/posts/leetcode-268/
 math: true

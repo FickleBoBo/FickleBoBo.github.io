@@ -297,8 +297,9 @@ boundary_notes:
     rule: >
       geometry는 좌표/도형에 대한 판정·계산(거리, 넓이, 방향, 삼각형 성립 판정, 겹침)이면 풀이가
       사소해도 붙이고 warm up은 뺀다. 격자 이동·2차원 배열 조작은 geometry가 아니다. pythagorean
-      theorem은 정수 해/빗변 정수성 판정이 풀이의 핵심일 때 geometry와 함께 붙이고, 거리 공식 대입
-      수준이면 geometry만.
+      theorem은 피타고라스 관계(두 점 사이 거리 공식·빗변 길이 계산·직각 판정 포함)가 풀이의 핵심
+      단계일 때 geometry와 함께 붙인다. 거리 공식도 피타고라스 정리를 좌표에 적용한 것이라 제외하지
+      않는다. 단 거리 계산이 다른 알고리즘의 부속 단계일 뿐 풀이의 주된 작업이 아니면 붙이지 않는다.
   - pair: [string, warm up]
     rule: >
       string은 math/implementation과 달리 "핵심 난이도" 바를 요구하지 않는 도메인 태그다 — 난이도 등급이

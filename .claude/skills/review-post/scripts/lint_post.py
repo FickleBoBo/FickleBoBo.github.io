@@ -3,25 +3,28 @@
 잡는 결정적 린터. LLM 판단 없음 — `review-post` 오케스트레이터가 서브에이전트
 dispatch 전에 돌려 결과를 리포트에 합친다.
 
-여기엔 **오탐이 거의 없는 규칙만** 둔다(발행본 전체에 돌려 확인). 맥락 판단이 필요한
+여기엔 **오탐이 적은 규칙만** 둔다(발행본 전체에 돌려 확인). 정규식이라 한계가 있다 —
+`수식 뒤 조사`는 지시어 "이"(`$N$ 이 값은`)를 오탐할 수 있고, 천 단위 콤마는 연도 표기
+(19xx·20xx)를 예외로 두므로 2000·2048 같은 값은 못 잡는다. 맥락 판단이 필요한
 것(평문·백틱·수식 선택, "왜"가 있는 아이디어, 코드-설명 정합성, 의존명사 띄어쓰기
 전반)은 계속 `STYLE.md` + 서브에이전트 몫이다. 이 린터가 조용하다고 해서 컨벤션이
 통과라는 뜻이 아니다 — 잡히는 것만 잡는다.
 
-검사 대상은 프로즈뿐이다. front matter, 펜스 코드 블록, 인라인 코드(백틱), 표 행,
-헤딩, 인용(`>`) 줄은 규칙별로 제외한다.
+검사 대상은 프로즈다. front matter, 펜스 코드 블록, 인라인 코드(백틱), 헤딩, 인용(`>`)
+줄은 제외하고, 표 행에는 수식 규칙(`MATH_RULES`)만 적용한다.
 
 사용법:
     python3 lint_post.py <포스트.md> [<포스트.md> ...]
-    python3 lint_post.py --all            # _drafts/ + _posts/ 전체
+    python3 lint_post.py --all            # _drafts/·_posts/의 {platform} 폴더 전체(PS 포스트만)
 
-출력: 이슈마다 `경로:줄: [규칙] 설명`. 이슈가 하나라도 있으면 종료 코드 1.
+출력: 이슈마다 `경로:줄: [규칙] 설명`. 종료 코드: 0 이슈 없음, 1 이슈 있음, 2 파일을 못 읽음.
 
 코드를 고칠 때 알아야 할 것:
 - 규칙을 추가하면 **먼저 `--all`로 발행본에 돌려** 오탐이 없는지 본다. 발행본의 진짜
   위반은 사용자 글이라 이 스크립트가 고치지 않고 리포트만 한다(`review-post`와 같은 원칙).
 - `### 풀이` 헤딩 형식 검사는 프로즈가 아니라 구조 검사라 `lint()`가 따로 부른다(`approach_issues`).
-- 태그 어휘는 `review-code/scripts/apply_tags.py`의 `load_tag_parents`를 그대로 쓴다.
+- 태그 어휘·정규 순서는 `review-code/scripts/apply_tags.py`의 `load_tag_parents`·`order_tags`를
+  그대로 쓴다(`tag_issues`). 태그 판정(어떤 태그가 맞는가)은 안 보고 형식·정합성만 검사한다.
 """
 
 import os
@@ -32,11 +35,8 @@ _SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."
 sys.path.insert(0, os.path.join(_SKILLS_DIR, "_shared"))
 sys.path.insert(0, os.path.join(_SKILLS_DIR, "review-code", "scripts"))
 
-from apply_tags import load_tag_parents
-from blog_common import DRAFTS_DIR, POSTS_DIR, front_matter_block
-
-# tags.yaml 어휘집엔 없지만 SQL 포스트가 관행적으로 쓰는 태그(문서화 안 된 관행)
-UNLISTED_OK = {"sql"}
+from apply_tags import expand_tags, load_tag_parents, order_tags
+from blog_common import DRAFTS_DIR, POSTS_DIR, front_matter_block, list_platform_posts
 
 # `### 풀이` 헤딩 형식(STYLE.md "다중 접근 — 접근 이름")
 _LANGS = r" (\[[^\]]+\])+"
@@ -50,6 +50,11 @@ FENCE_RE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE_RE = re.compile(r"(`+)(.+?)\1")
 MATH_RE = re.compile(r"\$([^$\n]+)\$")
 
+# 받침이 ㄴ·ㄹ인 음절(`될거`·`본거`의 `될`·`본`). `게`는 `길게` 같은 부사형이 있어 제외
+_NR_FINAL = "".join(
+    chr(c) for c in range(0xAC00, 0xD7A4) if (c - 0xAC00) % 28 in (4, 8)
+)
+
 # (규칙 이름, 정규식, 설명) — 프로즈(코드·수식 제거 후)에 적용
 PROSE_RULES = [
     (
@@ -57,7 +62,14 @@ PROSE_RULES = [
         re.compile(r"(합니다|입니다|습니다|됩니다|십시오)(?![가-힣])"),
         "합니다체 금지 — 다체(~이다/~한다)로",
     ),
-    ("해주다", re.compile(r"해\s?(주|줬|줘)"), "`해주다`/`해줬다` 계열 금지"),
+    (
+        "해주다",
+        re.compile(
+            r"해(?:주(?!어(?:진|지|졌))|줬|줘|준)"
+            r"|해\s(?:주(?:다|는|면|고|며|니|도|지|기|자|세|신|시|었|겠|어(?!진|지|졌)|(?![가-힣]))|줬|줘|준)"
+        ),
+        "`해주다`/`해줬다` 계열 금지",
+    ),
     (
         "오버플로우",
         re.compile(r"(오버|언더)플로(?!우)"),
@@ -69,10 +81,17 @@ PROSE_RULES = [
     ("어휘", re.compile(r"패널티|뭉탱이"), "`페널티`/`뭉텅이`로 표기"),
     (
         "의존명사",
-        re.compile(r"(?<=[는은])(게|거|걸)(?![가-힣])"),
+        re.compile(
+            rf"(?<=[는은])(게|거|걸)(?![가-힣])|(?<=[{_NR_FINAL}])(?:거(?=[다야죠라])|(거|걸)(?![가-힣]))"
+        ),
         "관형사형 어미 뒤 `것` 축약형은 띄운다(`하는게`→`하는 게`)",
     ),
 ]
+
+# 수식($...$) 뒤 조사·단위는 붙여 쓴다(`$N$ 이`→`$N$이`) — 수식을 남긴 채(인라인 코드만 제거) 적용
+MATH_PARTICLE_RE = re.compile(
+    r"\$ (의|와|과|에서|에|을|를|까지|로|으로|은|는|이|가|개|단|번|칸|명|라고|라는|이며|이므로|이라|이다|번째|킬로그램)(?![가-힣])"
+)
 
 # 수식($...$) 안에만 적용
 MATH_RULES = [
@@ -90,10 +109,14 @@ MATH_RULES = [
     ),
     (
         "연산자 공백",
-        re.compile(r"(?<![\\\w{^_])[A-Za-z0-9)]/[A-Za-z0-9(\\]"),
+        re.compile(r"(?<![\\{^_])[A-Za-z0-9)]/[A-Za-z0-9(\\]"),
         "나눗셈 `/` 양쪽에 공백(`N / 2`)",
     ),
 ]
+
+# 이항 `+` `-` 공백 — 위·아래첨자 안(`a_{n-1}`)과 `\text{}` 안은 붙여 쓰므로 먼저 지우고 검사
+SCRIPT_RE = re.compile(r"[_^]\{[^{}]*\}|\\text\{[^}]*\}")
+SIGN_RE = re.compile(r"[A-Za-z0-9)\]}][+\-][A-Za-z0-9(\\]")
 
 
 def strip_inline(line):
@@ -102,7 +125,7 @@ def strip_inline(line):
 
 
 def prose_lines(body_lines):
-    """(줄 번호, 프로즈 줄) 생성. 펜스 코드·표·헤딩·인용·Liquid 태그 줄 제외."""
+    """(줄 번호, 줄, 표 행 여부) 생성. 펜스 코드·헤딩·인용·Liquid 태그 줄 제외."""
     in_fence = False
     for no, line in body_lines:
         if FENCE_RE.match(line):
@@ -111,9 +134,9 @@ def prose_lines(body_lines):
         if in_fence:
             continue
         s = line.lstrip()
-        if not s or s[0] in "|#>" or s.startswith("{:") or s.startswith("<!--"):
+        if not s or s[0] in "#>" or s.startswith("{:") or s.startswith("<!--"):
             continue
-        yield no, line
+        yield no, line, s[0] == "|"
 
 
 def approach_issues(path, body, text):
@@ -168,7 +191,52 @@ def approach_issues(path, body, text):
     return issues
 
 
+def tag_issues(path, fm, text):
+    """front matter `tags:`의 형식·정합성. 어휘/조상 누락, 중복, 정규 순서, `sql` 단독·제목
+    일치, 단일 접근 `warm up` 병기, 발행본의 빈 태그."""
+    m = re.search(r"^tags:\s*\[(.*)\]\s*$", fm, re.MULTILINE)
+    if not m:
+        return []
+    issues = []
+    tags = [t.strip().strip('"') for t in m.group(1).split(",") if t.strip()]
+    if not tags:
+        if os.sep + "_posts" + os.sep in path:
+            issues.append((1, "태그", "발행본인데 태그가 비어 있음"))
+        return issues
+
+    parents = load_tag_parents()
+    unknown = [t for t in tags if t not in parents]
+    for t in unknown:
+        issues.append((1, "태그", f"어휘집에 없는 태그: {t!r}"))
+    for t in tags:
+        for p in parents.get(t, []):
+            if p not in tags:
+                issues.append((1, "태그", f"{t!r}의 조상 {p!r}가 빠짐"))
+    if len(set(tags)) != len(tags):
+        issues.append((1, "태그", "중복된 태그"))
+
+    title = re.search(r"^title:\s*(.*)$", fm, re.MULTILINE)
+    sql_only = bool(
+        title and re.search(r'(?<![\]\[])\[MySQL\]\s*"?\s*$', title.group(1))
+    )
+    if "sql" in tags and len(tags) > 1:
+        issues.append((1, "태그", "`sql`은 다른 태그와 병기하지 않음"))
+    elif ("sql" in tags) != sql_only:
+        issues.append((1, "태그", "`sql` 태그와 제목의 `[MySQL]` 단독 표기가 어긋남"))
+
+    if "warm up" in tags and len(tags) > 1:
+        if len(re.findall(r"^### 풀이", text, re.MULTILINE)) < 2:
+            issues.append((1, "태그", "단일 접근인데 `warm up`을 다른 태그와 병기함"))
+
+    if not unknown and len(set(tags)) == len(tags):
+        canonical = order_tags(expand_tags(tags, parents), parents)
+        if canonical != tags:
+            issues.append((1, "태그", f"태그 순서가 정규 순서와 다름 → {canonical}"))
+    return issues
+
+
 def lint(path):
+    path = os.path.abspath(path)
     with open(path, encoding="utf-8") as f:
         text = f.read()
     issues = []
@@ -183,71 +251,69 @@ def lint(path):
     # front matter
     if re.search(r"^description:", fm, re.MULTILINE):
         issues.append((1, "description", "폐기된 `description:` 필드 — 삭제"))
-    m = re.search(r"^tags:\s*\[(.*)\]\s*$", fm, re.MULTILINE)
-    # 대회 후기는 PS 태그 어휘를 안 쓰는 별도 장르
-    if m and f"{os.sep}contest{os.sep}" not in path:
-        tags = [t.strip().strip('"') for t in m.group(1).split(",") if t.strip()]
-        parents = load_tag_parents()
-        for t in tags:
-            if t in UNLISTED_OK:
-                continue
-            if t not in parents:
-                issues.append((1, "태그", f"어휘집에 없는 태그: {t!r}"))
-                continue
-            for p in parents[t]:
-                if p not in tags:
-                    issues.append((1, "태그", f"{t!r}의 조상 {p!r}가 빠짐"))
+    issues += tag_issues(path, fm, text)
 
     issues += approach_issues(path, body, text)
 
-    for no, line in prose_lines(body):
+    for no, line, is_table in prose_lines(body):
         plain = strip_inline(line)
         maths = [mm.group(1) for mm in MATH_RE.finditer(plain)]
         plain_no_math = MATH_RE.sub(lambda mm: " " * len(mm.group(0)), plain)
 
-        if "—" in plain_no_math:
-            issues.append(
-                (
-                    no,
-                    "em-dash",
-                    "문장 뒤 부연절 em-dash 금지 — 마침표로 끊어 다음 문장으로",
-                )
-            )
-        for name, pat, msg in PROSE_RULES:
-            if pat.search(plain_no_math):
-                issues.append((no, name, msg))
+        if not is_table:
+            issues += prose_issues(no, plain, plain_no_math)
         for expr in maths:
             for name, pat, msg in MATH_RULES:
                 if pat.search(expr):
                     issues.append((no, name, f"{msg}: ${expr}$"))
+            if SIGN_RE.search(SCRIPT_RE.sub("", expr)):
+                issues.append(
+                    (no, "연산자 공백", f"이항 `+` `-` 양쪽에 공백: ${expr}$")
+                )
 
     return issues
 
 
+def prose_issues(no, plain, plain_no_math):
+    issues = []
+    if "—" in plain_no_math:
+        issues.append(
+            (no, "em-dash", "문장 뒤 부연절 em-dash 금지 — 마침표로 끊어 다음 문장으로")
+        )
+    if MATH_PARTICLE_RE.search(plain):
+        issues.append(
+            (no, "수식 뒤 조사", "수식 뒤 조사·단위는 붙인다(`$N$ 이`→`$N$이`)")
+        )
+    for name, pat, msg in PROSE_RULES:
+        if pat.search(plain_no_math):
+            issues.append((no, name, msg))
+    return issues
+
+
 def collect_all():
-    paths = []
-    for root in (DRAFTS_DIR, POSTS_DIR):
-        for d, _, files in os.walk(root):
-            for f in files:
-                if f.endswith(".md"):
-                    paths.append(os.path.join(d, f))
-    return sorted(paths)
+    return list_platform_posts(DRAFTS_DIR) + list_platform_posts(POSTS_DIR)
 
 
 def main():
     args = sys.argv[1:]
     if not args:
         print(__doc__)
-        sys.exit(1)
+        sys.exit(2)
     paths = collect_all() if args == ["--all"] else args
 
-    total = 0
+    total = unreadable = 0
     for path in paths:
-        for no, rule, msg in sorted(lint(path)):
+        try:
+            found = sorted(lint(path))
+        except OSError as e:
+            print(f"{path}: 읽기 실패({e.strerror})")
+            unreadable += 1
+            continue
+        for no, rule, msg in found:
             print(f"{path}:{no}: [{rule}] {msg}")
             total += 1
     print(f"-- {len(paths)}개 파일, 이슈 {total}건", file=sys.stderr)
-    sys.exit(1 if total else 0)
+    sys.exit(2 if unreadable else 1 if total else 0)
 
 
 if __name__ == "__main__":

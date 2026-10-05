@@ -2,7 +2,7 @@
 title: "[LeetCode] #66 - Plus One [Java][C++][Python]"
 date: 2026-09-08
 categories: [PS, LeetCode]
-tags: ["math"]
+tags: ["implementation"]
 slug: leetcode-66
 media_subpath: /assets/img/posts/leetcode-66/
 math: true

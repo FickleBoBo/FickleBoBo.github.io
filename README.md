@@ -9,7 +9,7 @@
 
 ## 구성
 
-- **PS**: Programmers, LeetCode, Codeforces 문제 풀이. 아이디어, 복잡도, 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다.
+- **PS**: Programmers, LeetCode, Codeforces, BaekJoon 문제 풀이. 아이디어, 복잡도, 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다.
 - **Contest**: Codeforces 대회 후기. 성적·순위·레이팅 변동과 문제별 풀이를 담는다.
 
 ## PS 자동화 파이프라인
@@ -24,20 +24,21 @@ ps → sync → review-code → (태그 확정) → sync → review-post → pub
 | ------------- | --------------------------------------------------------------------------------------- |
 | `ps`          | PS 레포 풀이 폴더 → 포스트 스캐폴드(파일명, front matter, 코드 섹션) 생성               |
 | `sync`        | PS 레포 코드 변경을 포스트 코드 블록에 재동기화. `--posts`로 발행본 전체도 점검         |
-| `review-code` | 포스트에 임베드된 코드를 정확성·최선 접근·컨벤션 기준으로 리뷰하고 태그 후보 제안       |
+| `review-code` | 포스트에 임베드된 코드를 정확성·최선 접근 기준으로 리뷰하고 태그 후보 제안              |
 | `review-post` | 포스트 완성도(설명·복잡도·컨벤션)를 리뷰하고 빈 필드를 채움. 기계 검증은 `lint_post.py` |
-| `publish`     | 완료된 드래프트를 `_posts/`로 옮기고 블로그·PS 레포 양쪽에 커밋                         |
+| `publish`     | 완료 게이트를 통과한 드래프트 하나를 `_posts/`로 옮기고 블로그·PS 레포 양쪽에 커밋      |
 | `contest`     | 대회 후기(별도 장르)의 스캐폴드 생성과 발행. 위 파이프라인 밖에서 동작                  |
 
-스킬이 공유하는 경로 상수·front matter 파서·커밋 헬퍼는 `.claude/skills/_shared/blog_common.py`에 있다. 포스트 문체와 표기 규칙의 정본은 [`STYLE.md`](.claude/skills/review-post/STYLE.md), 태그 어휘의 정본은 [`tags.yaml`](.claude/skills/review-code/tags.yaml)이다. 각 스킬의 동작은 해당 `SKILL.md`에 자기완결적으로 적혀 있다.
+스킬이 공유하는 경로 상수·front matter 파서·커밋 헬퍼·문제 원문 조회·청크 분할은 `.claude/skills/_shared/`에 있다. 포스트 문체와 표기 규칙의 정본은 [`STYLE.md`](.claude/skills/review-post/STYLE.md), 태그 어휘의 정본은 [`tags.yaml`](.claude/skills/review-code/tags.yaml)이다. 각 스킬의 동작은 해당 `SKILL.md`에 자기완결적으로 적혀 있다.
 
 ## 저장소 구조
 
 ```text
-_posts/          발행된 포스트 (programmers, leetcode, codeforces, contest)
+_posts/          발행된 포스트 (programmers, leetcode, codeforces, baekjoon, contest)
 _drafts/         작성 중인 포스트
 _tabs/           About, Archives, Categories, Tags 페이지
 .claude/skills/  PS 자동화 스킬과 스크립트
+.claude/agents/  리뷰 서브에이전트 정의 (code-reviewer, post-reviewer)
 CLAUDE.md        Claude Code 작업 지침 (워크플로우, 커밋 규칙)
 ```
 

@@ -88,9 +88,14 @@ PROSE_RULES = [
     ),
 ]
 
-# 수식($...$) 뒤 조사·단위는 붙여 쓴다(`$N$ 이`→`$N$이`) — 수식을 남긴 채(인라인 코드만 제거) 적용
+# 수식($...$) 뒤 조사·단위는 붙여 쓴다(`$N$ 이`→`$N$이`) — 수식을 남긴 채(인라인 코드만 제거) 적용.
+# 조사는 뒤에 한글이 이어지면 다른 단어(`이`+`미지`)일 수 있어 단독일 때만, 단위는 `개의`·`개라서`·
+# `층짜리`처럼 조사·접미가 붙은 꼴까지 잡는다(`단계`·`번호`·`분포`는 단위가 아니라 제외)
+_MATH_PARTICLES = r"의|와|과|에서|에|을|를|까지|부터|보다|마다|로|으로|은|는|이|가|라고|라는|이며|이므로|이라|이다|이고|일|인"
+_MATH_UNITS = r"개|명|층|칸|번|단|배|회"
 MATH_PARTICLE_RE = re.compile(
-    r"\$ (의|와|과|에서|에|을|를|까지|로|으로|은|는|이|가|개|단|번|칸|명|라고|라는|이며|이므로|이라|이다|번째|킬로그램)(?![가-힣])"
+    rf"\$ (?:(?:{_MATH_PARTICLES}|킬로그램|번째)(?![가-힣])"
+    rf"|(?:{_MATH_UNITS})(?=(?:의|라서|로|가|를|은|는|이|짜리|째|씩)|(?![가-힣])))"
 )
 
 # 수식($...$) 안에만 적용
@@ -106,6 +111,11 @@ MATH_RULES = [
         "천 단위 콤마",
         re.compile(r"(?<![\d{},.^_])(?!(?:19|20)\d\d(?!\d))\d{4,}(?![\d}])"),
         "1,000 이상 숫자는 `{,}`로 콤마(`10{,}000`)",
+    ),
+    (
+        "천 단위 콤마",
+        re.compile(r"(?<![\d{},.^_])\d{1,3}(?:,\d{3})+(?!\d)"),
+        "1,000 이상 숫자는 `{,}`로 콤마(`10{,}000`) — 평문 콤마 `10,000`은 KaTeX가 여백을 넣는다",
     ),
     (
         "연산자 공백",
@@ -235,6 +245,85 @@ def tag_issues(path, fm, text):
     return issues
 
 
+# 복잡도 변수 설명 줄에서 서술형 명사 + 코드 변수(`수의 개수 `n``)는 쓰지 않는다 — ``입력값 `n` ``.
+# 대상 표기는 STYLE.md "변수 설명 프로즈 포맷"의 고정 표를 따른다
+VAR_NOUN_RE = re.compile(
+    r"\$[A-Z]\$ = (?!입력값 )[가-힣][가-힣 ]* `[A-Za-z_]\w*`(?=[,.)])"
+)
+VAR_T_INPUT_RE = re.compile(r"\$T\$ = 입력값")
+
+
+def _cell_vars(expr):
+    """복잡도 셀 수식에서 변수 문자(대문자). `O(`의 O와 `\\log` 같은 명령은 제외."""
+    expr = re.sub(r"\\[A-Za-z]+", "", expr).replace("O(", "(")
+    return set(re.findall(r"[A-Z]", expr))
+
+
+def complexity_issues(body):
+    """`## 2. 복잡도` 절의 일관성 검사: 표에 쓴 변수가 변수 설명 줄에 정의돼 있는지, 대상 표기가
+    고정 포맷인지, 출력 버퍼 주석이 없는지. 정의만 하고 표에 안 쓴 변수는 안 본다(언어별 소수파
+    주석·설명 문장 속 변수 같은 정당한 경우가 있다)."""
+    sec, on = [], False
+    for no, line in body:
+        if line.startswith("## 2. 복잡도"):
+            on = True
+            continue
+        if on and (line.startswith("## ") or line.strip() == "---"):
+            break
+        if on:
+            sec.append((no, line))
+    if not sec:
+        return []
+
+    issues = []
+    used, defined, first_row = set(), set(), None
+    for no, line in sec:
+        s = line.strip()
+        if "StringBuilder" in s or "출력 버퍼" in s:
+            issues.append(
+                (
+                    no,
+                    "복잡도 출력 버퍼",
+                    "출력 버퍼는 공간에 세지 않는다 — `StringBuilder` 주석 삭제",
+                )
+            )
+        if s.startswith("|"):
+            cells = [c.strip() for c in s.strip("|").split("|")]
+            if cells[0] == "접근" or set(s) <= set("|-: "):
+                continue
+            first_row = first_row or no
+            for c in cells[1:]:
+                for expr in MATH_RE.findall(c):
+                    used |= _cell_vars(expr)
+        elif s.startswith("("):
+            defined |= set(re.findall(r"\$([A-Z])\$ =", s))
+            if VAR_NOUN_RE.search(s):
+                issues.append(
+                    (
+                        no,
+                        "복잡도 변수 표기",
+                        "입력 스칼라는 ``입력값 `n` ``으로 쓴다(서술형 명사 + 코드 변수 금지)",
+                    )
+                )
+            if VAR_T_INPUT_RE.search(s):
+                issues.append(
+                    (
+                        no,
+                        "복잡도 변수 표기",
+                        "`$T$`는 `테스트 케이스 수`로 쓴다(`입력값 `t`` 금지)",
+                    )
+                )
+    for v in sorted(used - defined):
+        issues.append(
+            (
+                first_row or sec[0][0],
+                "복잡도 변수 설명",
+                f"표에 쓴 `${v}$`의 정의가 표 아래 변수 설명에 없음",
+            )
+        )
+    return issues
+
+
 def lint(path):
     path = os.path.abspath(path)
     with open(path, encoding="utf-8") as f:
@@ -254,6 +343,7 @@ def lint(path):
     issues += tag_issues(path, fm, text)
 
     issues += approach_issues(path, body, text)
+    issues += complexity_issues(body)
 
     for no, line, is_table in prose_lines(body):
         plain = strip_inline(line)

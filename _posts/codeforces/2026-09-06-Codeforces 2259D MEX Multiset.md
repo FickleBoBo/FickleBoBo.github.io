@@ -2,7 +2,7 @@
 title: "[Codeforces] #2259D - MEX Multiset [C++]"
 date: 2026-09-06
 categories: [PS, Codeforces]
-tags: ["constructive", "greedy"]
+tags: ["ad hoc", "constructive"]
 slug: codeforces-2259d
 media_subpath: /assets/img/posts/codeforces-2259d/
 math: true

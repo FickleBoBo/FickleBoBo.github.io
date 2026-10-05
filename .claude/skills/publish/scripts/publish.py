@@ -1,31 +1,20 @@
 """
-_drafts/{platform}/의 "발행 준비 완료"된 PS 포스트를 _posts/{platform}/로 옮기고,
-이 블로그 레포 + PS 레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함 — 로컬
-커밋까지만, 실제 배포는 사람이 직접. `ps`/`sync`와 마찬가지로 완전 결정론적,
-LLM 판단 없음.
+`_drafts/{platform}/`의 PS 포스트 하나를 `_posts/{platform}/`로 옮기고 블로그 레포 + PS
+레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함. 완전 결정론적, LLM 판단 없음.
+여러 개를 발행하려면 포스트마다 한 번씩 실행한다.
 
-**"발행 준비 완료"의 정확한 판정 기준, 커밋 메시지 포맷, git add 범위 등 설계
-이유는 전부 `publish/SKILL.md`에 문서화돼있음 — 여기서 다시 설명 안 함.**
+발행 준비 판정 기준·커밋 메시지·실패 처리는 `publish/SKILL.md`에 있다 — 여기서 반복 안 함.
 
-코드를 고칠 때 알아야 할 것 (SKILL.md에 없는, 이 파일 안에서만 유효한 정보):
-- 레포 상수·front matter 파서·git 커밋 헬퍼는 `_shared/blog_common.py`에서, 완료
-  판정에 쓰는 섹션 헤딩·SQL 전용 상수는 `ps`(`resolve_filename.py`)에서, PS 레포 폴더
-  역산(`resolve_source_folder`)은 `sync`(`sync_code.py`)에서 그대로 import해서 씀 —
-  front matter 파싱 규칙이나 PS 레포 경로 재구성 로직이 스킬 사이에서 갈라지면
-  안 되기 때문.
-- PS 레포 폴더 검증(`resolve_source_folder`)을 항상 블로그 레포를 건드리기
-  *전에* 먼저 함(`publish_one` 맨 앞) — 실패 시 아무 상태도 안 남기고 깨끗하게
-  에러 보고하기 위함. 이 순서를 바꾸면(먼저 옮기고 나중에 검증) 실패했을 때
-  파일만 옮겨진 애매한 상태가 남음.
-- `os.rename` 이후부터는 자동 롤백 없음 — 이유·각 실패 케이스별 대응은
-  `SKILL.md`의 "실패 처리" 참고.
+코드를 고칠 때 알아야 할 것 (SKILL.md에 없는 정보):
+- 레포 상수·front matter 파서·git 헬퍼·PS 폴더 역산(`resolve_source_folder`)은
+  `_shared/blog_common.py`, 완료 판정에 쓰는 섹션 헤딩·SQL 전용 상수는 `ps/scripts/ps_source.py`에서 import.
+- PS 레포 폴더 검증(`resolve_source_folder`)은 항상 블로그 레포를 건드리기 *전에* 한다 —
+  실패 시 아무 상태도 안 남기려는 것. 순서를 바꾸면 파일만 옮겨진 애매한 상태가 남는다.
+- `os.rename` 이후엔 자동 롤백이 없다(이유·케이스별 대응은 SKILL.md "실패 처리").
 
 사용법:
-    python3 publish.py [경로 ...]
-        경로를 안 주면 _drafts/{platform}/(platform ∈ PLATFORM_MAP) 전체를 스캔해서
-        완료된 것만 각각 독립적으로 발행(전체 배치). 하나 이상 주면 그 드래프트들만
-        대상으로 함(사용자가 특정 포스트를 지목했을 때) — 이 경우에도 "완료 판정"은
-        똑같이 적용됨(지정했다고 미완료 드래프트를 강제로 발행하지 않음).
+    python3 publish.py <_drafts/{platform}/ 아래 드래프트 .md 경로>
+종료 코드: 발행하면 0, 미완료·에러면 1, 인자 오류면 2.
 """
 
 import os
@@ -35,30 +24,25 @@ import sys
 _SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "_shared")))
 sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "ps", "scripts")))
-sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "sync", "scripts")))
 
 from blog_common import (
     DRAFTS_DIR,
-    PLATFORM_MAP,
+    PLATFORM_DIRS,
     POSTS_DIR,
     PS_REPO,
     REPO_ROOT,
     commit,
     extract_title,
+    front_matter_block,
     has_pending_changes,
     read_front_matter,
+    resolve_source_folder,
 )
-from resolve_filename import (
-    COMPLEXITY_HEADING,
-    IDEA_HEADING,
-    SQL_ONLY_LANGUAGES,
-)
-from sync_code import resolve_source_folder
+from ps_source import COMPLEXITY_HEADING, IDEA_HEADING, SQL_ONLY_LANGUAGES
 
 
 def _section_body(text, heading):
-    """`{heading}`("## " 포함한 전체 헤딩 문자열) 다음부터 다음 `## ` 헤딩 전까지의
-    본문 텍스트. 헤딩이 없으면 None."""
+    """`heading`("## " 포함 전체 헤딩) 다음부터 다음 `## ` 헤딩 전까지의 본문. 없으면 None."""
     m = re.search(
         rf"^{re.escape(heading)}\s*\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
     )
@@ -66,10 +50,8 @@ def _section_body(text, heading):
 
 
 def section_is_filled(text, heading):
-    """`{heading}`(예: `## 1. 아이디어`) 섹션 본문에 HTML 주석/구분선(---)을 뺀 실제
-    텍스트가 있는지. ps 스킬이 생성한 스캐폴드는 이 heading이 항상 존재한다는 전제
-    (핵심 섹션이라 사람이 통째로 안 지움) — 없으면 스켈레톤이 훼손된 것으로 보고
-    미완료 취급."""
+    """섹션 본문에 HTML 주석·구분선(---)을 뺀 실제 텍스트가 있는지. 헤딩이 없으면 스켈레톤이
+    훼손된 것으로 보고 미완료."""
     body = _section_body(text, heading)
     if body is None:
         return False
@@ -79,28 +61,22 @@ def section_is_filled(text, heading):
 
 
 def is_sql_only_title(title):
-    """title 끝의 연속된 언어 브래킷이 `SQL_ONLY_LANGUAGES`(ps 스킬,
-    resolve_filename.py)와 정확히 일치하는지 — SQL 전용 포스트 판정. `## 2. 복잡도`
-    헤딩 부재 자체로 판정하지 않는 이유는 `SKILL.md`의 "완료 판정" 참고.
-    is_ready(text)는 raw 텍스트만 받아 by_language 딕셔너리가 없어서 title의
-    언어 브래킷을 정규식으로 뽑아 값만 SQL_ONLY_LANGUAGES와 대조함(값은 단일
-    소스, 추출 로직만 여기 별도)."""
+    """title 끝의 언어 브래킷 집합이 `SQL_ONLY_LANGUAGES`와 같은지. `## 2. 복잡도` 헤딩
+    부재로 판정하지 않는 이유는 SKILL.md "완료 판정" 참고."""
     m = re.search(r"((?:\[[^\[\]]*\])+)\s*$", title)
     if not m:
         return False
-    langs = set(re.findall(r"\[([^\[\]]*)\]", m.group(1)))
-    return langs == SQL_ONLY_LANGUAGES
+    return set(re.findall(r"\[([^\[\]]*)\]", m.group(1))) == SQL_ONLY_LANGUAGES
 
 
 def complexity_table_filled(text):
-    """`## 2. 복잡도` 표의 모든 데이터 행(헤더/구분줄 제외)에서 시간·공간 셀이 둘 다
-    채워졌는지. 행 개수 자체는 검사 안 함(ps가 이미 접근법 수만큼 정확히 만들어둠) —
-    있는 행이 다 채워졌는지만 봄."""
+    """`## 2. 복잡도` 표의 모든 데이터 행에서 시간·공간 셀이 둘 다 채워졌는지(행 수는
+    검사 안 함 — `ps`가 접근법 수만큼 만든다)."""
     body = _section_body(text, COMPLEXITY_HEADING)
     if body is None:
         return False
     rows = [line.strip() for line in body.splitlines() if line.strip().startswith("|")]
-    data_rows = rows[2:]  # 헤더 행 + `|---|---|---|` 구분 행 제외
+    data_rows = rows[2:]  # 헤더 행 + 구분 행 제외
     if not data_rows:
         return False
     for row in data_rows:
@@ -110,87 +86,57 @@ def complexity_table_filled(text):
     return True
 
 
-def is_ready(text):
-    """드래프트 하나가 "발행 준비 완료"인지 (bool, 미완료 사유) 반환. 판정 기준
-    자체의 설계 이유는 SKILL.md 참고 — 여기선 각 검사만 순서대로 호출."""
+def front_matter_value(text, key):
+    m = re.search(rf"^{key}:\s*(.*)$", front_matter_block(text), re.MULTILINE)
+    return m.group(1).strip() if m else None
+
+
+def not_ready_reason(text, platform_dir):
+    """발행 준비가 안 됐으면 사유 문자열, 됐으면 None."""
+    m = re.match(
+        r"\[\s*PS\s*,\s*([^\],\s]+)\s*\]$", front_matter_value(text, "categories") or ""
+    )
+    if not m or m.group(1).lower() != platform_dir:
+        return (
+            f"categories({front_matter_value(text, 'categories')})가 폴더({platform_dir})와 "
+            "안 맞음 — 올바른 _drafts/{platform}/로 옮긴 뒤 발행"
+        )
+    if not re.fullmatch(r"\[\s*\S.*\]", front_matter_value(text, "tags") or ""):
+        return "tags가 비어 있음"
     if not section_is_filled(text, IDEA_HEADING):
-        return False, "'1. 아이디어' 섹션이 비어있음"
-    # SQL 전용 포스트는 ps 스킬이 복잡도 섹션 자체를 안 만듦(2026-09-22 확정) —
-    # 아래 검사를 건너뜀.
+        return "'1. 아이디어' 섹션이 비어 있음"
     if not is_sql_only_title(extract_title(text)) and not complexity_table_filled(text):
-        return False, "'2. 복잡도' 표가 안 채워짐"
-    return True, None
+        return "'2. 복잡도' 표가 안 채워짐"
+    return None
 
 
-def discover_ready_drafts(explicit_paths=None):
-    """explicit_paths가 없으면 _drafts/{platform}/*.md(platform ∈ PLATFORM_MAP)
-    전체를 훑고(전체 배치), 있으면 그 경로들만 후보로 씀(사용자가 특정 포스트를
-    지목한 모드) — 둘 다 완료 판정 로직은 동일하게 적용. 후보 중 완료 판정된 것만
-    (경로, platform_dir, 파일명) 리스트로, 미완료·못 찾음·경로가 이상함은 전부
-    (경로, 사유) 리스트로 반환. PLATFORM_MAP에 없는 서브폴더나 _drafts/ 바로 밑
-    파일은 애초에 안 봄(전체 배치 모드) — 블로그에 PS 아닌 드래프트가 생겨도 안
-    건드리기 위한 스코핑."""
-    valid_platforms = {v.lower() for v in PLATFORM_MAP.values()}
-    candidates, not_ready = [], []
+def publish_post(draft_path):
+    """드래프트 하나를 검증하고 발행한다. 미완료면 아무것도 안 건드리고 ValueError."""
+    draft_path = os.path.abspath(draft_path)
+    platform_dir = os.path.basename(os.path.dirname(draft_path))
+    if not os.path.isfile(draft_path):
+        raise ValueError("파일을 찾을 수 없음")
+    if platform_dir not in PLATFORM_DIRS or os.path.dirname(draft_path) != os.path.join(
+        DRAFTS_DIR, platform_dir
+    ):
+        raise ValueError("_drafts/{platform}/ 아래 있는 드래프트가 아님")
 
-    if explicit_paths:
-        for path in explicit_paths:
-            # 사용자가 상대경로를 넘길 수도 있어서, DRAFTS_DIR(절대경로)과 비교하기
-            # 전에 항상 절대경로로 정규화함 — 안 그러면 진짜 드래프트도 "경로가
-            # 이상함"으로 오판됨(실제로 겪은 버그).
-            abs_path = os.path.abspath(path)
-            platform_dir = os.path.basename(os.path.dirname(abs_path))
-            if not os.path.isfile(abs_path):
-                not_ready.append((path, "파일을 찾을 수 없음"))
-            elif platform_dir not in valid_platforms or os.path.dirname(
-                abs_path
-            ) != os.path.join(DRAFTS_DIR, platform_dir):
-                not_ready.append(
-                    (path, "_drafts/{platform}/ 아래 있는 드래프트가 아님")
-                )
-            else:
-                candidates.append((abs_path, platform_dir, os.path.basename(abs_path)))
-    else:
-        for platform_dir in sorted(valid_platforms):
-            dir_path = os.path.join(DRAFTS_DIR, platform_dir)
-            if not os.path.isdir(dir_path):
-                continue
-            for fname in sorted(os.listdir(dir_path)):
-                if fname.endswith(".md"):
-                    candidates.append(
-                        (os.path.join(dir_path, fname), platform_dir, fname)
-                    )
-
-    ready = []
-    for path, platform_dir, fname in candidates:
-        with open(path, encoding="utf-8") as f:
-            text = f.read()
-        ok, reason = is_ready(text)
-        if ok:
-            ready.append((path, platform_dir, fname))
-        else:
-            not_ready.append((path, reason))
-    return ready, not_ready
-
-
-def publish_one(draft_path, platform_dir, fname):
-    """드래프트 하나를 _posts로 옮기고 블로그 레포 + PS 레포에 각각 커밋. (옮긴
-    최종 경로, 블로그 실제 커밋 여부, PS 레포 실제 커밋 여부)를 반환. 실패하면
-    어디까지 진행됐는지 담긴 예외를 그대로 던짐(호출자가 그대로 보고)."""
     with open(draft_path, encoding="utf-8") as f:
         text = f.read()
+    reason = not_ready_reason(text, platform_dir)
+    if reason:
+        raise ValueError(f"미완료 — {reason}")
 
     date, slug = read_front_matter(text)
     title = extract_title(text)
 
-    # 블로그 레포를 건드리기 전에 PS 레포 폴더 존재부터 검증 — 여기서 실패하면
-    # 아무것도 안 건드린 깨끗한 상태로 에러 보고 가능.
+    # 블로그 레포를 건드리기 전에 PS 폴더 존재부터 검증.
     source_folder = resolve_source_folder(date, slug)
 
     posts_platform_dir = os.path.join(POSTS_DIR, platform_dir)
-    target_path = os.path.join(posts_platform_dir, fname)
+    target_path = os.path.join(posts_platform_dir, os.path.basename(draft_path))
     if os.path.exists(target_path):
-        raise FileExistsError(f"_posts에 이미 같은 이름의 파일이 있음: {target_path}")
+        raise ValueError(f"_posts에 이미 같은 이름의 파일이 있음: {target_path}")
 
     os.makedirs(posts_platform_dir, exist_ok=True)
     os.rename(draft_path, target_path)  # 이 시점부턴 실패해도 파일은 이미 옮겨진 상태
@@ -218,35 +164,23 @@ def publish_one(draft_path, platform_dir, fname):
             f"— PS 레포({source_folder})는 직접 확인 필요"
         )
 
-    return target_path, blog_committed, ps_committed
-
-
-def run_batch(explicit_paths=None):
-    ready, not_ready = discover_ready_drafts(explicit_paths)
-
-    published, errors = [], []
-    for draft_path, platform_dir, fname in ready:
-        try:
-            published.append(publish_one(draft_path, platform_dir, fname))
-        except Exception as e:
-            errors.append((draft_path, str(e)))
-
-    for target_path, blog_committed, ps_committed in published:
-        blog_note = "블로그 커밋함" if blog_committed else "블로그 이미 커밋된 상태"
-        ps_note = "PS 레포 커밋함" if ps_committed else "PS 레포 이미 커밋된 상태"
-        print(f"발행함: {target_path} — {blog_note}, {ps_note}")
-    for draft_path, msg in errors:
-        print(f"에러({draft_path}): {msg}")
-    for draft_path, reason in not_ready:
-        print(f"미완료라 스킵: {draft_path} — {reason}")
-    print(
-        f"--- 총 {len(published)}개 발행, {len(not_ready)}개는 미완료라 스킵, "
-        f"{len(errors)}개 에러 ---"
-    )
+    blog_note = "블로그 커밋함" if blog_committed else "블로그 이미 커밋된 상태"
+    ps_note = "PS 레포 커밋함" if ps_committed else "PS 레포 이미 커밋된 상태"
+    return f"발행함: {target_path} — {blog_note}, {ps_note}"
 
 
 def main():
-    run_batch(sys.argv[1:] or None)
+    if len(sys.argv) != 2:
+        print(
+            "사용법: python3 publish.py <드래프트 .md 경로> (한 번에 하나)",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    try:
+        print(publish_post(sys.argv[1]))
+    except Exception as e:
+        print(f"에러({sys.argv[1]}): {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

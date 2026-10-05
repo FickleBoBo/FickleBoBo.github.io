@@ -2,7 +2,7 @@
 title: "[Codeforces] #2260B - Monocarp and Projects [C++]"
 date: 2026-09-09
 categories: [PS, Codeforces]
-tags: ["brute force", "math", "number theory"]
+tags: ["math", "number theory"]
 slug: codeforces-2260b
 media_subpath: /assets/img/posts/codeforces-2260b/
 math: true

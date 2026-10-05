@@ -5,46 +5,26 @@ description: 이미 존재하는 블로그 포스트의 코드 블록을 PS 레�
 
 # sync — 포스트 코드 블록 재동기화
 
-`ps` 스킬의 본문 스켈레톤 구조(코드 블록 포맷 등)가 바뀌면 여기 코드 블록 탐지 로직도 같이 손봐야 함. 상세 설계 근거는 `scripts/sync_code.py` 주석 참고.
+`ps` 스킬의 본문 스켈레톤 구조(코드 블록 포맷 등)가 바뀌면 여기 코드 블록 탐지 로직도 같이 손봐야 함.
 
 ## 실행
 
-무인자 배치가 기본 사용 패턴 — 사용자는 항상 이렇게 부른다("`sync` 돌려줘" = `_drafts/{platform}/` 포스트 전체를 PS 레포와 싱크). 인자 버전은 Claude가 특정 포스트만 선별할 때, 또는 배치 스코프(`_drafts/`) 밖의 발행분을 다시 싱크할 때.
-
-**배치(인자 없이, 기본):**
-
 ```
-python3 <이 스킬의 base directory>/scripts/sync_code.py
+python3 <이 스킬의 base directory>/scripts/sync_code.py [platform]            # 드래프트(기본)
+python3 <이 스킬의 base directory>/scripts/sync_code.py --posts [platform]    # 발행분
+python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 절대경로>   # 하나만
 ```
 
-`_drafts/{platform}/`(platform ∈ 지원 플랫폼) 아래 포스트(.md)를 전부 스캔해서 PS 레포 최신 코드로 동기화함 — `_drafts/` 바로 밑이나 PS 아닌 서브폴더는 안 봄(`publish`와 동일한 스코핑). 포스트 하나가 실패해도(PS 레포에 대응 폴더가 없는 등) 그 포스트만 에러로 보고하고 나머지는 계속 처리함(`ps`의 배치 모드와 동일한 fail-soft 방침).
-
-**발행분 전체(`--posts`):**
-
-```
-python3 <이 스킬의 base directory>/scripts/sync_code.py --posts
-```
-
-`_posts/{platform}/` 아래 발행 포스트를 전부 스캔함(`_posts/contest/`는 PS 파이프라인 밖이라 안 봄). 출력·fail-soft·총계 형식은 기본 배치와 같고 총계 줄만 `총 N개 발행 중 ...`. 갱신된 게 있으면 `fix: [Platform] #번호 - ...` 손수정 커밋 대상이므로 diff를 확인한 뒤 커밋.
-
-**특정 포스트 하나만:**
-
-```
-python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 파일 절대경로>
-```
-
-예: `python3 .claude/skills/sync/scripts/sync_code.py "_posts/programmers/2026-08-22-Programmers 42898 등굣길.md"`
-
-배치에서 에러/수동확인이 뜬 포스트 하나만 다시 볼 때도 씀. 배치와 달리 실패하면 즉시 예외를 그대로 띄운다(콕 집어 지정했으니 조용히 안 넘어감).
+- **기본**: "`sync` 돌려줘" = `_drafts/{platform}/` 아래 포스트(.md) 전체를 PS 레포와 싱크. `platform`(`programmers`/`leetcode`/`baekjoon`/`codeforces`/`swea`, 소문자)을 주면 그 폴더만. 스캔 범위는 `_shared/blog_common.py`의 `PLATFORM_DIRS` 폴더로 한정돼서 `_drafts/contest/`나 `_drafts/` 바로 밑, 그 밖의 폴더·양식 포스트는 안 봄(`--posts`의 `_posts/contest/` 등도 동일).
+- **`--posts`**: `_posts/{platform}/`의 발행 포스트. 플랫폼 지정은 기본과 같다. 출력 형식도 같고 총계 줄만 `총 N개 발행 중 ...`. 갱신된 게 있으면 `fix: [Platform] #번호 - ...` 손수정 커밋 대상이므로 diff를 확인한 뒤 커밋.
+- **하나만**: 드래프트·발행분 어느 쪽이든 경로로 지정. Claude가 특정 포스트만 선별할 때, 또는 배치에서 에러/수동확인이 뜬 포스트를 다시 볼 때. 예: `python3 .claude/skills/sync/scripts/sync_code.py "_posts/programmers/2026-08-22-Programmers 42898 등굣길.md"`
 
 ## 동작 방식
 
 1. 포스트 front matter의 `date`/`slug`만으로 PS 레포 원본 폴더 경로를 재구성함(파일명이 바뀌어도 영향 없음).
-2. 그 폴더를 다시 스캔해서 현재 소스 파일들을 읽고 `ps`의 `clean_code.py`로 동일하게 정리.
+2. 그 폴더를 다시 스캔해서 현재 소스 파일들을 읽고 `ps`의 `clean_code.py`/`ps_source.py`를 그대로 불러써서 동일하게 정리함(변환 로직이 두 스킬에 중복되지 않게 함. 경로 상수는 `_shared/blog_common.py`).
 3. 파일명 끝자리 숫자로 접근법 번호를 뽑고, 포스트에서 그 번호에 해당하는 `### 풀이`/`### 풀이 N` 헤딩 구간 안의 fenced code block을 찾아 내용이 다르면 교체. 헤딩은 번호만 보고 매칭하므로 뒤에 붙은 접미어(`### 풀이 2: DP`, `[Java][C++]` 등)나 헤딩 아래 프로즈는 그대로 둔 채 fence 내용만 교체함. **코드 블록이 자기 접근법 헤딩 구간 밖으로 옮겨지면 못 찾음**(조용히 엉뚱한 곳에 덮어쓰지 않고 에러로 보고).
 4. 실제로 바뀐 파일이 있을 때만 포스트를 다시 씀.
-
-`ps`의 `clean_code.py`/`resolve_filename.py`를 그대로 불러써서 "PS 레포 코드 → 블로그용 코드" 변환 로직이 두 스킬에 중복되지 않게 함(배치 모드의 `_drafts/` 경로도 `resolve_filename`의 `DRAFTS_DIR`을 그대로 가져다 씀).
 
 ## 출력
 
@@ -63,5 +43,5 @@ python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 파�
 ## 규칙
 
 - PS 레포 원본 파일은 절대 건드리지 않음(읽기 전용)
-- 실패 처리: 단일 모드는 예외를 그대로 보고, 배치 모드는 그 포스트만 에러로 보고하고 계속 진행 — 임의 보정 금지
+- 실패 처리: 하나만 지정한 모드는 예외를 그대로 띄우고, 배치(`--posts` 포함)는 그 포스트만 에러로 보고하고 계속 진행(fail-soft) — 임의 보정 금지
 - **결과 보고 시 판단을 얹지 않음** — "수동 확인 필요"/"에러"에 "무시해도 될 듯" 같은 평가를 섞지 말고 사실만 전달. 판단은 사람 몫(`ps`와 동일)

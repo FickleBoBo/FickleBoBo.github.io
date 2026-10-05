@@ -1,16 +1,16 @@
 """
-Programmers/LeetCode/Codeforces 문제 번호로 (제목, 문제 URL)을 조회하는 함수들.
-`resolve_filename.py`의 `generate_one`에서만 씀 — sync/publish/review-code/contest
-등 다른 스킬은 이 모듈을 안 쓴다(제목 조회는 스캐폴드 생성 시점에만 필요, 이후
-파이프라인 단계는 이미 만들어진 드래프트 파일만 다룸).
+Programmers/LeetCode/Codeforces/BOJ 문제 번호로 (제목, 문제 URL)을 조회하는 함수들.
+스캐폴드 생성(`generate_one`)에서만 씀 — 제목 조회는 그 시점에만 필요하고, 이후
+파이프라인 단계는 이미 만들어진 드래프트 파일만 다룬다.
 
-`resolve_filename.py`에서 이 함수들만 분리한 이유: 나머지(파일명/front matter/본문
+`scaffold_post.py`에서 이 함수들만 분리한 이유: 나머지(파일명/front matter/본문
 빌더)는 순수 문자열 조작인데 이쪽만 유일하게 네트워크 I/O가 섞여 있어서 관심사가
-갈림(2026-09-22 분리).
+갈림.
 """
 
 import functools
 import json
+import os
 import re
 import urllib.request
 
@@ -29,6 +29,8 @@ def get_title_and_url(prefix, number):
         return get_title_url_leetcode(number)
     if prefix == "cofo":
         return get_title_url_codeforces(number)
+    if prefix == "boj":
+        return get_title_url_boj(number)
     raise NotImplementedError(f"{prefix} 제목 조회 미구현")
 
 
@@ -76,23 +78,41 @@ def _fetch_codeforces_contest_problems(contest_id):
     # 정본화되어 있음(실측: 2263 C1/C2가 problemset.problems엔 없고 2262 A1/A2로만
     # 등록됨) — 이럴 때 그 대회 응시 시점 문제 목록(contest.standings)으로
     # 재조회한다. /problemset/problem/{contest_id}/{index} 링크는 이 경우에도
-    # 살아있음(2026-09-14 확인).
+    # 살아있음.
     body = fetch(f"https://codeforces.com/api/contest.standings?contestId={contest_id}")
     return json.loads(body)["result"]["problems"]
 
 
 def get_title_url_codeforces(number):
-    # 폴더명 형식이 "{contestId}{Index}"(예: 1553A)라고 가정함 — 실제 사용 사례로 검증된 적 없음.
+    # 폴더명 형식: "{contestId}{Index}"(예: 1553A)
     m = re.match(r"(\d+)([A-Za-z]\d*)$", number)
     if not m:
         raise ValueError(f"Codeforces 번호 형식이 예상과 다름(예: 1553A): {number}")
     contest_id, index = m.groups()
+    index = index.upper()
+    url = f"https://codeforces.com/problemset/problem/{contest_id}/{index}"
     for p in _fetch_codeforces_problems():
-        if str(p["contestId"]) == contest_id and p["index"] == index.upper():
-            url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
+        if str(p["contestId"]) == contest_id and p["index"] == index:
             return p["name"], url
     for p in _fetch_codeforces_contest_problems(contest_id):
-        if p["index"] == index.upper():
-            url = f"https://codeforces.com/problemset/problem/{contest_id}/{index.upper()}"
+        if p["index"] == index:
             return p["name"], url
     raise ValueError(f"Codeforces {number}번을 목록에서 못 찾음")
+
+
+# 백준(acmicpc.net)은 2026-04-28부로 서비스가 내려가 있어 온라인 조회가 불가 — iCloud에 있는
+# 크롤링 미러(문제당 JSON, `title`·`url` 키)에서 읽는다. URL은 미러가 가진 원본 그대로
+# (`https://www.acmicpc.net/problem/{번호}`)라 기존 백준 포스트의 링크 형식과 같다.
+BOJ_MIRROR_DIR = os.path.expanduser(
+    "~/Library/Mobile Documents/com~apple~CloudDocs/baekjoon-crawling/data/problems"
+)
+
+
+def get_title_url_boj(number):
+    path = os.path.join(BOJ_MIRROR_DIR, f"{number}.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        raise ValueError(f"BOJ {number}번이 크롤링 미러에 없음: {path}")
+    return data["title"], data["url"]

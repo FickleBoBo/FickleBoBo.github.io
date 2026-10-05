@@ -65,7 +65,7 @@ def clean_java(source: str) -> str:
 
 
 def clean_code(source: str, language: str) -> str:
-    """language는 EXT_TO_LANGUAGE(resolve_filename.py)의 표시명("Java"/"C++"/"Python")."""
+    """language는 EXT_TO_LANGUAGE(scaffold_post.py)의 표시명("Java"/"C++"/"Python")."""
     if language == "Java":
         return clean_java(source)
     # C++/Python은 지금까지 실제로 문제된 케이스가 없어서 그대로 통과.

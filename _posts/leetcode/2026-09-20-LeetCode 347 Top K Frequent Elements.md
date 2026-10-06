@@ -30,7 +30,7 @@ Follow up은 $O(N \log N)$보다 빠른 시간복잡도로 이 문제를 해결�
 | 빈도순 정렬 | $O(N \log N)$ | $O(N)$ |
 | 버킷 정렬   | $O(N)$        | $O(N)$ |
 
-($N$ = `nums`의 길이)
+($N$ = `nums`의 길이, $K$ = 입력값 `k`. 빈도순 정렬의 Python은 `most_common(k)`가 힙 기반이라 시간 $O(N \log K)$)
 
 ---
 

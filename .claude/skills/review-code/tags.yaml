@@ -254,9 +254,11 @@ boundary_notes:
     rule: >
       brute force는 "이건 완전 탐색으로 푸는 문제구나"라는 인식 자체가 풀이의 아이디어일 때 — 탐색 공간
       설계나 "범위가 작으니 다 해봐도 된다"는 판단이 풀이의 핵심. 지문이 시키는 대로 훑으며 계산·세기만
-      하면(이중 루프여도) 아이디어 없이 완전 탐색을 한 것이라 warm up. backtracking은 재귀로 상태를
-      쌓고 되돌리며(undo) 가지치기하는 경우 — 가지치기 없는 재귀 열거는 brute force. dfs/bfs가
-      붙으면 brute force는 중복이라 뺀다.
+      하면(이중 루프여도) 아이디어 없이 완전 탐색을 한 것이라 warm up. backtracking은 재귀로 부분 해를
+      한 칸씩 쌓고 되돌아오며 탐색하는 경우 — `vis[]` 같은 명시적 undo 없이 `sel[depth]`를 덮어쓰는
+      구조여도, 가지치기가 없는 재귀 열거(중복순열 등)여도 해당한다(N과 M 시리즈 전체).
+      brute force는 이런 재귀 구조가 아니라 "다 해봐도 된다"는 판단 자체가 핵심일 때(반복문 전수 탐색 등).
+      dfs/bfs가 붙으면 brute force는 중복이라 뺀다.
   - pair: [dfs, bfs, flood fill, shortest path]
     rule: >
       dfs는 그래프·트리를 깊이 우선으로 순회하는 경우(visited 유무 무관, 조합 구성용 재귀는 아님).

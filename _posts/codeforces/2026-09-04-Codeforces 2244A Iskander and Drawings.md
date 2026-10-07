@@ -2,7 +2,7 @@
 title: "[Codeforces] #2244A - Iskander and Drawings [C++]"
 date: 2026-09-04
 categories: [PS, Codeforces]
-tags: ["string"]
+tags: ["warm up"]
 slug: codeforces-2244a
 media_subpath: /assets/img/posts/codeforces-2244a/
 math: true

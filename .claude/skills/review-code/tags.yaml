@@ -311,4 +311,6 @@ boundary_notes:
       카운트·split·splice 중 하나라도면 string. (b) 문자열 출력만 = echo, 두 개 이어붙여 출력, n번 반복
       같이 다른 로직이 없으면 warm up. (c) 문자열↔숫자 통째 변환(parseInt/int(), toString/str())은 string 조작이
       아니다 — 변환만 하고 핵심이 그 숫자의 비교/연산이면 string을 붙이지 않는다(warm up 등 다른 판정).
-      문자를 자르거나 들여다보는 순간부터는 (a)다.
+      (d) 단순 순회는 (a) 목록에 없으므로 string이 아니다 — 문자를 하나씩 보며 다른 자료구조(stack 등)에
+      넣거나 비교만 하는 문제(괄호 짝 맞추기: BOJ 9012·4949는 stack만)는 문자열이 입력 형식일 뿐이다.
+      string은 (a) 목록의 가공 동작이 풀이의 주된 작업일 때 붙인다.

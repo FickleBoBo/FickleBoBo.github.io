@@ -45,7 +45,7 @@ class Solution {
         int lo = 0, hi = arr.length - 1;
 
         while (lo <= hi) {
-            int mid = (lo + hi) / 2;
+            int mid = lo + (hi - lo) / 2;
 
             if (arr[mid] < target) {
                 lo = mid + 1;
@@ -71,7 +71,7 @@ class Solution {
         int lo = 0, hi = v.size() - 1;
 
         while (lo <= hi) {
-            int mid = (lo + hi) / 2;
+            int mid = lo + (hi - lo) / 2;
 
             if (v[mid] < target) {
                 lo = mid + 1;
@@ -97,7 +97,7 @@ class Solution:
         lo, hi = 0, len(nums) - 1
 
         while lo <= hi:
-            mid = (lo + hi) // 2
+            mid = lo + (hi - lo) // 2
 
             if nums[mid] < target:
                 lo = mid + 1

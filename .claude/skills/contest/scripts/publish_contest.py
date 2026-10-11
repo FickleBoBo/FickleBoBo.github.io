@@ -31,6 +31,12 @@ import os
 import re
 import sys
 
+# `_shared`(blog_common)를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
+# (아래 import를 정렬해도 깨지지 않게 — contest_common의 삽입에 기대지 않는다.)
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
+)
+
 from blog_common import (
     PS_REPO,
     REPO_ROOT,

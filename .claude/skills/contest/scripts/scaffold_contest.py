@@ -29,9 +29,15 @@ LLM 판단 없음 — CF 조회·계산·문자열 조립만. `ps` 스킬과 평
 import os
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
-from blog_common import (  # contest_common 뒤(sys.path)
+# `_shared`(blog_common)를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
+# (아래 import를 정렬해도 깨지지 않게 — contest_common의 삽입에 기대지 않는다.)
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
+)
+
+from blog_common import (
     REPO_ROOT,
     front_matter_block,
     sanitize_filename,
@@ -68,9 +74,9 @@ def load_all(contest_id):
     contest, problems = load_contest(contest_id)
     rank_count, mine = load_rating_change(contest_id)
     submissions = load_submissions(contest_id)
-    start_kst = datetime.fromtimestamp(
-        contest["startTimeSeconds"], tz=timezone.utc
-    ).astimezone(KST)
+    start_kst = datetime.fromtimestamp(contest["startTimeSeconds"], tz=UTC).astimezone(
+        KST
+    )
     by_index = classify_problems(problems, submissions, contest["durationSeconds"])
     return {
         "contest": contest,

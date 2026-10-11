@@ -17,7 +17,7 @@
 import re
 
 from blog_common import (
-    yaml_dq,  # contest_common이 먼저 import돼 sys.path에 _shared가 들어간 뒤여야 함
+    yaml_dq,  # 진입점이 sys.path에 _shared를 넣은 뒤여야 함
 )
 from contest_common import CARD_NAME, CODEFORCES_POSTS_DIR, find_posts_by_slug
 

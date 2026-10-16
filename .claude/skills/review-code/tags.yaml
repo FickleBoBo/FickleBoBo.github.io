@@ -250,6 +250,14 @@ boundary_notes:
       아니라 주어진 조건이므로 math/number theory를 붙이지 않고 warm up. 단 지문이 기준은 주되
       방법은 안 알려주면(예: 유한소수 판별 — 분모 소인수가 2·5뿐이라는 기준만 주고 기약분수화는
       안 알려줌) 풀이가 가져온 기법(euclidean algorithm 등)과 그 조상은 그대로 단다.
+  - pair: [game theory, sprague grundy, dynamic programming]
+    rule: >
+      game theory는 두 사람이 번갈아 두는 게임의 승패·필승 전략을 다루는 문제 전반이다. 일반 님의 XOR
+      판정(Bouton 정리)은 game theory만 붙인다. 님블처럼 님과 동형으로 환원되는 문제도 game theory만.
+      sprague grundy는 그런디 수를 mex로 직접 구하고 독립된 게임들의 그런디 수를 XOR로 합쳐 판정할 때
+      붙는다(이동 규칙이 님과 달라 그런디 수를 계산해야 하는 경우). 미제르 님은 스프라그 그런디가
+      다루지 않는 변형이라 붙이지 않는다. 승패를 작은 상태부터 점화식으로 채우면(돌 게임 3·4)
+      dynamic programming을 함께 붙이고, 홀짝·주기 규칙으로 바로 판정되면 game theory만 붙인다.
   - pair: [brute force, backtracking, warm up]
     rule: >
       brute force는 "이건 완전 탐색으로 푸는 문제구나"라는 인식 자체가 풀이의 아이디어일 때 — 탐색 공간

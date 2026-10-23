@@ -6,7 +6,6 @@ tags: ["sql"]
 slug: programmers-59414
 media_subpath: /assets/img/posts/programmers-59414/
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->
@@ -17,7 +16,7 @@ mermaid: false
 
 ## 1. 아이디어
 
-`DATETIME` 컬럼에서 시각을 떼고 날짜만 남기는 문제다. `DATE()` 함수로 해결하면 된다.
+모든 동물의 아이디, 이름, 들어온 날짜를 아이디 순으로 조회하는 문제다. `DATETIME`에는 시각까지 들어 있는데 시각을 뺀 날짜만 보여 달라고 했으므로 `DATE`로 날짜 부분만 꺼낸다.
 
 ---
 
@@ -26,7 +25,7 @@ mermaid: false
 ### 풀이 [MySQL]
 
 ```sql
-SELECT ANIMAL_ID, NAME, DATE(DATETIME) AS 날짜
+SELECT ANIMAL_ID, NAME, DATE(DATETIME)
 FROM ANIMAL_INS
 ORDER BY ANIMAL_ID
 ```

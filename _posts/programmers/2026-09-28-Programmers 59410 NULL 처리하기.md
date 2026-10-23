@@ -6,7 +6,6 @@ tags: ["sql"]
 slug: programmers-59410
 media_subpath: /assets/img/posts/programmers-59410/
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->
@@ -17,7 +16,7 @@ mermaid: false
 
 ## 1. 아이디어
 
-동물의 생물 종, 이름, 성별 및 중성화 여부를 아이디 순으로 조회하는 문제다. 이름이 `NULL`인 동물은 `IFNULL`로 `'No name'`이라고 표시하면 된다.
+동물의 종, 이름, 성별 및 중성화 여부를 아이디 순으로 조회하되 이름이 없는 동물은 이름을 `'No name'`으로 표시하는 문제다. 이름이 없다는 것은 `NAME`이 NULL이라는 뜻이므로 `IFNULL`로 `'No name'`을 대신 채운다.
 
 ---
 

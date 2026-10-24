@@ -51,7 +51,7 @@ class Solution {
 };
 ```
 
-`std::unordered_set`으로 바꾼 뒤 `size`만 비교하면 중복 여부를 바로 알 수 있다.
+`std::unordered_set`으로 바꾼 뒤 `size`만 비교해 중복 여부를 알아냈다.
 
 ```python
 class Solution:
@@ -59,6 +59,6 @@ class Solution:
         return len(set(nums)) < len(nums)
 ```
 
-`set`으로 바꾸면 중복이 사라져 `len`만 비교하면 된다.
+`set`으로 바꿔 중복을 없앤 뒤 `len`만 비교했다.
 
 ---

@@ -6,7 +6,6 @@ tags: ["warm up"]
 slug: programmers-181933
 media_subpath: /assets/img/posts/programmers-181933/
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->
@@ -17,19 +16,11 @@ mermaid: false
 
 ## 1. 아이디어
 
-정수 `a`, `b`와 boolean `flag`가 주어질 때, `flag`가 `true`면 `a + b`를, `false`면 `a - b`를 반환하면 되는 문제다.
+`flag`가 참이면 두 수의 합을, 거짓이면 차를 반환한다.
 
 ---
 
-## 2. 복잡도
-
-| 접근 | 시간   | 공간   |
-| ---- | ------ | ------ |
-| 풀이 | $O(1)$ | $O(1)$ |
-
----
-
-## 3. 코드
+## 2. 코드
 
 ### 풀이 [Java][C++][Python]
 

@@ -6,7 +6,6 @@ tags: ["string"]
 slug: programmers-181863
 media_subpath: /assets/img/posts/programmers-181863/
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->
@@ -17,21 +16,11 @@ mermaid: false
 
 ## 1. 아이디어
 
-`rny_string`에서 `m`을 전부 `rn`으로 바꾸면 되는 간단한 문제다.
+`"m"`을 만날 때마다 `"rn"`으로 바꾸면 되고, `"rn"`에는 `"m"`이 없어서 바꾼 결과를 다시 치환할 일이 없으니 원본을 한 번 훑는 것으로 끝난다.
 
 ---
 
-## 2. 복잡도
-
-| 접근 | 시간   | 공간   |
-| ---- | ------ | ------ |
-| 풀이 | $O(N)$ | $O(N)$ |
-
-($N$ = `rny_string`의 길이)
-
----
-
-## 3. 코드
+## 2. 코드
 
 ### 풀이 [Java][C++][Python]
 
@@ -42,8 +31,6 @@ class Solution {
     }
 }
 ```
-
-`replace` 메서드를 활용해서 문자열 치환을 했다.
 
 ```c++
 #include <bits/stdc++.h>
@@ -63,13 +50,11 @@ string solution(string rny_string) {
 }
 ```
 
-빈 문자열 `s`를 선언한 후 `rny_string`의 각 문자를 삽입하는데 `m`을 만날 때만 `rn`을 삽입했다.
+`std::string`의 `replace`는 위치와 길이로 구간을 바꾸는 함수라 모든 `"m"`을 한 번에 바꾸지 못해서, 문자를 하나씩 보며 새 문자열에 이어 붙였다.
 
 ```python
 def solution(rny_string):
     return rny_string.replace("m", "rn")
 ```
-
-`replace` 함수를 활용해서 문자열 치환을 했다.
 
 ---

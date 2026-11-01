@@ -160,6 +160,7 @@ class Solution {
 ```python
 class Solution:
     def isHappy(self, n: int) -> bool:
+
         def step(x):
             return sum(int(d) ** 2 for d in str(x))
 

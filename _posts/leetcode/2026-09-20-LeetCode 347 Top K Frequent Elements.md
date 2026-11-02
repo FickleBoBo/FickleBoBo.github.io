@@ -81,7 +81,7 @@ class Solution:
         return [x for x, _ in cnt.most_common(k)]
 ```
 
-`most_common`에 `k`를 넘겨 횟수 내림차순 상위 `k`개를 바로 얻었다.
+`most_common`에 `k`를 넘겨 횟수 내림차순 상위 `k`개를 바로 얻었다. `k`를 넘기면 전체를 정렬하지 않고 힙으로 상위 `k`개만 뽑으므로 시간은 $O(n \log k)$이다.
 
 ---
 

@@ -7,8 +7,8 @@ review-code/review-post가 처리할 포스트 목록을 찾아서 청크(서브
     python3 chunk_drafts.py [경로 ...]
         경로를 안 주면 _drafts/{platform}/ 전체(전체 배치), 하나 이상 주면 그
         포스트들만(사용자가 지목했을 때). 경로는 `_drafts|_posts/{platform}/*.md`
-        (platform ∈ PLATFORM_DIRS)여야 하고, 없는 파일이나 범위 밖 경로가 섞여
-        있으면 즉시 에러(종료 코드 1).
+        (platform ∈ PLATFORM_DIRS) 또는 그 폴더(아래 .md 전부)여야 하고, 없는
+        경로나 범위 밖 경로가 섞여 있으면 즉시 에러(종료 코드 1).
 
 출력: "CHUNK N:" 헤더 아래 그 청크의 절대경로들, 마지막에 총계 한 줄.
 
@@ -40,14 +40,25 @@ def in_scope(path):
     )
 
 
+def expand_dir(path):
+    """폴더면 그 아래 .md(이름순), 아니면 그대로."""
+    if not os.path.isdir(path):
+        return [path]
+    return [
+        os.path.join(path, f) for f in sorted(os.listdir(path)) if f.endswith(".md")
+    ]
+
+
 def discover_all_drafts(explicit_paths=None):
-    """explicit_paths가 없으면 `_drafts/{platform}/*.md` 전체, 있으면 그 경로들을
-    검증해 절대경로로 반환. 없는 파일이나 범위 밖 경로가 있으면 예외."""
+    """explicit_paths가 없으면 `_drafts/{platform}/*.md` 전체, 있으면 그 경로들(폴더는
+    아래 .md로 확장)을 검증해 절대경로로 반환. 없는 경로나 범위 밖 경로가 있으면 예외."""
     if not explicit_paths:
         return list_platform_posts(DRAFTS_DIR)
 
     # 서브에이전트로 그대로 넘어갈 경로라 cwd와 무관하게 절대경로로 정규화.
-    abs_paths = [os.path.abspath(p) for p in explicit_paths]
+    abs_paths = [q for p in explicit_paths for q in expand_dir(os.path.abspath(p))]
+    if not abs_paths:
+        raise ValueError("대상 포스트가 없음(빈 폴더)")
     missing = [p for p in abs_paths if not os.path.isfile(p)]
     if missing:
         raise FileNotFoundError(f"파일을 찾을 수 없음: {', '.join(missing)}")

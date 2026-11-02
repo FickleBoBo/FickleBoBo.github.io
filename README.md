@@ -9,27 +9,29 @@
 
 ## 구성
 
-- **PS**: Programmers, LeetCode, Codeforces, BaekJoon 문제 풀이. 아이디어, 복잡도, 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다.
+- **PS**: Programmers, LeetCode, Codeforces, BaekJoon 문제 풀이. 아이디어와 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다. Codeforces는 C++만, SQL 문제는 MySQL을 쓴다.
 - **Contest**: Codeforces 대회 후기. 성적·순위·레이팅 변동과 문제별 풀이를 담는다.
 
 ## PS 자동화 파이프라인
 
-`.claude/skills/`에 PS 레포의 풀이를 블로그 포스트로 옮기는 [Claude Code][claude-code] 스킬을 두었다. 반복 작업(파일명 결정, front matter, 코드 블록 동기화, 커밋)은 스크립트가 맡고, 판단이 필요한 부분(아이디어·복잡도 초안, 코드 리뷰, 태그 후보)만 LLM이 맡는다.
+`.claude/skills/`에 PS 레포의 풀이를 블로그 포스트로 옮기는 [Claude Code][claude-code] 스킬을 두었다. 반복 작업(파일명 결정, front matter, 코드 블록 동기화, 커밋)은 결정론적 스크립트가 맡고, 판단이 필요한 부분(아이디어·설명 작성, 코드 리뷰, 포스트 평가, 태그 판정)만 LLM이 맡는다. 리뷰는 읽기 전용 서브에이전트가 하며, 실행 전후 스냅샷을 대조해 파일이 바뀌지 않았는지 검증한다.
 
 ```text
-ps → sync → review-code → (태그 확정) → sync → review-post → publish
+ps → review-code → write-post → review-post → tag → publish
 ```
 
-| 스킬          | 역할                                                                                    |
-| ------------- | --------------------------------------------------------------------------------------- |
-| `ps`          | PS 레포 풀이 폴더 → 포스트 스캐폴드(파일명, front matter, 코드 섹션) 생성               |
-| `sync`        | PS 레포 코드 변경을 포스트 코드 블록에 재동기화. `--posts`로 발행본 전체도 점검         |
-| `review-code` | 포스트에 임베드된 코드를 정확성·최선 접근 기준으로 리뷰하고 태그 후보 제안              |
-| `review-post` | 포스트 완성도(설명·복잡도·컨벤션)를 리뷰하고 빈 필드를 채움. 기계 검증은 `lint_post.py` |
-| `publish`     | 완료 게이트를 통과한 드래프트 하나를 `_posts/`로 옮기고 블로그·PS 레포 양쪽에 커밋      |
-| `contest`     | 대회 후기(별도 장르)의 스캐폴드 생성과 발행. 위 파이프라인 밖에서 동작                  |
+| 스킬          | 역할                                                                                |
+| ------------- | ----------------------------------------------------------------------------------- |
+| `ps`          | PS 레포 풀이 폴더 → 포스트 스캐폴드(파일명, front matter, 코드 섹션) 생성           |
+| `sync`        | PS 레포 코드 변경을 포스트 코드 블록에 재동기화. 포스트 하나 또는 폴더 단위         |
+| `review-code` | 포스트에 임베드된 코드를 정확성·최선 접근 기준으로 리뷰(제안만, 코드는 고치지 않음) |
+| `write-post`  | 아이디어·접근 이름·코드 블록 설명을 작성. 채워진 포스트는 백지에서 다시 써 비교     |
+| `review-post` | 포스트 완성도(코드-설명 정합성·컨벤션)를 평가. 기계 검증은 `lint_post.py`           |
+| `tag`         | 아이디어를 보고 태그 어휘집에서 태그를 판정해 부착                                  |
+| `publish`     | 완료 게이트를 통과한 드래프트 하나를 `_posts/`로 옮기고 블로그·PS 레포 양쪽에 커밋  |
+| `contest`     | 대회 후기(별도 장르)의 스캐폴드 생성과 발행. 위 파이프라인 밖에서 동작              |
 
-스킬이 공유하는 경로 상수·front matter 파서·커밋 헬퍼·문제 원문 조회·청크 분할은 `.claude/skills/_shared/`에 있다. 포스트 문체와 표기 규칙의 정본은 [`STYLE.md`](.claude/skills/review-post/STYLE.md), 태그 어휘의 정본은 [`tags.yaml`](.claude/skills/review-code/tags.yaml)이다. 각 스킬의 동작은 해당 `SKILL.md`에 자기완결적으로 적혀 있다.
+스킬이 공유하는 경로·본문 파서·커밋 헬퍼·저지 조회·린터·청크 분할은 `.claude/skills/_shared/`에 있다. 포스트 문체와 표기 규칙의 정본은 [`STYLE.md`](.claude/skills/_shared/STYLE.md), 태그 어휘의 정본은 [`tags.yaml`](.claude/skills/_shared/tags.yaml), 판정 기준은 [`RULES.md`](.claude/skills/tag/RULES.md)이다. 각 스킬의 동작은 해당 `SKILL.md`에 자기완결적으로 적혀 있다.
 
 ## 저장소 구조
 
@@ -37,6 +39,10 @@ ps → sync → review-code → (태그 확정) → sync → review-post → pub
 _posts/          발행된 포스트 (programmers, leetcode, codeforces, baekjoon, contest)
 _drafts/         작성 중인 포스트
 _tabs/           About, Archives, Categories, Tags 페이지
+_data/          사이트 데이터 (연락처, 공유 링크)
+_includes/       사이드바 확장
+_plugins/        포스트 수정일 훅
+.github/         GitHub Pages 빌드·배포 워크플로우
 .claude/skills/  PS 자동화 스킬과 스크립트
 .claude/agents/  리뷰 서브에이전트 정의 (code-reviewer, post-reviewer)
 CLAUDE.md        Claude Code 작업 지침 (워크플로우, 커밋 규칙)

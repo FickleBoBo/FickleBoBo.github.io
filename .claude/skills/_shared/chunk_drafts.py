@@ -24,7 +24,7 @@ review-code/review-post가 처리할 포스트 목록을 찾아서 청크(서브
 import os
 import sys
 
-from blog_common import DRAFTS_DIR, PLATFORM_DIRS, POSTS_DIR, list_platform_posts
+from repo import DRAFTS_DIR, PLATFORM_DIRS, POSTS_DIR, list_platform_posts
 
 MAX_DRAFTS_PER_CHUNK = 4
 MAX_LINES_PER_CHUNK = 1200

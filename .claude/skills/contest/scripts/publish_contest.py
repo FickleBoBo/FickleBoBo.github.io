@@ -3,7 +3,7 @@
 레포 + PS 레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함. `publish` 스킬과 같은
 "옮긴 뒤 레포별로 각각 커밋" 흐름이고, 후기 장르라 갈라지는 부분만 다르다:
 
-- **완료 게이트가 다르다.** 후기엔 `## 1. 아이디어`·복잡도 표가 없다. 대신 스캐폴드가 남기는
+- **완료 게이트가 다르다.** 후기엔 `## 1. 아이디어`가 없다. 대신 스캐폴드가 남기는
   미완 표식(라이브 코드 자리·ratingChanges 자리·레이팅 그래프 이미지)과 `## 총평`이 채워졌는지
   검사한다(`not_ready_reason`). 서술의 질은 사람 몫이라 검사 안 함.
 - **PS 레포 소스가 1:N.** `publish`는 slug로 폴더 하나를 찾지만, 후기는 그 대회의 라이브 코드
@@ -31,27 +31,22 @@ import os
 import re
 import sys
 
-# `_shared`(blog_common)를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
+# `_shared`를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
 # (아래 import를 정렬해도 깨지지 않게 — contest_common의 삽입에 기대지 않는다.)
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
 )
 
-from blog_common import (
-    PS_REPO,
-    REPO_ROOT,
-    commit,
-    extract_title,
-    has_pending_changes,
-    read_front_matter,
-)
 from contest_common import (
     CONTEST_DRAFTS_DIR,
     CONTEST_POSTS_DIR,
     find_posts_by_slug,
     parse_contest_id,
 )
+from git_ops import move_and_commit
+from post_text import extract_title, read_front_matter
 from recap_body import LIVE_CODE_PLACEHOLDER, RATING_PLACEHOLDER
+from repo import PS_REPO, REPO_ROOT
 
 
 def _live_folder_re(contest_id):
@@ -149,31 +144,9 @@ def publish_one(draft_path):
             f"_posts/contest/에 이미 같은 이름의 파일이 있음: {target_path}"
         )
 
-    os.makedirs(CONTEST_POSTS_DIR, exist_ok=True)
-    os.rename(draft_path, target_path)  # 이 시점부턴 실패해도 파일은 이미 옮겨진 상태
-
-    asset_dir = os.path.join(REPO_ROOT, "assets", "img", "posts", slug)
-    blog_paths = [target_path] + ([asset_dir] if os.path.isdir(asset_dir) else [])
-
-    try:
-        blog_committed = has_pending_changes(REPO_ROOT, blog_paths)
-        if blog_committed:
-            commit(REPO_ROOT, blog_paths, message)
-    except Exception as e:
-        raise RuntimeError(
-            f"파일은 이미 {target_path}로 이동됐지만 블로그 커밋 실패: {e} "
-            "— 수동으로 git add/commit 필요"
-        )
-
-    try:
-        ps_committed = has_pending_changes(PS_REPO, live_folders)
-        if ps_committed:
-            commit(PS_REPO, live_folders, message)
-    except Exception as e:
-        raise RuntimeError(
-            f"블로그는 이미 커밋됨({target_path}), 하지만 PS 레포 커밋 실패: {e} "
-            f"— PS 레포({', '.join(live_folders)})는 직접 확인 필요"
-        )
+    blog_committed, ps_committed = move_and_commit(
+        draft_path, target_path, slug, live_folders, message
+    )
 
     blog_note = "블로그 커밋함" if blog_committed else "블로그 이미 커밋된 상태"
     ps_note = (

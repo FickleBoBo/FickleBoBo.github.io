@@ -7,7 +7,7 @@ description: Codeforces 대회 후기 포스트 장르(`Contest` 카테고리)�
 
 **스코프**: 스켈레톤 생성은 파일명 + front matter + `## 1. 대회 개요` + `## 2. 결과` + `## 3. 풀이 과정`의 스탯 표까지 완전 자동 — 문제별 서술·라이브 코드·총평·수동 뉘앙스(`미완 · 업솔빙` 등)는 사람이 채운다(`ps` 스킬과 평행 구조). 발행은 `_drafts/contest/` → `_posts/contest/` 이동 + 블로그·PS 레포 커밋까지.
 
-**파이프라인 밖 장르.** `ps`/`sync`/`review-code`/`review-post`/`publish`는 전부 문제 포스트 구조(`## 1. 아이디어` + `## 2. 복잡도`)를 전제한다 — 후기엔 안 맞는다. `_drafts/contest/`는 `blog_common.PLATFORM_DIRS`(programmers/leetcode/baekjoon/codeforces/swea)에 없어서 이 스킬들이 통째로 무시한다(의도된 안전장치). 발행은 이 스킬의 `publish_contest.py`가 담당(아래 "발행").
+**파이프라인 밖 장르.** `ps`/`sync`/`review-code`/`review-post`/`publish`는 전부 문제 포스트 구조(`## 1. 아이디어` + `## 2. 코드`)를 전제한다 — 후기엔 안 맞는다. `_drafts/contest/`는 `repo.PLATFORM_DIRS`(programmers/leetcode/baekjoon/codeforces)에 없어서 이 스킬들이 통째로 무시한다(의도된 안전장치). 발행은 이 스킬의 `publish_contest.py`가 담당(아래 "발행").
 
 스크립트(`scripts/`) — 진입점 2개 + 역할별 모듈:
 
@@ -23,7 +23,7 @@ description: Codeforces 대회 후기 포스트 장르(`Contest` 카테고리)�
 ## 스캐폴드 생성
 
 ```
-python3 <이 스킬의 base directory>/scripts/scaffold_contest.py <대회 ID 또는 URL> [--force | --card-only]
+python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_contest.py <대회 ID 또는 URL> [--force | --card-only]
 ```
 
 예:
@@ -93,7 +93,7 @@ python3 .claude/skills/contest/scripts/scaffold_contest.py https://codeforces.co
 ## 발행
 
 ```
-python3 <이 스킬의 base directory>/scripts/publish_contest.py <후기 .md 경로 또는 대회 ID/URL>
+python3 ${CLAUDE_SKILL_DIR}/scripts/publish_contest.py <후기 .md 경로 또는 대회 ID/URL>
 ```
 
 한 번에 후기 하나. `publish` 스킬과 같은 "옮긴 뒤 레포별로 각각 커밋" 흐름:

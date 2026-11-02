@@ -10,7 +10,8 @@ import sys
 _SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(_SKILLS_DIR, "_shared"))
 
-from blog_common import DRAFTS_DIR, POSTS_DIR, front_matter_block, yaml_scalar_value
+from post_text import front_matter_block, yaml_scalar_value
+from repo import DRAFTS_DIR, POSTS_DIR
 
 CONTEST_DRAFTS_DIR = os.path.join(DRAFTS_DIR, "contest")
 CONTEST_POSTS_DIR = os.path.join(POSTS_DIR, "contest")

@@ -12,7 +12,7 @@ LLM 판단 없음 — CF 조회·계산·문자열 조립만. `ps` 스킬과 평
 
 **후기 '양식'은 `contest/SKILL.md`가 정본, 설계 근거는 프로젝트 메모리
 `contest-recap-post-format.md`.** 이 스크립트는 `_drafts/contest/`에만 쓴다 — 그 폴더는
-`blog_common.PLATFORM_DIRS`에 없어서 `sync`·`review-*`·`publish`가 통째로 무시한다(의도된
+`repo.PLATFORM_DIRS`에 없어서 `sync`·`review-*`·`publish`가 통째로 무시한다(의도된
 안전장치). 발행은 `publish_contest.py`.
 
 사용법:
@@ -31,17 +31,12 @@ import re
 import sys
 from datetime import UTC, datetime, timedelta, timezone
 
-# `_shared`(blog_common)를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
+# `_shared`를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
 # (아래 import를 정렬해도 깨지지 않게 — contest_common의 삽입에 기대지 않는다.)
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
 )
 
-from blog_common import (
-    REPO_ROOT,
-    front_matter_block,
-    sanitize_filename,
-)
 from cf_contest import (
     build_card_data,
     classify_problems,
@@ -58,6 +53,7 @@ from contest_common import (
     find_posts_by_slug,
     parse_contest_id,
 )
+from post_text import front_matter_block
 from recap_body import (
     build_body,
     build_front_matter,
@@ -65,6 +61,7 @@ from recap_body import (
     image_front_matter,
 )
 from render_card import ChromeNotFound, render_card
+from repo import REPO_ROOT, sanitize_filename
 
 KST = timezone(timedelta(hours=9))
 

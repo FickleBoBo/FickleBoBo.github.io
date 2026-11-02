@@ -16,10 +16,8 @@
 
 import re
 
-from blog_common import (
-    yaml_dq,  # 진입점이 sys.path에 _shared를 넣은 뒤여야 함
-)
 from contest_common import CARD_NAME, CODEFORCES_POSTS_DIR, find_posts_by_slug
+from post_text import yaml_dq  # 진입점이 sys.path에 _shared를 넣은 뒤여야 함
 
 LIVE_CODE_PLACEHOLDER = "// 라이브 코드"
 RATING_PLACEHOLDER = "<!-- ratingChanges 미반영 — 확정 후 수동 -->"

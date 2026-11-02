@@ -1,10 +1,12 @@
 """
-레포 배치: 블로그·PS 레포 경로 상수, PS 플랫폼 접두사 맵, 포스트 파일 탐색·파일명 규칙.
+레포 배치: 블로그·PS 레포 경로 상수, PS 플랫폼 접두사 맵(저지 목록에서 파생), 포스트 파일 탐색·파일명 규칙.
 모든 경로는 `__file__` 기준 상대경로다. `PS_REPO`는 이 블로그 레포의 형제 디렉토리 `PS/`로 잡는다
 (다른 위치에 두려면 여기만 고친다).
 """
 
 import os
+
+from judge import JUDGES
 
 # 이 파일(.claude/skills/_shared/repo.py) 기준 이 블로그 레포 루트
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -14,12 +16,8 @@ POSTS_DIR = os.path.join(REPO_ROOT, "_posts")
 # PS 레포(형제 디렉토리) 루트
 PS_REPO = os.path.abspath(os.path.join(REPO_ROOT, "..", "PS"))
 
-PLATFORM_MAP = {
-    "prms": "Programmers",
-    "leet": "LeetCode",
-    "boj": "BaekJoon",
-    "cofo": "Codeforces",
-}
+# 접두사 → 플랫폼 표기. 지원하는 저지 목록은 `judge`가 정본이다
+PLATFORM_MAP = {j.PREFIX: j.PLATFORM for j in JUDGES}
 
 PREFIX_OF_PLATFORM = {v.lower(): k for k, v in PLATFORM_MAP.items()}
 

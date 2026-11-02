@@ -12,6 +12,8 @@ CODE_HEADING = "## 2. 코드"
 QUERY_HEADING = "## 2. 쿼리"
 # 코드 섹션 헤딩 패턴. 번호는 신(`## 2.`)·구(`## 3.`) 모두 받는다.
 CODE_SECTION_PATTERN = r"## \d+\. (?:코드|쿼리)"
+# 선택 섹션(코드 뒤). 사용자가 쓰고 `review-post`가 평가한다.
+RETRO_SECTION_PATTERN = r"## \d+\. 회고"
 
 
 def idea_is_filled(text):

@@ -3,33 +3,26 @@
 태그 판정(어떤 태그가 맞는가)은 보지 않는다.
 """
 
-import functools
-import re
-
-from post_text import yaml_scalar_value
+from post_text import read_tags, yaml_scalar_value
 from ps_source import is_sql_only
-from tag_vocab import expand_tags, load_tag_parents, order_tags
+from tag_vocab import canonical_tags, load_tag_parents
 
 from .structure import trailing_langs
-
-# 포스트마다 tags.yaml을 다시 읽지 않는다
-_tag_parents = functools.cache(load_tag_parents)
 
 
 def tag_issues(fm, layout, published):
     """어휘/조상 누락, 중복, 정규 순서, `sql` 단독·제목 일치, 단일 접근 포스트의 `warm up` 병기,
     발행본(`published`)의 빈 태그. 다중 접근 여부는 `layout`의 풀이 헤딩 수로 본다."""
-    m = re.search(r"^tags:[ \t]*\[(.*)\][ \t]*$", fm, re.MULTILINE)
-    if not m:
+    tags = read_tags(fm)
+    if tags is None:
         return []
     issues = []
-    tags = [t.strip().strip('"') for t in m.group(1).split(",") if t.strip()]
     if not tags:
         if published:
             issues.append((1, "태그", "발행본인데 태그가 비어 있음"))
         return issues
 
-    parents = _tag_parents()
+    parents = load_tag_parents()
     unknown = [t for t in tags if t not in parents]
     for t in unknown:
         issues.append((1, "태그", f"어휘집에 없는 태그: {t!r}"))
@@ -53,7 +46,7 @@ def tag_issues(fm, layout, published):
         )
 
     if not unknown and len(set(tags)) == len(tags):
-        canonical = order_tags(expand_tags(tags, parents), parents)
+        canonical = canonical_tags(tags)
         if canonical != tags:
             issues.append((1, "태그", f"태그 순서가 정규 순서와 다름 → {canonical}"))
     return issues

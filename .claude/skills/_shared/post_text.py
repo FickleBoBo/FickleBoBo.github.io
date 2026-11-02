@@ -1,8 +1,9 @@
 """
-포스트 본문 텍스트 읽기: front matter 필드(읽기와 그 짝인 YAML 문자열 이스케이프), 코드 펜스 분류, `## ` 섹션 범위.
+포스트 본문 텍스트 다루기: front matter 필드(읽기, `tags` 쓰기, YAML 문자열 이스케이프), 코드 펜스 분류, `## ` 섹션 범위.
 문자열을 받아 문자열·값을 돌려주는 순수 함수만 둔다(파일 입출력은 호출하는 쪽 몫).
 """
 
+import json
 import re
 
 
@@ -33,6 +34,27 @@ def yaml_scalar_value(front_matter_text, field):
     if len(raw) >= 2 and raw[0] == raw[-1] == "'":
         return raw[1:-1].replace("''", "'")
     return raw
+
+
+_TAGS_LINE_RE = re.compile(r"^tags:[ \t]*\[(.*)\][ \t]*$", re.MULTILINE)
+
+
+def read_tags(front_matter_text):
+    """front matter의 `tags: ["a", "b"]` 한 줄 배열을 리스트로. 그 형태의 줄이 없으면 None."""
+    m = _TAGS_LINE_RE.search(front_matter_text)
+    if not m:
+        return None
+    return [t.strip().strip('"') for t in m.group(1).split(",") if t.strip()]
+
+
+def replace_tags(post_text, tags):
+    """`tags:` 줄만 `tags` 배열로 바꾼 본문. 그 형태의 줄이 front matter에 없으면 ValueError."""
+    m = _TAGS_LINE_RE.search(front_matter_block(post_text))
+    if not m:
+        raise ValueError("front matter 안에서 `tags: [...]` 줄을 못 찾음")
+    start = len("---\n") + m.start()  # front_matter_block은 여는 `---\n` 뒤부터다
+    new_line = "tags: " + json.dumps(tags, ensure_ascii=False)
+    return post_text[:start] + new_line + post_text[start + len(m.group(0)) :]
 
 
 def read_front_matter(post_text):

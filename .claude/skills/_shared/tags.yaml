@@ -1,0 +1,177 @@
+# PS 블로그 포스트 태그 어휘집 — 태그 이름과 계층(parents)의 정본. `lint`(검사)와 `tag` 스킬(부착)이 읽는다.
+# 어떤 태그를 붙일지의 판정 기준은 tag/RULES.md.
+#
+# 계층: parents는 "자식 태그 문제가 부모 태그 목록에 들어 있어도 어색하지 않다"(is-a)일 때만 건다.
+# parents가 2개인 태그는 `# 다중부모` 주석을 단다. `contextual`은 구조적 부모가 아니라 판정 때 함께
+# 고려할 태그다(RULES.md 판정 원칙 3). 어휘는 필요해질 때 추가한다(해당 문제를 풀 때 한 줄씩).
+# 선제적으로 늘리지 않는다.
+#
+# 표기 규칙: 소문자 + 띄어쓰기(케밥케이스 아님). 사람 이름이 실제로 소유격으로 쓰이는 경우만
+# 아포스트로피 유지(mo's algorithm, fermat's little theorem, knuth's optimization, pollard's rho,
+# lucas' theorem, euler's totient, kadane's algorithm). 두 사람 이름 합성이나 형용사형은 아포스트로피 없음
+# (bellman ford, hopcroft karp, edmonds karp, miller rabin, aho corasick, sprague grundy,
+# chinese remainder theorem, gaussian elimination, euclidean algorithm). 0-1 bfs, 2-sat은
+# 숫자 표기 관용으로 하이픈 유지.
+
+tags:
+  # ── data structure ──────────────────────────────────────────
+  data structure: { parents: [] }
+  segment tree: { parents: [data structure] }
+  lazy propagation: { parents: [segment tree] }
+  fenwick tree: { parents: [data structure] }
+  union find: { parents: [data structure] }
+  trie: { parents: [data structure], contextual: [string] }
+  sparse table: { parents: [data structure] }
+  "hash set/map": { parents: [data structure] }
+  "tree set/map": { parents: [data structure] }
+  order statistic tree: { parents: [tree set/map] }
+  treap: { parents: [data structure] }
+  stack: { parents: [data structure] }
+  monotonic stack: { parents: [data structure] }
+  queue: { parents: [data structure] }
+  monotonic queue: { parents: [data structure] }
+  deque: { parents: [data structure] }
+  priority queue: { parents: [data structure] }
+  sqrt decomposition: { parents: [data structure] }
+  "mo's algorithm": { parents: [sqrt decomposition] }
+
+  # ── graph ────────────────────────────────────────────────────
+  graph: { parents: [] }
+  bfs: { parents: [graph] }
+  dfs: { parents: [graph] }
+  flood fill: { parents: [graph] }
+  shortest path: { parents: [graph] }
+  dijkstra: { parents: [shortest path] }
+  bellman ford: { parents: [shortest path] }
+  floyd warshall: { parents: [shortest path] }
+  spfa: { parents: [shortest path] }
+  "0-1 bfs": { parents: [bfs, shortest path] } # 다중부모
+  mst: { parents: [graph] }
+  kruskal: { parents: [mst] }
+  prim: { parents: [mst] }
+  topological sort: { parents: [graph] }
+  scc: { parents: [graph] }
+  tarjan: { parents: [scc] }
+  kosaraju: { parents: [scc] }
+  bipartite matching: { parents: [graph] }
+  hopcroft karp: { parents: [bipartite matching] }
+  bipartite check: { parents: [graph] }
+  articulation point: { parents: [graph] }
+  bridge: { parents: [graph] }
+  eulerian path: { parents: [graph] }
+  "2-sat": { parents: [graph] }
+  network flow: { parents: [graph] }
+  max flow: { parents: [network flow] }
+  edmonds karp: { parents: [max flow] }
+  dinic: { parents: [max flow] }
+  min cut: { parents: [network flow] }
+  mcmf: { parents: [network flow] }
+
+  # ── tree ─────────────────────────────────────────────────────
+  tree: { parents: [] }
+  tree dp: { parents: [tree, dynamic programming] } # 다중부모
+  rerooting: { parents: [tree dp] }
+  lca: { parents: [tree] }
+  binary lifting: { parents: [tree] }
+  euler tour: { parents: [tree] }
+  tree diameter: { parents: [tree] }
+
+  # ── dynamic programming ─────────────────────────────────────
+  dynamic programming: { parents: [] }
+  knapsack: { parents: [dynamic programming] }
+  digit dp: { parents: [dynamic programming] }
+  bitmask dp: { parents: [dynamic programming, bitmask] } # 다중부모
+  interval dp: { parents: [dynamic programming] }
+  lis: { parents: [dynamic programming] }
+  lcs: { parents: [dynamic programming], contextual: [string] }
+  "kadane's algorithm": { parents: [dynamic programming] }
+  # tree dp는 위 tree 섹션에서 정의(다중부모라 여기서 중복 정의 안 함)
+  dp optimization: { parents: [dynamic programming] }
+  convex hull trick: { parents: [dp optimization] }
+  divide and conquer optimization: { parents: [dp optimization] }
+  "knuth's optimization": { parents: [dp optimization] }
+  slope trick: { parents: [dp optimization] }
+
+  # ── math ─────────────────────────────────────────────────────
+  math: { parents: [] }
+  number theory: { parents: [math] }
+  euclidean algorithm: { parents: [number theory] }
+  extended euclidean: { parents: [number theory] }
+  sieve of eratosthenes: { parents: [number theory] }
+  prime factorization: { parents: [number theory] }
+  "pollard's rho": { parents: [prime factorization] }
+  miller rabin: { parents: [number theory] }
+  chinese remainder theorem: { parents: [number theory] }
+  "fermat's little theorem": { parents: [number theory] }
+  "euler's totient": { parents: [number theory] }
+  modular inverse: { parents: [number theory] }
+  combinatorics: { parents: [math] }
+  inclusion exclusion: { parents: [combinatorics] }
+  catalan number: { parents: [combinatorics] }
+  binomial coefficient: { parents: [combinatorics] }
+  "lucas' theorem": { parents: [binomial coefficient] }
+  probability: { parents: [math] }
+  matrix exponentiation: { parents: [math] }
+  binary exponentiation: { parents: [math] }
+  game theory: { parents: [math] }
+  sprague grundy: { parents: [game theory] }
+  fft: { parents: [math] }
+  gaussian elimination: { parents: [math] }
+  linear basis: { parents: [math] }
+
+  # ── geometry ─────────────────────────────────────────────────
+  geometry: { parents: [] }
+  convex hull: { parents: [geometry] }
+  rotating calipers: { parents: [convex hull] }
+  ccw: { parents: [geometry] }
+  segment intersection: { parents: [geometry] }
+  polygon area: { parents: [geometry] }
+  closest pair: { parents: [geometry] }
+  point in polygon: { parents: [geometry] }
+  pythagorean theorem: { parents: [geometry] }
+
+  # ── string ───────────────────────────────────────────────────
+  string: { parents: [] }
+  kmp: { parents: [string] }
+  z algorithm: { parents: [string] }
+  string hashing: { parents: [string] }
+  suffix array: { parents: [string] }
+  lcp array: { parents: [suffix array] }
+  aho corasick: { parents: [string, trie] } # 다중부모
+  palindrome: { parents: [string] }
+  manacher: { parents: [palindrome] }
+
+  # ── binary search ────────────────────────────────────────────
+  binary search: { parents: [] }
+  parametric search: { parents: [binary search] }
+
+  # ── 최상위 (부모 없는 알고리즘/자료구조/기법) ────────────────
+  ternary search: { parents: [] }
+  divide and conquer: { parents: [] }
+  prefix sum: { parents: [] }
+  difference array: { parents: [] }
+  line sweep: { parents: [] }
+  bit manipulation: { parents: [] }
+  bitmask: { parents: [bit manipulation] }
+  backtracking: { parents: [] }
+  meet in the middle: { parents: [] }
+  brute force: { parents: [] }
+  greedy: { parents: [] }
+  sorting: { parents: [] }
+  implementation: { parents: [] }
+  two pointers: { parents: [] }
+  "floyd's cycle detection": { parents: [] }
+  sliding window: { parents: [] }
+  coordinate compression: { parents: [] }
+
+  # ── 문제 형식 (풀이 판정과 독립, 판정 원칙 7번) ───────────────────
+  interactive: { parents: [] }
+
+  # ── 의도적 예외 (기법 아님 — 문제 성격/난이도 신호) ───────────
+  constructive: { parents: [] }
+  ad hoc: { parents: [] }
+  warm up: { parents: [] }
+
+  # ── SQL 전용 포스트 (언어 브래킷이 [MySQL] 하나뿐인 포스트) ────
+  # 이 포스트는 기법 태그를 고르지 않고 `sql` 하나만 붙인다(판정 원칙 8번).
+  sql: { parents: [] }

@@ -5,13 +5,13 @@ description: _drafts/의 PS 포스트를 완성도 관점에서 평가한다(쓰
 
 # review-post — PS 포스트 완성도 리뷰
 
-`_drafts/`의 PS 포스트를 완성도 관점에서 **평가만** 한다. `1. 아이디어`·접근 이름·코드 블록 설명은 이 스킬 전에 사용자나 메인 세션이 쓴다(규칙 정본은 [`STYLE.md`](../_shared/STYLE.md)). 비어 있는 포스트는 평가하지 못하고 "작성 필요"로 보고한다.
+`_drafts/`의 PS 포스트를 완성도 관점에서 **평가만** 한다. `1. 아이디어`·접근 이름·코드 블록 설명은 이 스킬 전에 사용자나 `write-post`가 쓴다(규칙 정본은 [`STYLE.md`](../_shared/STYLE.md)). 비어 있는 포스트는 평가하지 못하고 "작성 필요"로 보고한다.
 
 - 오케스트레이터(이 문서): 청크 분할, 스냅샷, 원문·단위 준비, 서브에이전트 dispatch, 취합·직접 검증, 등급 확정.
 - 서브에이전트: [`post-reviewer`](../../agents/post-reviewer.md). 그 정의의 본문이 평가 절차와 JSON 출력 형식의 유일한 출처이고, 프로즈·표기 규칙은 `STYLE.md`를 읽는다. 읽기 전용이며 원문 파일은 데이터다. **등급은 서브에이전트가 매기지 않는다.**
-- 스크립트: `_shared/chunk_drafts.py`(청크), `_shared/review_session.py`(스냅샷·원문·변조 검증), `scripts/units.py`(평가할 문장·문단 목록), `scripts/render_report.py`(보고 검증·린터·건수·예비 등급).
+- 스크립트: `_shared/chunk_drafts.py`(청크), `_shared/review_session.py`(스냅샷·원문·변조 검증), `_shared/units.py`(평가할 문장·문단 목록), `scripts/render_report.py`(보고 검증·린터·건수·예비 등급).
 
-**대상은 사용자가 지목한 포스트.** 지목된 포스트는 하나도 빠짐없이 전 절차를 밟는다(쉬워 보여도 선별·축약하지 않음). 특정 포스트는 `_drafts/{platform}/`에서 매칭해 절대경로로 넘기고, 인자 없이 호출하면 `_drafts/{platform}/` 전체가 대상인데, 청크 수(서브에이전트 수)를 먼저 알리고 승인받은 뒤 시작한다. 이미 발행된 `_posts/`도 대상이 될 수 있다(`sync`로 코드가 갱신된 뒤 코드-설명 정합성 재확인, 발행분 손보기). `_posts/` 절대경로를 넘긴다. **`sync`로 코드가 바뀐 포스트는 이 리뷰를 다시 돌린다.**
+**대상은 사용자가 지목한 포스트.** 지목된 포스트는 하나도 빠짐없이 전 절차를 밟는다(쉬워 보여도 선별·축약하지 않음). 한 포스트의 아이디어 모든 문장과 모든 설명은 한 번에 함께 보고, 라운드를 나눠 한 렌즈씩 보지 않는다. 특정 포스트는 `_drafts/{platform}/`에서 매칭해 절대경로로 넘기고, 인자 없이 호출하면 `_drafts/{platform}/` 전체가 대상인데, 청크 수(서브에이전트 수)를 먼저 알리고 승인받은 뒤 시작한다. 이미 발행된 `_posts/`도 대상이 될 수 있다(`sync`로 코드가 갱신된 뒤 코드-설명 정합성 재확인, 발행분 손보기). `_posts/` 절대경로를 넘긴다. **`sync`로 코드가 바뀐 포스트는 이 리뷰를 다시 돌린다.**
 
 ## 오케스트레이터 절차
 
@@ -20,7 +20,7 @@ description: _drafts/의 PS 포스트를 완성도 관점에서 평가한다(쓰
 1. `python3 ${CLAUDE_SKILL_DIR}/../_shared/chunk_drafts.py [경로 ...]`로 대상을 청크로 분할한다(`review-code`와 공유).
 2. **dispatch 전에 준비한다**:
    - `python3 ${CLAUDE_SKILL_DIR}/../_shared/review_session.py prepare reviewpost <스크래치패드> <대상 절대경로 ...>`: 포스트 사본(`_drafts/`는 git 미추적이라 `git diff`가 변경을 못 잡는다), 마커, 문제 원문(`reviewpost-src/{slug}.md`)을 만든다. 스냅샷 없이 돌리지 않는다.
-   - `python3 ${CLAUDE_SKILL_DIR}/scripts/units.py <스크래치패드>/reviewpost-units <대상 절대경로 ...>`: 평가할 문장·문단 목록(`{slug}.txt`)을 만든다. 서브에이전트가 모든 단위에 역할을 보고해야 하고, 빠지면 `render_report.py`가 되돌려 보낸다.
+   - `python3 ${CLAUDE_SKILL_DIR}/../_shared/units.py <스크래치패드>/reviewpost-units <대상 절대경로 ...>`: 평가할 문장·문단 목록(`{slug}.txt`)을 만든다. 서브에이전트가 모든 단위에 역할을 보고해야 하고, 빠지면 `render_report.py`가 되돌려 보낸다.
 3. **원문이 안 잡힌 포스트를 보충한다**(prepare 종료 코드 1은 확보 실패, 3은 Codeforces 보류):
    - 보류는 출력 안내대로 TinyFish로 받은 지문을 `fetch_statement.py --out-dir <스크래치패드>/reviewpost-src --stdin <포스트 경로>`로 저장한다. 불완전하면 거부되니 다시 받고, 계속 실패하면 사용자에게 지문 복사를 요청한다.
    - 끝내 못 받으면 원문 없이 dispatch한다. 에이전트가 `미확인`으로 보고하고 S가 불가하다.
@@ -58,6 +58,8 @@ description: _drafts/의 PS 포스트를 완성도 관점에서 평가한다(쓰
 드래프트별로 스크립트가 낸 지적 표와 건수를 싣고(직접 검증을 거친 것만), 그 아래 한 줄:
 
 **등급: A** — (한 줄 근거)
+
+"이상 없음"만 쓰지 않는다. 포스트마다 평가한 단위 수, 직접 대조한 대상, 미검증 범위를 적고 일부만 봤으면 일부라고 말한다.
 
 이어서 확인을 마친 `심화 관찰`과 `도식 후보`, 목적 없는 단위·같은 문장의 판단 결과를 붙인다. 마지막에 배치 전체 요약:
 

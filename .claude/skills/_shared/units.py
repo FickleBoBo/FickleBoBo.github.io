@@ -1,7 +1,8 @@
 """
-`review-post`가 평가할 프로즈 단위를 뽑는다: 아이디어 문장(`I`), 코드 섹션의 블록 설명 문단(`C`), 회고
-문장(`R`). 서브에이전트는 단위마다 역할을 보고하고 `render_report.py`가 빠진 단위를 잡는다(검토 누락
-방지). 두 스크립트가 같은 `extract_units`를 쓰므로 번호가 어긋나지 않는다.
+포스트의 프로즈 단위를 뽑는다: 아이디어 문장(`I`), 코드 섹션의 블록 설명 문단(`C`), 회고 문장(`R`).
+`review-post`의 서브에이전트는 단위마다 역할을 보고하고(`render_report.py`가 빠진 단위를 잡는다),
+`write-post`는 쓴 글의 모든 단위에 역할이 있는지 스스로 확인한다. 역할의 정의는 `STYLE.md`
+"문장의 목적"이다. 두 스킬이 같은 `extract_units`를 쓰므로 번호가 어긋나지 않는다.
 
 사용법:
     units.py <출력 디렉토리> <포스트 .md 경로> [...]
@@ -12,9 +13,6 @@ import os
 import re
 import sys
 from collections import Counter
-
-_SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
-sys.path.insert(0, os.path.abspath(os.path.join(_SKILLS_DIR, "_shared")))
 
 from post_text import classify_fences, read_front_matter
 from problem_post import CODE_SECTION_PATTERN, IDEA_HEADING, RETRO_SECTION_PATTERN

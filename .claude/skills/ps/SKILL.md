@@ -5,7 +5,7 @@ description: PS 레포의 특정 날짜 풀이를 이 블로그의 포스트 스
 
 # ps — PS 포스트 스캐폴드 생성
 
-PS 레포 한 날짜의 풀이 → `_drafts/{platform}/` 드래프트들. 파일명·front matter·문제 링크·코드까지 자동이고 **`## 1. 아이디어`는 빈 헤딩**(작성은 `review-code` 뒤 사용자나 메인 세션이 하고, 규칙·작성 방식은 [`STYLE.md`](../_shared/STYLE.md)). PS 레포는 `{YYYY-MM}/src/day_{DD}/{접두사}_{번호}/`와 소스 파일 네이밍 규칙을 항상 지킨다고 보고 검증 없이 읽는다.
+PS 레포 한 날짜의 풀이 → `_drafts/{platform}/` 드래프트들. 파일명·front matter·문제 링크·코드까지 자동이고 **`## 1. 아이디어`는 빈 헤딩**(작성은 `review-code` 뒤 사용자나 `write-post`가 하고, 규칙은 [`STYLE.md`](../_shared/STYLE.md)). PS 레포는 `{YYYY-MM}/src/day_{DD}/{접두사}_{번호}/`와 소스 파일 네이밍 규칙을 항상 지킨다고 보고 검증 없이 읽는다.
 
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_post.py YYYY-MM-DD
@@ -20,7 +20,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_post.py YYYY-MM-DD
 
 ## 스캐폴드 규칙 (코드에서 안 보이는 것)
 
-- 같은 언어 파일이 여러 개면(`Main.java`+`Main2.java`) 파일명 끝자리 숫자로 접근법을 나눠 `### 풀이 1`/`### 풀이 2`(하나면 `### 풀이`). 접근 이름(`풀이 2: DP`)은 아이디어와 함께 사용자나 메인 세션이 붙인다(`STYLE.md`).
+- 같은 언어 파일이 여러 개면(`Main.java`+`Main2.java`) 파일명 끝자리 숫자로 접근법을 나눠 `### 풀이 1`/`### 풀이 2`(하나면 `### 풀이`). 접근 이름(`풀이 2: DP`)은 아이디어와 함께 사용자나 `write-post`가 붙인다(`STYLE.md`).
 - 헤딩 바로 아래 설명 = 그 접근법 전 언어 공통, 코드 블록 바로 아래 설명 = 그 언어 전용. 코드 블록을 자기 접근법 구간 밖으로 옮기면 `sync`가 못 찾는다.
 - SQL 전용 포스트는 `## 2. 쿼리`, 브래킷 `[MySQL]`, 코드펜스 ` ```sql `.
 - 회고는 생성하지 않는다. 실수·오답 원인 같은 구체적 사건이 있을 때만 코드 뒤에 `## 3. 회고`를 직접 추가(`STYLE.md`).

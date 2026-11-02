@@ -7,7 +7,6 @@
 """
 
 import os
-import re
 import sys
 
 _SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -19,7 +18,7 @@ from post_text import (
     extract_title,
     front_matter_block,
     read_front_matter,
-    yaml_scalar_value,
+    read_tags,
 )
 from problem_post import idea_is_filled
 from ps_source import resolve_source_folder
@@ -35,8 +34,7 @@ def blocking_defects(draft_path, text):
     """(발행을 막는 결함 목록, 표기 이슈 목록). 표기 이슈는 알리기만 한다."""
     defects = []
 
-    tags = yaml_scalar_value(front_matter_block(text), "tags") or ""
-    if not re.fullmatch(r"\[\s*\S.*\]", tags):
+    if not read_tags(front_matter_block(text)):
         defects.append("tags가 비어 있음")
     if not idea_is_filled(text):
         defects.append("'1. 아이디어' 섹션이 비어 있음")

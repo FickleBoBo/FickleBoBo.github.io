@@ -1,5 +1,5 @@
 """
-표기 규칙: 어투, 확정 가능한 맞춤법, 용어, 수식 표기. 보고만 하고 `publish`는 막지 않는다.
+표기 규칙: 어투, 확정 가능한 맞춤법, 용어, 수식 표기, 아이디어 구성. 보고만 하고 `publish`는 막지 않는다.
 
 기계적으로 확정되는 것만 둔다. 정규식이라 한계가 있다 — `수식 뒤 조사`는 지시어 "이"(`$N$ 이 값은`)를
 오탐할 수 있고, 천 단위 콤마는 연도 표기(19xx·20xx)를 예외로 두므로 2000·2048 같은 값은 못 잡는다.
@@ -13,6 +13,7 @@
 import re
 
 from post_text import classify_fences
+from problem_post import IDEA_HEADING
 
 INLINE_CODE_RE = re.compile(r"(`+)(.+?)\1")
 MATH_RE = re.compile(r"\$([^$\n]+)\$")
@@ -143,6 +144,48 @@ def _prose_lines(body):
         yield no, line, s[0] == "|"
 
 
+APPROACH_REF_RE = re.compile(r"풀이 ?\d")
+
+
+def _idea_paragraphs(body):
+    """아이디어 섹션의 (첫 줄 번호, 문단 텍스트) 목록. 구분선·이미지·주석 줄은 문단 경계로 본다."""
+    kinds, _ = classify_fences([line for _, line in body])
+    paras, cur, in_idea = [], [], False
+    for (no, line), kind in zip(body, kinds):
+        if kind != "text":
+            continue
+        s = line.strip()
+        if line.startswith("## "):
+            in_idea = line.rstrip() == IDEA_HEADING
+        if not in_idea or not s or s.startswith(("## ", "---", "![", "{:", "<!--")):
+            if cur:
+                paras.append((cur[0][0], " ".join(t for _, t in cur)))
+                cur = []
+        else:
+            cur.append((no, s))
+    if cur:
+        paras.append((cur[0][0], " ".join(t for _, t in cur)))
+    return paras
+
+
+def _idea_issues(body):
+    paras = _idea_paragraphs(body)
+    issues = [
+        (no, "접근 지칭", "아이디어에서 접근은 번호가 아니라 이름으로 가리킨다")
+        for no, text in paras
+        if APPROACH_REF_RE.search(text)
+    ]
+    if paras and "Follow-up" in paras[0][1]:
+        issues.append(
+            (
+                paras[0][0],
+                "Follow-up 문단",
+                "Follow-up은 첫 문단이 아니라 별도 문단으로 잇는다",
+            )
+        )
+    return issues
+
+
 def _text_issues(no, plain, plain_no_math):
     issues = []
     if "—" in plain_no_math:
@@ -174,7 +217,7 @@ def _math_issues(no, expr, is_table):
 
 def prose_issues(body):
     """`body`는 (줄 번호, 줄) 리스트."""
-    issues = []
+    issues = _idea_issues(body)
     for no, line, is_table in _prose_lines(body):
         plain = _strip_inline(line)
         plain_no_math = MATH_RE.sub(lambda m: " " * len(m.group(0)), plain)

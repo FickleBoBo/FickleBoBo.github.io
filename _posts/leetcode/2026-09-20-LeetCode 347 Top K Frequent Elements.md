@@ -2,11 +2,10 @@
 title: "[LeetCode] #347 - Top K Frequent Elements [Java][C++][Python]"
 date: 2026-09-20
 categories: [PS, LeetCode]
-tags: ["data structure", "hash table", "sorting"]
+tags: ["data structure", "hash set/map", "sorting"]
 slug: leetcode-347
 media_subpath: /assets/img/posts/leetcode-347/
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->
@@ -17,24 +16,13 @@ mermaid: false
 
 ## 1. 아이디어
 
-정수 배열 `nums`와 정수 `k`가 주어질 때, `nums`에서 가장 등장 빈도가 높은 `k`가지 원소를 구하는 문제다. 카운팅 맵을 활용해 각 원소와 등장 횟수를 기록한 후 등장 횟수를 기준으로 내림차순 정렬한 후 `k`개의 원소를 앞에서부터 순서대로 뽑으면 간단하게 해결할 수 있다.
+주어진 배열에서 가장 많이 등장한 원소 $k$개를 구하는 문제이고, 어느 풀이든 먼저 원소별 등장 횟수를 센다. 기본 풀이인 빈도순 정렬은 센 (원소, 횟수) 쌍을 횟수 내림차순으로 정렬해 앞의 $k$개를 취하며, 배열의 길이를 $n$이라 하면 고유 원소가 최대 $n$개라 $O(n \log n)$이다.
 
-Follow up은 $O(N \log N)$보다 빠른 시간복잡도로 이 문제를 해결해야 한다. 이때는 버킷 정렬을 활용하면 해결할 수 있는데 인덱스에 빈도수, 값에 원소들을 저장하는 배열을 만들어 카운팅 맵의 각 엔트리에 대해 버킷 정렬에 삽입하면 된다. 인덱스가 빈도수이므로 역순으로 순회하며 각 원소를 `k`개 담으면 된다.
-
----
-
-## 2. 복잡도
-
-| 접근        | 시간          | 공간   |
-| ----------- | ------------- | ------ |
-| 빈도순 정렬 | $O(N \log N)$ | $O(N)$ |
-| 버킷 정렬   | $O(N)$        | $O(N)$ |
-
-($N$ = `nums`의 길이, $K$ = 입력값 `k`. 빈도순 정렬의 Python은 `most_common(k)`가 힙 기반이라 시간 $O(N \log K)$)
+지문의 Follow-up은 시간 복잡도가 $O(n \log n)$보다 나을 것을 요구하므로 빈도순 정렬은 이를 만족하지 못하고, Follow-up에 맞춘 풀이가 버킷 정렬이다. 등장 횟수는 1 이상 $n$ 이하의 정수이므로 횟수를 인덱스로 하는 버킷에 원소를 담고 큰 인덱스부터 읽으면 정렬 없이 횟수 내림차순이 되어 $O(n)$에 끝난다.
 
 ---
 
-## 3. 코드
+## 2. 코드
 
 ### 풀이 1: 빈도순 정렬 [Java][C++][Python]
 
@@ -93,6 +81,8 @@ class Solution:
         return [x for x, _ in cnt.most_common(k)]
 ```
 
+`most_common`에 `k`를 넘겨 횟수 내림차순 상위 `k`개를 바로 얻었다.
+
 ---
 
 ### 풀이 2: 버킷 정렬 [Java][C++][Python]
@@ -127,6 +117,8 @@ class Solution {
 }
 ```
 
+큰 횟수의 버킷부터 이어 붙인 리스트에서 스트림의 `limit`으로 앞의 `k`개만 취하고, `mapToInt`로 `int[]`로 바꿔 반환했다.
+
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
@@ -152,6 +144,8 @@ class Solution {
 };
 ```
 
+큰 횟수의 버킷부터 `res`에 이어 붙인 뒤 `resize(k)`로 앞의 `k`개만 남겼다.
+
 ```python
 from collections import Counter
 from itertools import chain
@@ -168,5 +162,7 @@ class Solution:
 
         return list(chain.from_iterable(reversed(buckets)))[:k]
 ```
+
+`reversed`로 큰 횟수의 버킷부터 `chain.from_iterable`로 하나로 이어 붙이고, 앞의 `k`개를 슬라이스했다.
 
 ---

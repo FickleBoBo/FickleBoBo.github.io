@@ -19,9 +19,7 @@ CF API를 부르지 않고, 데이터(dict)를 받아 HTML을 만든 뒤 헤드�
   `(`가 없으면 `후기`만 둘째 줄. 글자 크기는 가장 긴 줄 길이에 맞춰 축소(`_title_size`).
 - 폰트는 macOS 기본 Apple SD Gothic Neo 우선(로컬 렌더 전제). 다른 환경이면
   폴백 체인의 다음 폰트.
-- Chrome이 없으면 예외(`ChromeNotFound`) — 호출부가 잡아서 카드 없이 진행.
-
-사용(디버그): `python3 render_card.py <out.png>` — 샘플 데이터로 렌더.
+- Chrome이 없으면 예외 — 호출부가 잡아서 카드 없이 진행.
 """
 
 import html
@@ -29,7 +27,6 @@ import math
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 
 MARKER_MAX = 12
@@ -46,10 +43,6 @@ CHROME_CANDIDATES = [
 ]
 
 
-class ChromeNotFound(RuntimeError):
-    pass
-
-
 def find_chrome():
     for c in CHROME_CANDIDATES:
         if not c:
@@ -59,7 +52,7 @@ def find_chrome():
                 return c
         elif shutil.which(c):
             return shutil.which(c)
-    raise ChromeNotFound("Chrome을 못 찾음(CHROME_BIN 환경변수로 지정 가능)")
+    raise RuntimeError("Chrome을 못 찾음(CHROME_BIN 환경변수로 지정 가능)")
 
 
 # ── 차트 ─────────────────────────────────────────────────────────────────────
@@ -87,8 +80,13 @@ def _chart_svg(vals, delta):
     W, H = CHART_W, CHART_H
     ymin, ymax, step = _axis(vals)
     n = len(vals)
-    X = lambda i: i * (W / (n - 1))
-    Y = lambda v: H - (v - ymin) / (ymax - ymin) * H
+
+    def X(i):
+        return i * (W / (n - 1))
+
+    def Y(v):
+        return H - (v - ymin) / (ymax - ymin) * H
+
     pts = [(X(i), Y(v)) for i, v in enumerate(vals)]
     line = " ".join(
         f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(pts)
@@ -197,7 +195,7 @@ h1 span{{background:linear-gradient(90deg,#aeb2ff,#7fe3b0);-webkit-background-cl
 
 
 def render_card(data, out_path):
-    """카드 PNG를 out_path에 쓴다. Chrome이 없으면 ChromeNotFound."""
+    """카드 PNG를 out_path에 쓴다. Chrome이 없으면 RuntimeError."""
     chrome = find_chrome()
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
@@ -222,25 +220,3 @@ def render_card(data, out_path):
         )
     if not os.path.exists(out_path):
         raise RuntimeError(f"Chrome이 스크린샷을 안 만듦: {out_path}")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(__doc__)
-        sys.exit(1)
-    render_card(
-        {
-            "name": "Codeforces Round 1122 (Div. 3)",
-            "date": "2026.09.21",
-            "solved": 3,
-            "total": 8,
-            "penalty": 162,
-            "rank": 9176,
-            "rank_count": 20851,
-            "pct": 44.0,
-            "ratings": [100, 474, 736, 953, 1043, 1105],
-            "delta": 62,
-        },
-        sys.argv[1],
-    )
-    print(sys.argv[1])

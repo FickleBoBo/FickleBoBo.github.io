@@ -4,9 +4,8 @@ Codeforces API 조회와 문제별 성적 계산 — 이 스킬에서 네트워�
 
 코드를 고칠 때 알아야 할 것:
 
-- **CF API는 익명 GET이면 브라우저 UA도 불필요**(지문 조회와 다름 — 프로젝트 메모리
-  `ps-problem-statement-fetch` 참고). 단 `contest.standings?contestId=`는 파라미터를
-  하나라도 더 붙이면 FAILED("no extra parameters") — bare로만 호출. 응답이 크다(수 MB,
+- **CF API는 익명 GET으로 읽힌다**(문제 페이지와 달리 막히지 않음). `contest.standings?contestId=`는
+  파라미터를 하나라도 더 붙이면 FAILED("no extra parameters") — bare로만 호출. 응답이 크다(수 MB,
   행 ~11000에서 잘리지만 JSON 자체는 유효하고 우리가 쓰는 `result.contest`/`result.problems`는
   앞부분이라 안전).
 - **페널티는 어느 API에도 없다** — 반드시 계산한다. CF Div 3는 ICPC 방식: 해결한 문제마다
@@ -23,8 +22,7 @@ Codeforces API 조회와 문제별 성적 계산 — 이 스킬에서 네트워�
   표시와 정확히 일치.
 """
 
-import json
-import urllib.request
+from judge.net import get_json
 
 HANDLE = "FickleBoBo"
 CF_API = "https://codeforces.com/api"
@@ -33,10 +31,7 @@ CF_API = "https://codeforces.com/api"
 def cf_get(method, **params):
     """CF API 호출 → result 반환. status != OK면 예외."""
     qs = "&".join(f"{k}={v}" for k, v in params.items())
-    url = f"{CF_API}/{method}?{qs}" if qs else f"{CF_API}/{method}"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    data = get_json(f"{CF_API}/{method}?{qs}" if qs else f"{CF_API}/{method}")
     if data.get("status") != "OK":
         raise RuntimeError(f"CF API {method} 실패: {data.get('comment', data)}")
     return data["result"]

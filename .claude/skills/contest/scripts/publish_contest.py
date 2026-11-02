@@ -1,26 +1,13 @@
 """
-대회 후기 드래프트 하나(`_drafts/contest/{파일}.md`)를 `_posts/contest/`로 옮기고, 이 블로그
-레포 + PS 레포(형제 디렉토리) 양쪽에 각각 커밋한다. push는 안 함. `publish` 스킬과 같은
-"옮긴 뒤 레포별로 각각 커밋" 흐름이고, 후기 장르라 갈라지는 부분만 다르다:
+대회 후기 드래프트 하나(`_drafts/contest/{파일}.md`)를 `_posts/contest/`로 옮기고 블로그 레포와
+PS 레포 양쪽에 같은 메시지(`feat: [Contest] {CF API 대회명} 후기`)로 각각 커밋한다. push는 안 함.
+`publish`와 같은 흐름이고(`git_ops.move_and_commit`), 후기 장르라 갈라지는 부분만 다르다:
 
-- **완료 게이트가 다르다.** 후기엔 `## 1. 아이디어`가 없다. 대신 스캐폴드가 남기는
-  미완 표식(라이브 코드 자리·ratingChanges 자리·레이팅 그래프 이미지)과 `## 총평`이 채워졌는지
-  검사한다(`not_ready_reason`). 서술의 질은 사람 몫이라 검사 안 함.
-- **PS 레포 소스가 1:N.** `publish`는 slug로 폴더 하나를 찾지만, 후기는 그 대회의 라이브 코드
-  폴더 여러 개(`live_{contestId}{index}` — 대회날 `day_XX`에 문제별로)에 대응한다. 전부 같은
-  메시지로 커밋한다.
-- **커밋 메시지**: `feat: [Contest] {CF API 대회명} 후기`(블로그·PS 레포 동일). 대회명은 포스트
-  `title`에서 그대로(front matter가 `"{대회명} 후기"`). 트레일러는 `commit`이 붙이는
-  `Co-Authored-By: Claude <noreply@anthropic.com>`(모델명 없음 — 정적 스크립트라 커밋 시점
-  모델 버전을 모름, 블로그 CLAUDE.md "트레일러 모델명 규칙").
-
-코드를 고칠 때 알아야 할 것:
-- PS 레포 쪽(`live_` 폴더) 검증을 블로그 레포를 건드리기 *전에* 한다 — `publish.py`와 같은
-  이유. `live_` 폴더를 하나도 못 찾으면 아무것도 안 옮기고 에러.
-- `os.rename` 이후부턴 실패해도 파일을 원래 자리로 안 되돌림 — 예외 메시지에 어디까지
-  진행됐는지 명시.
-- `live_` 패턴은 실제 관측된 레이아웃(`live_2259a`~`live_2259e`, 문제별)만 매칭한다
-  (`_live_folder_re`). 대회 하나에 폴더 하나로 바뀌면 그 함수도 손볼 것.
+- 완료 게이트는 `## 1. 아이디어` 대신 스캐폴드가 남기는 미완 표식과 `## 총평`을 본다
+  (`not_ready_reason`). 서술의 질은 사람 몫이라 검사하지 않는다.
+- PS 레포 소스가 1:N이다. 대회날 `day_XX`에 문제별로 생긴 `live_{contestId}{index}` 폴더 전부를
+  커밋한다. 패턴(`_live_folder_re`)은 실제 관측된 레이아웃만 매칭하므로 폴더 구조가 바뀌면 손볼 것.
+- 폴더를 하나도 못 찾으면 블로그 레포를 건드리기 전에 에러로 끝낸다.
 
 사용법:
     python3 publish_contest.py <후기 .md 경로 또는 대회 ID/URL>
@@ -31,8 +18,7 @@ import os
 import re
 import sys
 
-# `_shared`를 import 순서와 무관하게 찾도록 진입점에서 먼저 sys.path에 넣는다.
-# (아래 import를 정렬해도 깨지지 않게 — contest_common의 삽입에 기대지 않는다.)
+# 아래 import(contest_common·cf_contest 포함)가 `_shared`를 찾도록 먼저 sys.path에 넣는다.
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
 )
@@ -62,8 +48,7 @@ def resolve_draft(arg):
             raise ValueError(f"_drafts/contest/ 아래 있는 드래프트가 아님: {abs_path}")
         return abs_path
 
-    # 경로처럼 생겼는데 파일이 없으면 경로 오타 — 아래 숫자 추출이 경로 속 날짜("2026") 등을
-    # 대회 ID로 오인하지 않게 여기서 명확히 실패한다.
+    # 경로 오타를 대회 ID로 오인하지 않게(경로 속 "2026" 등) 여기서 실패시킨다.
     if "/" in arg or arg.endswith(".md"):
         raise ValueError(f"후기 드래프트 파일을 찾을 수 없음: {abs_path}")
 
@@ -109,7 +94,9 @@ def not_ready_reason(text, slug):
         return "rating-graph.png가 없음(캡처해 넣거나 본문의 이미지 줄을 지울 것)"
     m = re.search(r"^## 총평\s*\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
     body = re.sub(r"<!--.*?-->", "", m.group(1) if m else "", flags=re.DOTALL)
-    if not "\n".join(l for l in body.splitlines() if l.strip() != "---").strip():
+    if not "\n".join(
+        line for line in body.splitlines() if line.strip() != "---"
+    ).strip():
         return "'## 총평'이 비어 있음"
     return None
 

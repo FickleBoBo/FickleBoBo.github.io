@@ -2,8 +2,7 @@
 대회 후기의 front matter + 본문 스켈레톤 조립 — 순수 함수(네트워크·파일 I/O 없음).
 데이터 수집은 `cf_contest.py`, 파일 쓰기는 `scaffold_contest.py`.
 
-**후기 '양식'(섹션 구성·표 컬럼·어휘)은 `contest/SKILL.md`가 정본, 설계 근거 전체는
-프로젝트 메모리 `contest-recap-post-format.md`.** 여기엔 옆 코드만 봐선 안 보이는 '왜'만:
+**후기 '양식'(섹션 구성·표 컬럼·어휘)은 `contest/SKILL.md`가 정본.** 여기엔 옆 코드만 봐선 안 보이는 '왜'만:
 
 - **"---" 구분선 소유권**: `ps`의 `scaffold_post.py`와 똑같이 항상 "뒤 섹션이 자기 앞에
   다는 것"(섹션 사이 접착제 아님). `## 3. 풀이 과정` 안의 각 `### {index}` 서브섹션도
@@ -17,7 +16,7 @@
 import re
 
 from contest_common import CARD_NAME, CODEFORCES_POSTS_DIR, find_posts_by_slug
-from post_text import yaml_dq  # 진입점이 sys.path에 _shared를 넣은 뒤여야 함
+from post_text import yaml_dq
 
 LIVE_CODE_PLACEHOLDER = "// 라이브 코드"
 RATING_PLACEHOLDER = "<!-- ratingChanges 미반영 — 확정 후 수동 -->"

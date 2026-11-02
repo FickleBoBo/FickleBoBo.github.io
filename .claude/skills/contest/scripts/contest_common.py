@@ -1,14 +1,10 @@
 """
 대회 후기 스크립트(`scaffold_contest.py`·`publish_contest.py`)가 같이 쓰는 경로 상수와
-slug로 후기 파일을 찾는 헬퍼. 스킬이 아니라 이 스킬의 내부 모듈(SKILL.md 없음).
+slug로 후기 파일을 찾는 헬퍼. 진입점이 `_shared`를 `sys.path`에 넣은 뒤 import된다.
 """
 
 import os
 import re
-import sys
-
-_SKILLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-sys.path.insert(0, os.path.join(_SKILLS_DIR, "_shared"))
 
 from post_text import front_matter_block, yaml_scalar_value
 from repo import DRAFTS_DIR, POSTS_DIR

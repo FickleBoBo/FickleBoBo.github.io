@@ -6,7 +6,7 @@
 이슈는 `(줄 번호, 규칙 이름, 설명)`이고 구조(`publish`가 막음)와 표기(보고만)로 나뉜다. 두 종류의 규칙
 목록과 근거는 `STYLE.md`가 정본이다. 규칙을 바꾸면 거기도 같이 바꾼다.
 
-- `structure`: 구조 규칙(front matter·제목·섹션·풀이 헤딩·코드 블록)
+- `structure`: 구조 규칙(front matter·제목·섹션·풀이 헤딩·코드 블록·이미지)
 - `tags`: 태그 규칙
 - `prose`: 표기 규칙(어투·맞춤법·용어·수식)
 
@@ -25,13 +25,22 @@ from .prose import prose_issues
 from .structure import (
     approach_issues,
     front_matter_issues,
+    image_issues,
     layout_issues,
     scan_layout,
 )
 from .tags import tag_issues
 
 # 구조 이슈의 규칙 이름. 이 밖의 이슈는 표기 이슈(보고만)다
-STRUCTURE_RULES = {"front matter", "제목", "섹션", "풀이 헤딩", "코드 블록", "태그"}
+STRUCTURE_RULES = {
+    "front matter",
+    "제목",
+    "섹션",
+    "풀이 헤딩",
+    "코드 블록",
+    "이미지",
+    "태그",
+}
 
 
 def split_issues(issues):
@@ -61,5 +70,6 @@ def lint(path, strict=False):
         ),
         *fm_issues,
         *layout_issues(layout, title_langs),
+        *image_issues(fm, body),
         *prose_issues(body),
     ]

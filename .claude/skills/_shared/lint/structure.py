@@ -1,14 +1,17 @@
 """
 구조 규칙: front matter 필수 키, 제목 형식·언어 브라켓 순서, 섹션 헤딩, `### 풀이` 헤딩 형식, 코드 블록
-언어(풀이 헤딩 브라켓·제목과의 일치), 펜스 짝. `publish`가 이 규칙 위반이 있으면 막는다.
+언어(풀이 헤딩 브라켓·제목과의 일치), 펜스 짝, 이미지(파일 존재·라이트/다크 쌍). `publish`가 이 규칙
+위반이 있으면 막는다.
 """
 
+import os
 import re
 from dataclasses import dataclass, field
 
 from post_text import classify_fences, yaml_scalar_value
 from problem_post import CODE_HEADING, IDEA_HEADING, QUERY_HEADING
 from ps_source import LANGUAGE_DISPLAY_ORDER, LANGUAGE_OF_FENCE, is_sql_only
+from repo import REPO_ROOT
 
 REQUIRED_KEYS = ("title", "date", "categories", "tags", "slug")
 TITLE_RE = re.compile(r"^\[[^\[\]]+\] #\S+ - .+? (?P<langs>(?:\[[^\[\]]+\])+)$")
@@ -21,6 +24,12 @@ SINGLE_HEADING_RE = re.compile(rf"^### 풀이{_LANGS}$")
 MULTI_HEADING_RE = re.compile(rf"^### 풀이 (\d+): (\S.*?){_LANGS}$")
 # ps 스캐폴드 직후(이름 전)
 SCAFFOLD_HEADING_RE = re.compile(rf"^### 풀이 (\d+){_LANGS}$")
+
+# 이미지 `![alt](src){: .light }` (IMAGE_STYLE.md "다크 모드")
+IMAGE_RE = re.compile(
+    r"!\[(?P<alt>[^\]]*)\]\((?P<src>[^)\s]+)\)(?:\{:(?P<attr>[^}]*)\})?"
+)
+THEME_SUFFIX_RE = re.compile(r"^(?P<stem>.+)-(?P<mode>light|dark)(?P<ext>\.\w+)$")
 
 
 def bracket_langs(s):
@@ -195,4 +204,47 @@ def layout_issues(layout, title_langs):
                 f"제목 언어 브라켓 {title_langs}과 풀이 헤딩 브라켓 {sorted(union)}이 다름",
             )
         )
+    return issues
+
+
+def image_issues(fm, body):
+    """본문 이미지: 파일이 `media_subpath` 아래에 있는지, 클래스(`.light`·`.dark`)가 파일명 접미사와
+    맞는지, 라이트·다크 쌍이 같은 alt로 모두 있는지(IMAGE_STYLE.md). 외부 URL은 보지 않는다."""
+    kinds, _ = classify_fences([line for _, line in body])
+    media = yaml_scalar_value(fm, "media_subpath") or ""
+    issues = []
+
+    def add(no, msg):
+        issues.append((no, "이미지", msg))
+
+    pairs = {}  # (stem, ext) -> {mode: (줄 번호, alt)}
+    for (no, line), kind in zip(body, kinds):
+        if kind != "text":
+            continue
+        for m in IMAGE_RE.finditer(line):
+            src = m.group("src")
+            if re.match(r"([a-z]+:)?//|/", src):
+                continue
+            if not media:
+                add(no, f"상대 경로 이미지인데 `media_subpath`가 없음: {src}")
+                continue
+            if not os.path.isfile(os.path.join(REPO_ROOT, media.strip("/"), src)):
+                add(no, f"파일이 없음: {media.rstrip('/')}/{src}")
+            theme = THEME_SUFFIX_RE.match(src)
+            if not theme:
+                add(no, f"파일명이 `{{이름}}-light|dark.확장자` 형식이 아님: {src}")
+                continue
+            mode = theme.group("mode")
+            classes = set(re.findall(r"\.([\w-]+)", m.group("attr") or ""))
+            if classes & {"light", "dark"} != {mode}:
+                add(no, f"`{src}`에 `{{: .{mode} }}` 클래스만 있어야 함")
+            key = (theme.group("stem"), theme.group("ext"))
+            pairs.setdefault(key, {})[mode] = (no, m.group("alt"))
+    for (stem, ext), modes in pairs.items():
+        if len(modes) == 1:
+            ((mode, (no, _)),) = modes.items()
+            other = "dark" if mode == "light" else "light"
+            add(no, f"`{stem}-{mode}{ext}`의 짝 `{stem}-{other}{ext}`가 본문에 없음")
+        elif modes["light"][1] != modes["dark"][1]:
+            add(modes["dark"][0], f"`{stem}{ext}` 라이트·다크의 alt가 다름")
     return issues

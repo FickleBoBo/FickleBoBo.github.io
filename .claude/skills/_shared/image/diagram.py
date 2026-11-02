@@ -1,12 +1,14 @@
 """PS 포스트 도식용 공용 모듈(스타일 정본은 IMAGE_STYLE.md).
 
-도식 하나는 `draw(c, frame) -> str` 함수(SVG 본문 문자열 반환)로 쓰고, `emit`이 라이트/다크 SVG와
-(프레임이 여럿이면) GIF를 만든다. 알고리즘 상태(프레임)는 호출하는 쪽이 코드로 계산해 넘긴다.
+도식 하나는 `draw(c, frame, solid_bg) -> str` 함수(`svg(...)`로 감싼 SVG 문자열 반환, `solid_bg`는
+GIF용 단색 배경 여부)로 쓰고, `emit`이 라이트/다크 SVG와 (프레임이 여럿이면) GIF를 만든다.
+알고리즘 상태(프레임)는 호출하는 쪽이 코드로 계산해 넘긴다.
 GIF 래스터화에 `rsvg-convert`(brew install librsvg)와 Pillow가 필요하다.
 """
 
 import io
 import subprocess
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from PIL import Image
@@ -136,7 +138,9 @@ def emit(out_dir, name, draw, frames, static_index=-1, gif=True, ms=1000):
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     for mode, c in THEMES.items():
-        (out / f"{name}-{mode}.svg").write_text(draw(c, frames[static_index], False))
+        static = draw(c, frames[static_index], False)
+        ET.fromstring(static)  # XML 오류면 ParseError로 멈춘다(깨진 SVG를 쓰지 않는다)
+        (out / f"{name}-{mode}.svg").write_text(static)
         if gif and len(frames) > 1:
             save_gif(
                 [raster(draw(c, f, True)) for f in frames],

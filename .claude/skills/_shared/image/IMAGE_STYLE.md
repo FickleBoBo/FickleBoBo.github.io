@@ -1,6 +1,6 @@
 # 포스트 이미지 스타일
 
-PS 포스트의 도식 정본. 생성은 같은 폴더의 `diagram.py`(팔레트 토큰·그리기 헬퍼·SVG/GIF 출력)를 쓰고, 도식마다 `draw(c, frame, solid_bg)` 함수를 짠다. 샘플 구현: `assets/img/posts/leetcode-202/make_diagrams.py`(노드·간선·포인터 라벨, 사이클 탐색 GIF).
+PS 포스트의 도식 정본. **도식은 글보다 그림이 이해를 확실히 돕는 경우에만 넣는다**(후보 기준은 `post-reviewer`의 "도식 후보"). 넣는다면 모든 도식이 한 시리즈로 보이도록 일관된 디자인을 쓰고, 라이트·다크 모드를 둘 다 지원한다. 생성은 같은 폴더의 `diagram.py`(팔레트 토큰·그리기 헬퍼·SVG/GIF 출력)를 쓰고, 도식마다 `draw(c, frame, solid_bg)` 함수를 짠다. 샘플 구현: `assets/img/posts/leetcode-202/make_diagrams.py`(노드·간선·포인터 라벨, 사이클 탐색 GIF).
 
 ## 원칙
 
@@ -47,10 +47,21 @@ PS 포스트의 도식 정본. 생성은 같은 폴더의 `diagram.py`(팔레트
 
 파일은 `assets/img/posts/{slug}/`에 두고 front matter `media_subpath`(스캐폴드가 넣는다)로 상대 경로를 쓴다. `diagram.py`의 `emit`이 `{이름}-light|dark.svg`·`.gif`를 한 번에 만든다. 두 벌 모두 `alt`를 같게 쓴다.
 
-**생성 스크립트는 결과물과 같은 폴더에 `make_diagrams.py`로 둔다**(예: `assets/img/posts/leetcode-202/make_diagrams.py`). 도식과 만든 방법이 한곳에 있고, 포스트를 옮기거나 지울 때 같이 움직인다. 공용 모듈 `diagram.py`는 스크립트가 레포 루트 기준 경로로 불러온다. 스크립트는 입력 값 선택 이유, 출력 위치, 실행 방법을 위쪽 docstring에 적고, 인자 없이 돌리면 그 폴더의 GIF를 다시 만들게 한다. 도식이 여러 개면 한 스크립트에 함께 둔다. 수정하면 GIF를 다시 만들어 눈으로 확인한 뒤 같이 커밋해서, 이전 버전은 git 이력으로 남긴다. Python 포맷은 Prettier가 아니라 Ruff를 쓴다(VS Code의 `[python]` 설정이 저장 시 `ruff format`·fixAll·organizeImports를 돌린다). 명령줄로는 VS Code Ruff 확장에 번들된 `ruff format <파일>`로 같은 결과가 나온다.
+## 생성 스크립트
+
+**결과물과 같은 폴더에 `make_diagrams.py`로 둔다**(예: `assets/img/posts/leetcode-202/make_diagrams.py`). 도식과 만든 방법이 한곳에 있고, 포스트를 옮기거나 지울 때 같이 움직인다.
+
+- 공용 모듈 `diagram.py`는 스크립트가 레포 루트 기준 경로로 불러온다.
+- 위쪽 docstring에 입력 값 선택 이유, 출력 위치, 실행 방법을 적고, 인자 없이 돌리면 그 폴더의 GIF를 다시 만들게 한다. 도식이 여러 개면 한 스크립트에 함께 둔다.
+- 수정하면 GIF를 다시 만들어 눈으로 확인한 뒤 같이 커밋해서, 이전 버전은 git 이력으로 남긴다.
+- Python 포맷은 Prettier가 아니라 Ruff를 쓴다(VS Code의 `[python]` 설정이 저장 시 `ruff format`·fixAll·organizeImports를 돌린다). 명령줄로는 VS Code Ruff 확장에 번들된 `ruff format <파일>`로 같은 결과가 나온다.
 
 ## 만든 뒤 확인
 
-- 라이트·다크 둘 다 직접 렌더해서 눈으로 본다(글자 잘림, 색 구분, 대비).
-- 상태를 코드로 계산했으면 최종 값이 풀이 결과와 일치하는지 한 번 대조한다.
+틀린 도식은 없는 도식보다 나쁘다. 아래를 모두 하고, 못 한 항목은 보고에 적는다.
+
+- **서식**: `emit`이 정적 SVG의 XML 오류와 렌더 실패를 막는다. 그 밖의 시각 문제(글자 잘림·겹침, 색 구분, 대비)는 라이트·다크 둘 다 처음·중간·마지막 프레임을 PNG로 내려 직접 본다(`rsvg-convert`로 래스터화한 뒤 Read로 연다).
+- **값**: 도식의 상태는 풀이 로직을 도식 코드에서 실행해 얻고, 같은 입력으로 포스트의 코드 블록(Java·C++·Python 중 실행 가능한 것)을 실제로 돌려 최종 값이 같은지 대조한다. 스크립트 안에 `assert`로 남긴다.
+- **설명**: 본문과 alt에 쓴 수치(입력, 반복 횟수, 만나는 값 등)는 손으로 옮기지 않고 스크립트 출력에서 가져와 한 글자씩 대조한다. 도식이 보여 주는 단계와 본문이 말하는 단계가 같은 순서인지, 색 역할이 본문 서술(예: "빠른 포인터")과 맞는지도 본다.
+- **발행 전**: `lint_post.py`의 `이미지` 이슈가 0건이어야 한다(검사 항목은 `STYLE.md`, 위반이면 `publish`가 막는다).
 - 로컬에서 `jekyll serve`로 `.light`/`.dark` 전환이 실제로 되는지 한 번 확인한다(사용자 몫).

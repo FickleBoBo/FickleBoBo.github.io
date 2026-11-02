@@ -6,7 +6,7 @@ description: 이미 존재하는 블로그 포스트의 코드 블록을 PS 레�
 # sync — 포스트 코드 블록 재동기화
 
 ```
-python3 <이 스킬의 base directory>/scripts/sync_code.py <포스트 .md 경로 | 폴더>
+python3 ${CLAUDE_SKILL_DIR}/scripts/sync_code.py <포스트 .md 경로 | 폴더>
 ```
 
 포스트 하나, 또는 폴더 아래 `.md` 전부(드래프트·발행분 무관). 에러가 있으면 종료 코드 1이다.

@@ -9,7 +9,8 @@ import sys
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_shared"))
 )
-from blog_common import read_front_matter, resolve_source_folder
+from post_text import read_front_matter
+from ps_source import resolve_source_folder
 from sync_text import sync_text
 
 

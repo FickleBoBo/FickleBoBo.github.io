@@ -1,5 +1,6 @@
 ---
 title: "Codeforces Round 1125 (Div. 3) 후기"
+description: "대회 중 3/8문제 해결 · 6991위 · 레이팅 1105 → 1145 (+40)"
 date: 2026-10-07
 categories: [Contest]
 tags: ["codeforces", "div 3"]
@@ -8,7 +9,6 @@ media_subpath: /assets/img/posts/codeforces-2275/
 image:
   path: preview.png
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->

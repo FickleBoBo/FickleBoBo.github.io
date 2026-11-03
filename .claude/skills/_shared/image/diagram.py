@@ -32,6 +32,10 @@ THEMES = {
         green_t="#d2efe5",
         red="#d55e00",
         red_t="#fbe0cf",
+        purple="#a8478a",
+        purple_t="#f2dcec",
+        yellow="#8f7500",
+        yellow_t="#f5edbd",
     ),
     "dark": dict(
         bg="#1b1b1e",
@@ -51,6 +55,10 @@ THEMES = {
         green_t="#1a3d33",
         red="#ff8c5a",
         red_t="#4d2a1a",
+        purple="#e49ccb",
+        purple_t="#44243b",
+        yellow="#f0e442",
+        yellow_t="#4a4410",
     ),
 }
 SANS = "Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif"

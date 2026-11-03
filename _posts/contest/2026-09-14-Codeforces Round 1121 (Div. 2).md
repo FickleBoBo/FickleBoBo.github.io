@@ -1,5 +1,6 @@
 ---
 title: "Codeforces Round 1121 (Div. 2) 후기"
+description: "대회 중 1/7문제 해결 · 6263위 · 레이팅 953 → 1043 (+90)"
 date: 2026-09-14
 categories: [Contest]
 tags: ["codeforces", "div 2"]
@@ -8,7 +9,6 @@ media_subpath: /assets/img/posts/codeforces-2264/
 image:
   path: preview.png
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->

@@ -39,6 +39,7 @@ from contest_common import (
 from post_text import front_matter_block
 from recap_body import (
     build_body,
+    build_description,
     build_front_matter,
     determine_div_tags,
     image_front_matter,
@@ -193,6 +194,7 @@ def scaffold(contest_id, force):
         start_kst,
         slug,
         determine_div_tags(contest["name"]),
+        build_description(data["problems"], data["by_index"], data["mine"]),
         has_card=bool(card),
     )
     body = build_body(

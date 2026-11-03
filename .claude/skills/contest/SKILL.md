@@ -29,13 +29,14 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_contest.py <대회 ID 또는 URL> [
 - `_drafts/contest/{파일명}`이 이미 있으면 거부(사람이 채운 서술·라이브 코드 보호). 재생성은 `--force`.
 - `assets/img/posts/{slug}/` 폴더도 같이 만든다(레이팅 그래프 스크린샷 자리). 여기에 프리뷰 카드 `preview.png`(2400×1260)를 렌더하고 front matter에 `image:`를 넣는다. 로컬 Chrome이 필요하고(`CHROME_BIN`으로 경로 지정 가능) 없거나 렌더가 실패하면 카드만 빠진다(stderr 경고).
 - `--card-only`: 이미 있는 후기(`_drafts/contest`·`_posts/contest`, slug로 탐색)의 카드만 (재)생성하고 `image:`가 없으면 넣는다. 서술·코드는 안 건드려서 `--force`와 달리 덮어써도 안전하다. 순위·레이팅 확정 뒤 카드 갱신, 과거 후기 소급, 디자인 변경 후 재생성에 쓴다.
-- 대회 직후 `ratingChanges`가 비어 있으면 순위·레이팅 행을 placeholder(HTML 주석)로 남긴다. 확정 후 그 행만 채우거나 `--force`로 재생성하고, 카드는 `--card-only`로 다시 만든다.
+- 대회 직후 `ratingChanges`가 비어 있으면 순위·레이팅 행을 placeholder(HTML 주석)로 남기고 `description`에서도 뺀다. 확정 후 그 행과 `description`만 채우거나 `--force`로 재생성하고, 카드는 `--card-only`로 다시 만든다.
 - 성공하면 stdout엔 쓴 파일의 절대경로만. stderr엔 페널티·순위·레이팅 요약과 그래프 저장 경로(눈 대조용).
 
 ## 채워지는 것 (양식 정본은 `recap_body.py`)
 
 - 파일명 `{대회 시작일 KST}-{CF 대회명 그대로}.md`, `title` `"{대회명} 후기"`, `date` 대회 시작일(KST), `categories` `[Contest]`, `slug` `codeforces-{contestId}`.
 - `tags`: `["codeforces"]` + 대회명이 정확히 `(Div. N)`·`(Rated for Div. N)` 꼴이면 `"div N"`. 통합 라운드(`Div. 1 + Div. 2`)·Global 등은 사람이 추가.
+- `description`: `대회 중 {푼 수}/{문제 수}문제 해결 · {순위}위 · 레이팅 {이전} → {이후} ({변동})`. 검색·공유용 요약이자 Chirpy가 제목 밑에 보여 주는 부제다(없으면 `<meta description>`이 본문 첫 줄 "대회 링크"가 된다). 순위·레이팅이 미확정이면 앞부분만 들어가니, 확정 뒤 `## 2. 결과`를 채울 때 같이 맞춘다.
 - 본문: `## 1. 대회 개요` 표, `## 2. 결과` 표(푼 문제·페널티·순위·레이팅)와 `rating-graph.png` 참조, `## 3. 풀이 과정` 표(문제·결과·제출 시각·WA), 문제마다 `### {index}. {name}` 서브섹션(빈 `c++` 펜스, AC·업솔빙·실재하는 미해결엔 `풀이 →` 링크), 헤딩만 있는 `## 총평`.
 - 결과 라벨은 `AC`·`업솔빙`·`미해결`·`미시도`. 미시도 문제는 `대회 중 미시도.` 한 줄.
 - 페널티는 API에 없어서 스크립트가 계산한다(ICPC 방식, 규칙은 `cf_contest.py` docstring). 순위·레이팅은 `contest.ratingChanges` 기준인데 CF가 페이지끼리도 값이 다르므로 발행 전 `/contest/{id}/standings`와 눈으로 대조한다.

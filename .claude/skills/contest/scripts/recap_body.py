@@ -91,12 +91,26 @@ def image_front_matter():
     return ["image:", f"  path: {CARD_NAME}"]
 
 
-def build_front_matter(contest, start_kst, slug, tags, has_card=False):
+def build_description(problems, by_index, mine):
+    """front matter `description` — 검색 결과·공유 카드의 요약이자 Chirpy가 제목 밑에
+    한 줄로 보여 주는 부제. 없으면 본문 첫 문단(대회 링크 박스)이 `<meta description>`이
+    되어 "대회 링크"만 남는다. 제목이 이미 대회명이라 결과 수치만 쓴다. 순위·레이팅은
+    `## 2. 결과`와 같은 값(ratingChanges 기준)이고 미확정(`mine` 없음)이면 뺀다."""
+    solved = sum(by_index[p["index"]]["result"] == "AC" for p in problems)
+    parts = [f"대회 중 {solved}/{len(problems)}문제 해결"]
+    if mine:
+        old, new = mine["oldRating"] or 100, mine["newRating"]  # 0은 첫 대회 센티넬
+        parts += [f"{mine['rank']}위", f"레이팅 {old} → {new} ({signed(new - old)})"]
+    return " · ".join(parts)
+
+
+def build_front_matter(contest, start_kst, slug, tags, description, has_card=False):
     tag_list = ", ".join(f'"{t}"' for t in tags)
     title = yaml_dq(contest["name"])
     lines = [
         "---",
         f'title: "{title} 후기"',
+        f'description: "{yaml_dq(description)}"',
         f"date: {start_kst:%Y-%m-%d}",
         "categories: [Contest]",
         f"tags: [{tag_list}]",
@@ -104,7 +118,6 @@ def build_front_matter(contest, start_kst, slug, tags, has_card=False):
         f"media_subpath: /assets/img/posts/{slug}/",
         *(image_front_matter() if has_card else []),
         "math: true",
-        "mermaid: false",
         "---",
     ]
     return "\n".join(lines)

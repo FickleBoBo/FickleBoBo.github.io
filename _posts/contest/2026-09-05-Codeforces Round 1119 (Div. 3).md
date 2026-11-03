@@ -1,5 +1,6 @@
 ---
 title: "Codeforces Round 1119 (Div. 3) 후기"
+description: "대회 중 4/8문제 해결 · 5272위 · 레이팅 100 → 474 (+374)"
 date: 2026-09-05
 categories: [Contest]
 tags: ["codeforces", "div 3"]
@@ -8,7 +9,6 @@ media_subpath: /assets/img/posts/codeforces-2259/
 image:
   path: preview.png
 math: true
-mermaid: false
 ---
 
 <!-- prettier-ignore -->

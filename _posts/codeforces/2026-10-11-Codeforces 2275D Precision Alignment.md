@@ -2,7 +2,7 @@
 title: "[Codeforces] #2275D - Precision Alignment [C++]"
 date: 2026-10-11
 categories: [PS, Codeforces]
-tags: ["ad hoc", "binary search", "parametric search"]
+tags: ["binary search", "parametric search"]
 slug: codeforces-2275d
 media_subpath: /assets/img/posts/codeforces-2275d/
 math: true

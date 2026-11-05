@@ -84,7 +84,7 @@ tags:
   interval dp: { parents: [dynamic programming] }
   lis: { parents: [dynamic programming] }
   lcs: { parents: [dynamic programming], contextual: [string] }
-  "kadane's algorithm": { parents: [dynamic programming] }
+  "kadane's algorithm": { parents: [dynamic programming, greedy] } # 다중부모
   # tree dp는 위 tree 섹션에서 정의(다중부모라 여기서 중복 정의 안 함)
   dp optimization: { parents: [dynamic programming] }
   convex hull trick: { parents: [dp optimization] }

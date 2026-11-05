@@ -2,7 +2,7 @@
 title: "[Codeforces] #2260A - Monocarp's Contest [C++]"
 date: 2026-09-09
 categories: [PS, Codeforces]
-tags: ["ad hoc"]
+tags: ["warm up"]
 slug: codeforces-2260a
 media_subpath: /assets/img/posts/codeforces-2260a/
 math: true

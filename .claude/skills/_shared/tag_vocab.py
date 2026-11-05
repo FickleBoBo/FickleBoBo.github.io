@@ -65,34 +65,26 @@ def _expand(leaf_tags, parents_map):
 
 
 def _order(tags, parents_map):
-    """태그 집합을 최상위 조상 알파벳순 체인으로 재배열한다(입력 순서는 안 씀)."""
+    """태그 집합을 정규 순서로 재배열한다(입력 순서는 안 씀).
+    각 태그의 키는 (가장 뒤에 나오는 부모의 키) + (자기 이름)이고 키 순으로 정렬한다.
+    그러면 최상위 조상 알파벳순 체인이 되고 체인 안은 부모 → 자식이며, 다중부모 태그는
+    부모를 모두 쓴 뒤에 온다."""
     tag_set = set(tags)
-    children = {}
-    roots = []
-    for tag in tags:
-        # 주 체인 부모: parents 목록에서 먼저 나오면서 이 집합에 포함된 것
-        parent = next((p for p in parents_map[tag] if p in tag_set), None)
-        if parent is None:
-            roots.append(tag)
-        else:
-            children.setdefault(parent, []).append(tag)
+    keys = {}
 
-    ordered = []
+    def key(tag):
+        if tag not in keys:
+            parents = [p for p in parents_map[tag] if p in tag_set]
+            keys[tag] = (max(key(p) for p in parents) if parents else ()) + (tag,)
+        return keys[tag]
 
-    def visit(tag):
-        ordered.append(tag)
-        for child in sorted(children.get(tag, [])):
-            visit(child)
-
-    for root in sorted(roots):
-        visit(root)
-    return ordered
+    return sorted(tags, key=key)
 
 
 def canonical_tags(leaf_tags):
     """leaf 태그를 조상까지 펼쳐 정규 순서로 정렬한 `tags:` 배열. 어휘집에 없는 태그는 ValueError.
     정규 순서는 최상위 조상 알파벳순 체인이고 체인 안은 상위 → 하위, 같은 부모 밑 형제는 알파벳순이다
     (`bfs`+`bit manipulation` → `bit manipulation, graph, bfs`). 다중부모 태그(`tree dp`,
-    `aho corasick`)는 parents 목록에서 먼저 나오는 부모의 체인에 속한다."""
+    `kadane's algorithm`)는 부모를 모두 쓴 뒤에 온다(`dynamic programming, greedy, kadane's algorithm`)."""
     parents_map = load_tag_parents()
     return _order(_expand(leaf_tags, parents_map), parents_map)

@@ -81,7 +81,7 @@ class Solution:
         return [x for x, _ in cnt.most_common(k)]
 ```
 
-`most_common`에 `k`를 넘겨 횟수 내림차순 상위 `k`개를 바로 얻었다. `k`를 넘기면 전체를 정렬하지 않고 힙으로 상위 `k`개만 뽑으므로 시간은 $O(n \log k)$이다.
+`most_common`에 `k`를 넘겨 횟수 내림차순 상위 `k`개를 바로 얻었다. `k`를 넘기면 전체를 정렬하지 않고 힙으로 상위 `k`개만 뽑으므로 시간은 $O(n \log k)$이다. 다만 $k$가 고유 원소 수에 가까우면 $O(n \log n)$과 다르지 않아 Follow-up은 만족하지 못한다.
 
 ---
 

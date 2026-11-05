@@ -2,7 +2,7 @@
 title: "[Codeforces] #2257A - Creating Abbreviations [C++]"
 date: 2026-09-01
 categories: [PS, Codeforces]
-tags: ["ad hoc", "string"]
+tags: ["string"]
 slug: codeforces-2257a
 media_subpath: /assets/img/posts/codeforces-2257a/
 math: true

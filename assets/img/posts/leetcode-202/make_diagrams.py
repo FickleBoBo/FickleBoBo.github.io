@@ -11,21 +11,19 @@ slow=blue, fast=red, 만남=green.
 사용법:
     python3 make_diagrams.py [출력 디렉토리]   # 기본: 이 스크립트가 있는 폴더
 
-`diagram.emit`이 정적 SVG도 같이 만들지만 본문은 GIF만 쓰므로 임시 폴더에 만든 뒤 GIF만 옮긴다.
-diagram.py(팔레트·헬퍼)를 바꾸면 결과가 달라진다. 다시 만들었다면 GIF를 눈으로 확인한 뒤 커밋한다.
+크기·글자·제목/단계/캡션 위치·전환 속도는 `diagram.py` 공용 틀(IMAGE_STYLE.md)을 따른다. 본문은 GIF만 쓰므로
+`emit(..., static=False)`로 SVG는 만들지 않는다. diagram.py를 바꾸면 결과가 달라지니 다시 만든 GIF는 눈으로 확인한 뒤 커밋한다.
 """
 
 import math
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
 REPO = HERE.parents[4]  # assets/img/posts/{slug}/ 기준 레포 루트
 sys.path.insert(0, str(REPO / ".claude" / "skills" / "_shared" / "image"))  # diagram.py
 
-from diagram import circle, emit, line, svg, text
+from diagram import CANVAS_W, caption, circle, emit, header, line, svg, text
 
 DEFAULT_OUT = HERE.parent
 R_NODE = 24
@@ -117,26 +115,16 @@ def make_draw(seq, positions, outward, edges, loops, n, total, verdict):
         else:
             body += tag(c, positions[s], outward[s], "slow", c["blue"])
             body += tag(c, positions[f], outward[f], "fast", c["red"])
-        body += text(16, 22, f"n = {n}", c["text"], 15, anchor="start", weight=700)
-        body += text(
-            16,
-            44,
-            f"{k} / {total}번째 반복" if k else "시작",
-            c["muted"],
-            13,
-            anchor="start",
-            mono=False,
-        )
-        if meet:
-            body += text(
-                W - 16,
-                22,
-                verdict,
-                c["green"],
-                14,
-                anchor="end",
-                mono=False,
-                weight=700,
+        body += header(c, f"n = {n}", k, total)
+        if k == 0:
+            body += caption(c, H - 22, "시작: slow는 n, fast는 step(n)에서 출발한다")
+        elif meet:
+            body += caption(
+                c, H - 22, f"{k}번째 반복에 만난다. {verdict}", c["green"], 700
+            )
+        else:
+            body += caption(
+                c, H - 22, f"{k}번째 반복: slow는 한 칸, fast는 두 칸 이동한다"
             )
         return svg(W, H, body, c, solid_bg)
 
@@ -152,8 +140,8 @@ def build_unhappy(n=2):
         x = step(x)
     tail, ring = seen[: seen.index(x)], seen[seen.index(x) :]
     assert tail == [2] and len(ring) == 8, (tail, ring)
-    W, H = 620, 400
-    cx, cy, R = 400, 215, 130
+    W, H = CANVAS_W, 400
+    cx, cy, R = 375, 205, 112
     pos, out = {"_size": (W, H)}, {}
     for i, v in enumerate(ring):
         th = math.pi + i * math.pi / 4  # 왼쪽에서 시작해 시계 방향
@@ -186,10 +174,10 @@ def build_happy(n=19):
         seq.append(x)
         x = step(x)
     assert seq[-1] == 1 and x == 1
-    W, H = 620, 210
+    W, H = CANVAS_W, 224
     pos, out = {"_size": (W, H)}, {}
     for i, v in enumerate(seq):
-        pos[v] = (60 + i * 125, 125)
+        pos[v] = (42 + i * 110, 125)
         out[v] = (0, 1)
     edges = [(seq[i], seq[i + 1]) for i in range(len(seq) - 1)]
     assert frames[-1][0] == 1
@@ -202,17 +190,12 @@ def build_happy(n=19):
 def main(out_dir):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp:
-        for name, (draw, frames) in {
-            "floyd-unhappy": build_unhappy(),
-            "floyd-happy": build_happy(),
-        }.items():
-            print(name, [f for _, f in frames])
-            emit(tmp, name, draw, frames)
-            for mode in ("light", "dark"):
-                shutil.copy2(
-                    Path(tmp) / f"{name}-{mode}.gif", out_dir / f"{name}-{mode}.gif"
-                )
+    for name, (draw, frames) in {
+        "floyd-unhappy": build_unhappy(),
+        "floyd-happy": build_happy(),
+    }.items():
+        print(name, [f for _, f in frames])
+        emit(out_dir, name, draw, frames, static=False)
     print("→", out_dir)
 
 

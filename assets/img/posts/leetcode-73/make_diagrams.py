@@ -19,8 +19,7 @@ Python 코드 블록(풀이 2)을 실제로 돌린 결과와 같은지 assert로
 (포스트 코드는 안쪽 칸마다 표시를 확인하지만 같은 결과다. 무작위 입력으로 같음을 확인했다).
 정보를 줄이려고 행·열 번호와 원래 있던 0의 별도 표시는 두지 않았다.
 
-전환 시간: 프레임마다 FRAME_MS, 마지막 프레임 LAST_MS(IMAGE_STYLE.md 기본 1초·2.2초보다 느리게).
-`diagram.emit`은 마지막 프레임 시간을 못 바꾸므로 `raster`·`save_gif`를 직접 쓴다.
+전환 시간·크기·글자·제목/단계/범례/캡션 위치는 `diagram.py` 공용 틀(IMAGE_STYLE.md)을 따른다.
 
 사용법:
     python3 make_diagrams.py [출력 디렉토리]   # 기본: 이 스크립트가 있는 폴더
@@ -37,7 +36,25 @@ HERE = Path(__file__).resolve()
 REPO = HERE.parents[4]  # assets/img/posts/{slug}/ 기준 레포 루트
 sys.path.insert(0, str(REPO / ".claude" / "skills" / "_shared" / "image"))  # diagram.py
 
-from diagram import THEMES, raster, rect, save_gif, svg, text
+from diagram import (
+    FS_CELL,
+    GAP,
+    CELL_H,
+    CELL_W,
+    ROW,
+    caption,
+    cell_xy,
+    emit,
+    grid_bottom,
+    grid_x0,
+    header,
+    legend,
+    rect,
+    svg,
+    CANVAS_W,
+    MARGIN,
+    text,
+)
 
 DEFAULT_OUT = HERE.parent
 MATRIX = [
@@ -46,14 +63,10 @@ MATRIX = [
     [1, 1, 1, 1, 1],
     [1, 1, 0, 1, 1],
 ]
-FRAME_MS, LAST_MS = 2000, 3500
-CELL_W, CELL_H, GAP = 92, 60, 8
-X0, Y0 = 34, 52
-W = 2 * X0 + 5 * CELL_W + 4 * GAP
-GRID_BOTTOM = Y0 + 4 * CELL_H + 3 * GAP
-FLAG_Y = GRID_BOTTOM + 36
-LEGEND_Y = FLAG_Y + 36
-CAPTION_Y = LEGEND_Y + 40
+R_, C_ = len(MATRIX), len(MATRIX[0])
+FLAG_Y = grid_bottom(R_) + ROW
+LEGEND_Y = FLAG_Y + ROW
+CAPTION_Y = LEGEND_Y + ROW + 6
 H = CAPTION_Y + 22
 
 
@@ -224,10 +237,6 @@ def post_solution_result(matrix):
     return None
 
 
-def cell_xy(i, j):
-    return X0 + j * (CELL_W + GAP), Y0 + i * (CELL_H + GAP)
-
-
 def cell_style(c, frame, i, j):
     pos = (i, j)
     if pos in frame["read"]:
@@ -242,22 +251,13 @@ def cell_style(c, frame, i, j):
 
 
 def make_draw(total):
-    R, C = len(MATRIX), len(MATRIX[0])
+    R, C = R_, C_
 
     def draw(c, frame, solid_bg):
-        body = text(
-            16,
-            24,
-            f"{frame['step']} / {total}단계" if frame["step"] else "시작",
-            c["text"],
-            17,
-            anchor="start",
-            mono=False,
-            weight=700,
-        )
+        body = header(c, f"{R}×{C} 행렬", frame["step"], total)
         for i in range(R):
             for j in range(C):
-                x, y = cell_xy(i, j)
+                x, y = cell_xy(i, j, C)
                 fill, stroke, sw = cell_style(c, frame, i, j)
                 body += rect(x, y, CELL_W, CELL_H, fill, stroke, sw)
                 v = frame["grid"][i][j]
@@ -266,7 +266,7 @@ def make_draw(total):
                     y + CELL_H / 2,
                     v,
                     c["text"],
-                    24,
+                    FS_CELL,
                     weight=700 if v == 0 else 500,
                 )
         if frame["outline"]:  # 지금 훑거나 처리하는 행·열을 윤곽선으로 보인다
@@ -274,19 +274,26 @@ def make_draw(total):
             gw = C * CELL_W + (C - 1) * GAP
             gh = R * CELL_H + (R - 1) * GAP
             if kind == "row":
-                _, y = cell_xy(k, 0)
+                _, y = cell_xy(k, 0, C)
                 body += rect(
-                    X0 - 7, y - 7, gw + 14, CELL_H + 14, "none", c["ink"], 2.5, 12
+                    grid_x0(C) - 7,
+                    y - 7,
+                    gw + 14,
+                    CELL_H + 14,
+                    "none",
+                    c["ink"],
+                    2.5,
+                    12,
                 )
             else:
-                x, _ = cell_xy(0, k)
+                x, y0 = cell_xy(0, k, C)
                 body += rect(
-                    x - 7, Y0 - 7, CELL_W + 14, gh + 14, "none", c["ink"], 2.5, 12
+                    x - 7, y0 - 7, CELL_W + 14, gh + 14, "none", c["ink"], 2.5, 12
                 )
-        # 기억한 값(첫 행·열에 원래 0이 있었는지). 기억하기 전 프레임에는 그리지 않는다
+        # 상태 줄: 기억한 값(첫 행·열에 원래 0이 있었는지). 기억하기 전 프레임에는 그리지 않는다
         flags = [
-            ("fr", "첫 행에 0", frame["fr"], X0),
-            ("fc", "첫 열에 0", frame["fc"], X0 + 290),
+            ("fr", "첫 행에 0", frame["fr"], MARGIN),
+            ("fc", "첫 열에 0", frame["fc"], MARGIN + 290),
         ]
         for key, label, flag, x in flags:
             if flag is None:
@@ -312,28 +319,24 @@ def make_draw(total):
                     mono=False,
                     weight=700,
                 )
-        # 범례
-        legend = [
-            (c["blue_t"], c["blue"], 3, "읽는 칸"),
-            (c["orange_t"], c["orange"], 3, "표시 칸"),
-            (c["green_t"], c["green"], 3, "0이 된 칸"),
-        ]
-        for k, (fill, stroke, sw, label) in enumerate(legend):
-            x = X0 + k * 150
-            body += rect(x, LEGEND_Y - 9, 18, 18, fill, stroke, sw, rx=3)
-            body += text(
-                x + 28, LEGEND_Y, label, c["text"], 15, anchor="start", mono=False
-            )
-        body += text(
-            16,
+        body += legend(
+            c,
+            [
+                (c["blue_t"], c["blue"], 3, "읽는 칸"),
+                (c["orange_t"], c["orange"], 3, "표시 칸"),
+                (c["green_t"], c["green"], 3, "0이 된 칸"),
+            ],
+            LEGEND_Y,
+        )
+        last = frame["step"] == total
+        body += caption(
+            c,
             CAPTION_Y,
             frame["caption"],
-            c["text"],
-            16,
-            anchor="start",
-            mono=False,
+            c["green"] if last else None,
+            700 if last else 500,
         )
-        return svg(W, H, body, c, solid_bg)
+        return svg(CANVAS_W, H, body, c, solid_bg)
 
     return draw
 
@@ -362,15 +365,7 @@ def main(out_dir):
             "new",
             sorted(f["new"]),
         )
-    draw = make_draw(len(frames) - 1)
-    for mode, c in THEMES.items():
-        images = [raster(draw(c, f, True)) for f in frames]
-        save_gif(
-            images,
-            out_dir / f"first-rowcol-{mode}.gif",
-            ms=FRAME_MS,
-            last_ms=LAST_MS,
-        )
+    emit(out_dir, "first-rowcol", make_draw(len(frames) - 1), frames, static=False)
     print("→", out_dir)
 
 

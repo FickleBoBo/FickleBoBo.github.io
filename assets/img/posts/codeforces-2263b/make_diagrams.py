@@ -22,13 +22,25 @@ HERE = Path(__file__).resolve()
 REPO = HERE.parents[4]  # assets/img/posts/{slug}/ 기준 레포 루트
 sys.path.insert(0, str(REPO / ".claude" / "skills" / "_shared" / "image"))  # diagram.py
 
-from diagram import emit, rect, svg, text
+from diagram import (
+    CANVAS_W,
+    CELL_H,
+    CELL_W,
+    FS_CELL,
+    LEGEND_ROW,
+    ROW,
+    caption,
+    cell_xy,
+    emit,
+    grid_bottom,
+    header,
+    legend,
+    rect,
+    svg,
+    text,
+)
 
 DEFAULT_OUT = HERE.parent
-CELL_W, CELL_H, GAP = 96, 62, 6
-W = 560
-GX = (W - (5 * CELL_W + 4 * GAP)) // 2  # n = 5 기준 가운데 정렬
-GY = 58
 LABEL = {"both": "행·열", "col": "열", "row": "행"}
 
 
@@ -84,82 +96,51 @@ def style(c, r):
 
 
 def make_draw(a, role, row_vals, col_vals, n, k, m):
-    grid_h = n * CELL_H + (n - 1) * GAP
-    legend_y = GY + grid_h + 30
-    sum_y = legend_y + 2 * 34 + 22
-    H = sum_y + 3 * 28 + 14
+    legend_y = grid_bottom(n) + ROW
+    sum_y = legend_y + LEGEND_ROW + ROW
+    H = sum_y + 2 * LEGEND_ROW + 22
 
     def join(v):
         return ", ".join(map(str, v))
 
     def draw(c, _frame, solid_bg):
-        body = text(
-            GX,
-            26,
-            f"n = {n}, k = {k}  (겹침 m = {m})",
-            c["text"],
-            17,
-            anchor="start",
-            weight=700,
-        )
+        body = header(c, f"n = {n}, k = {k}  (겹침 m = {m})")
         for i in range(n):
             for j in range(n):
-                x = GX + j * (CELL_W + GAP)
-                y = GY + i * (CELL_H + GAP)
+                x, y = cell_xy(i, j, n)
                 r = role[(i, j)]
                 fill, stroke, sw, tc = style(c, r)
                 body += rect(x, y, CELL_W, CELL_H, fill, stroke, sw)
                 cx, cy = x + CELL_W / 2, y + CELL_H / 2
                 if r:
-                    body += text(cx, cy - 8, a[i][j], tc, 22, weight=700)
-                    body += text(cx, cy + 17, LABEL[r], tc, 15, mono=False, weight=600)
+                    body += text(cx, cy - 9, a[i][j], tc, FS_CELL, weight=700)
+                    body += text(cx, cy + 16, LABEL[r], tc, 15, mono=False, weight=600)
                 else:
-                    body += text(cx, cy, a[i][j], tc, 20)
+                    body += text(cx, cy, a[i][j], tc, FS_CELL)
         items = [
             ("both", "행과 열의 최솟값을 함께 맡는 칸"),
             ("col", "열의 최솟값만 맡는 칸"),
             ("row", "행의 최솟값만 맡는 칸"),
             ("", "더 큰 수로 채운 칸"),
         ]
-        for idx, (r, label) in enumerate(items):
-            col, row = idx % 2, idx // 2
-            lx = GX + col * 292
-            ly = legend_y + row * 34
-            fill, stroke, sw, _ = style(c, r)
-            body += rect(lx, ly, 24, 24, fill, stroke, sw, rx=5)
-            body += text(
-                lx + 34, ly + 12, label, c["text"], 15, anchor="start", mono=False
-            )
-        body += text(
-            GX,
-            sum_y,
-            f"행 최솟값: {join(row_vals)}",
-            c["text"],
-            16,
-            anchor="start",
-            mono=False,
-        )
-        body += text(
-            GX,
-            sum_y + 28,
-            f"열 최솟값: {join(col_vals)}",
-            c["text"],
-            16,
-            anchor="start",
-            mono=False,
+        body += legend(
+            c,
+            [(*style(c, r)[:3], label) for r, label in items],
+            legend_y,
+            cols=2,
+            col_w=262,
         )
         distinct = sorted(set(row_vals) | set(col_vals))
-        body += text(
-            GX,
-            sum_y + 56,
+        body += caption(c, sum_y, f"행 최솟값: {join(row_vals)}")
+        body += caption(c, sum_y + LEGEND_ROW, f"열 최솟값: {join(col_vals)}")
+        body += caption(
+            c,
+            sum_y + 2 * LEGEND_ROW,
             f"합치면 서로 다른 값이 {len(distinct)}개 = k",
             c["green"],
-            16,
-            anchor="start",
-            mono=False,
-            weight=700,
+            700,
         )
-        return svg(W, H, body, c, solid_bg)
+        return svg(CANVAS_W, H, body, c, solid_bg)
 
     return draw
 

@@ -64,6 +64,16 @@ THEMES = {
 SANS = "Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif"
 MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
 
+# ── 모든 도식이 같이 쓰는 틀(숫자의 정본, 설명은 IMAGE_STYLE.md `형태`·`형식`) ──
+CANVAS_W = 560  # 캔버스 폭
+MARGIN = 16  # 제목·단계·범례·캡션의 왼쪽 시작 x
+HEADER_H = 68  # 제목(y 24)·단계(y 46) 아래, 그림이 시작하는 y
+CELL_W, CELL_H, GAP = 92, 60, 8  # 격자 칸
+FS_TITLE, FS_STEP, FS_CAPTION, FS_LEGEND, FS_CELL = 16, 13, 15, 15, 24
+ROW = 34  # 그림 아래 상태 줄·범례·캡션 사이 세로 간격
+LEGEND_ROW = 28  # 범례 항목 줄 간격
+FRAME_MS, LAST_MS = 2000, 3500  # GIF: 프레임당, 마지막 프레임
+
 
 def esc(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -112,6 +122,55 @@ def pointer(cx, y, label, color):
     )
 
 
+def header(c, title, step=None, total=None, unit="단계"):
+    """제목(도식이 다루는 입력)과, GIF면 `k / N단계`(첫 프레임은 `시작`)를 왼쪽 위에 쓴다."""
+    out = text(MARGIN, 24, title, c["text"], FS_TITLE, anchor="start", weight=700)
+    if step is not None:
+        label = f"{step} / {total}{unit}" if step else "시작"
+        out += text(MARGIN, 46, label, c["muted"], FS_STEP, anchor="start", mono=False)
+    return out
+
+
+def caption(c, y, s, color=None, weight=500):
+    """그림 아래 한 줄 설명. 마지막 프레임·결론 줄은 color=c["green"], weight=700."""
+    return text(
+        MARGIN,
+        y,
+        s,
+        color or c["text"],
+        FS_CAPTION,
+        anchor="start",
+        mono=False,
+        weight=weight,
+    )
+
+
+def legend(c, items, y, cols=3, col_w=170):
+    """범례. items=[(채움, 윤곽, 윤곽 굵기, 라벨)]를 cols열로 y부터 배치한다(줄 간격 LEGEND_ROW)."""
+    out = ""
+    for k, (fill, stroke, sw, label) in enumerate(items):
+        x = MARGIN + (k % cols) * col_w
+        yy = y + (k // cols) * LEGEND_ROW
+        out += rect(x, yy - 9, 18, 18, fill, stroke, sw, rx=4)
+        out += text(x + 26, yy, label, c["text"], FS_LEGEND, anchor="start", mono=False)
+    return out
+
+
+def grid_x0(cols):
+    """칸 cols개를 가로 가운데에 놓는 왼쪽 x."""
+    return (CANVAS_W - (cols * CELL_W + (cols - 1) * GAP)) // 2
+
+
+def cell_xy(i, j, cols):
+    """격자 (i, j)칸의 왼쪽 위 좌표."""
+    return grid_x0(cols) + j * (CELL_W + GAP), HEADER_H + i * (CELL_H + GAP)
+
+
+def grid_bottom(rows):
+    """격자 rows줄의 아래 끝 y."""
+    return HEADER_H + rows * CELL_H + (rows - 1) * GAP
+
+
 def raster(svg_text, scale=2.5):
     p = subprocess.run(
         ["rsvg-convert", "-z", str(scale), "-f", "png"],
@@ -122,7 +181,7 @@ def raster(svg_text, scale=2.5):
     return Image.open(io.BytesIO(p.stdout)).convert("RGB")
 
 
-def save_gif(images, path, ms=1000, last_ms=2200):
+def save_gif(images, path, ms=FRAME_MS, last_ms=LAST_MS):
     q = [
         im.quantize(
             colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE
@@ -140,18 +199,33 @@ def save_gif(images, path, ms=1000, last_ms=2200):
     )
 
 
-def emit(out_dir, name, draw, frames, static_index=-1, gif=True, ms=1000):
-    """`{name}-light.svg`·`{name}-dark.svg`(정적, frames[static_index])와 gif=True면 `{name}-{mode}.gif`를 쓴다.
+def emit(
+    out_dir,
+    name,
+    draw,
+    frames,
+    static_index=-1,
+    gif=True,
+    static=True,
+    ms=FRAME_MS,
+    last_ms=LAST_MS,
+):
+    """`{name}-light|dark.svg`(정적, frames[static_index], static=True일 때)와 gif=True면 `{name}-{mode}.gif`를 쓴다.
+    static=False면 SVG 파일은 쓰지 않고 XML 검증만 한다(GIF만 쓰는 도식).
     draw(c, frame, solid_bg) -> svg 문자열."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     for mode, c in THEMES.items():
-        static = draw(c, frames[static_index], False)
-        ET.fromstring(static)  # XML 오류면 ParseError로 멈춘다(깨진 SVG를 쓰지 않는다)
-        (out / f"{name}-{mode}.svg").write_text(static)
+        svg_text = draw(c, frames[static_index], False)
+        ET.fromstring(
+            svg_text
+        )  # XML 오류면 ParseError로 멈춘다(깨진 SVG를 쓰지 않는다)
+        if static:
+            (out / f"{name}-{mode}.svg").write_text(svg_text)
         if gif and len(frames) > 1:
             save_gif(
                 [raster(draw(c, f, True)) for f in frames],
                 out / f"{name}-{mode}.gif",
                 ms=ms,
+                last_ms=last_ms,
             )

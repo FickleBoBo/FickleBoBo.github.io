@@ -15,7 +15,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_post.py YYYY-MM-DD
 - 이미 포스트/드래프트가 있는 문제(`_drafts`·`_posts`의 front matter `slug` 기준)는 건너뛴다. 같은 문제가 여러 날짜에 있으면 먼저 처리한 날짜(구간이면 더 최근 날짜)의 풀이가 채택된다. 스킵은 이 경우뿐이고 실패한 풀이(`_fail`로 끝나는 폴더)나 대상 저지가 아닌 폴더(`live_*` 등)는 폴더 식별 단계에서 에러(`실패한 풀이(_fail)`, `대상 저지 아님(접두사 …)`)로 보고된다.
 - 출력: `생성함: {경로}` / `스킵(이미 있음): {폴더명} — slug={slug}` / `에러({폴더명}): {예외}` + 총계 한 줄. **스킵한 항목은 사용 후 사용자에게 그대로 알린다.** 한 폴더의 에러는 그 폴더만 보고하고 계속한다. 판단은 얹지 않는다.
 - 폴더에 있는 소스 파일을 확장자로 판별해 전부 싣는다(저지별 언어는 검사하지 않는다). 브래킷 순서는 `[Java][C++][Python]`.
-- 제목·URL은 Programmers·BaekJoon은 문제 페이지의 `<title>`, LeetCode·Codeforces는 공개 API에서 읽는다.
+- 제목·URL은 Programmers·BaekJoon은 문제 페이지의 `<title>`, LeetCode는 GraphQL(원문과 같은 엔드포인트), Codeforces는 공개 API에서 읽는다. LeetCode가 Cloudflare 403으로 막히면 UA 위조 등 우회 없이 사용자 Chrome(claude-in-chrome)에서 조회해 그 값으로 `judge.leetcode.title_and_url`을 대체해 돌린다.
 - 미리보기: `bundle exec jekyll serve --drafts`.
 
 ## 스캐폴드 규칙 (코드에서 안 보이는 것)

@@ -43,9 +43,10 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트를 `.claude/skills/`�
 | Codeforces  | C++                 |
 
 - 3언어 저지도 특정 언어가 AC 불가·제출 불가·과하게 복잡해지면 그 언어만 사유 없이 비운다(C++ 큰 수 연산처럼). SQL 문제는 MySQL로 통일한다.
-- BaekJoon의 Python은 재오픈 이후 새로 푸는 문제부터 적용하고 기존 포스트에는 소급하지 않는다.
+- BaekJoon의 Python은 재오픈(2026-11-20) 이후 새로 푸는 문제부터 적용하고 기존 포스트에는 소급하지 않는다.
+- 저지를 나열·보고할 때는 BaekJoon → Programmers → LeetCode → Codeforces 순서로 쓴다(`judge.JUDGES`가 정본).
 - 저지는 위 4개가 전부이고 언어는 3개를 넘기지 않는다.
-- 버전: Java 21, C++20(Codeforces·LeetCode는 C++23), Python은 미정. 코드 설명을 검증할 때는 저지별 버전으로 컴파일·실행한다.
+- 버전: Java 21, C++20(LeetCode·Codeforces는 C++23), Python은 미정. 코드 설명을 검증할 때는 저지별 버전으로 컴파일·실행한다.
 
 ### 대회 후기 (별도 장르)
 

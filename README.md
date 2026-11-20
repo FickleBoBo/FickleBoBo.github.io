@@ -9,7 +9,7 @@
 
 ## 구성
 
-- **PS**: Programmers, LeetCode, Codeforces, BaekJoon 문제 풀이. 아이디어와 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다. Codeforces는 C++만, SQL 문제는 MySQL을 쓴다.
+- **PS**: BaekJoon, Programmers, LeetCode, Codeforces 문제 풀이. 아이디어와 언어별 코드(Java, C++, Python)로 이루어진 고정 구조다. Codeforces는 C++만, SQL 문제는 MySQL을 쓴다.
 - **Contest**: Codeforces 대회 후기. 성적·순위·레이팅 변동과 문제별 풀이를 담는다.
 
 ## PS 자동화 파이프라인
@@ -36,7 +36,7 @@ ps → review-code → write-post → review-post → tag → publish
 ## 저장소 구조
 
 ```text
-_posts/          발행된 포스트 (programmers, leetcode, codeforces, baekjoon, contest)
+_posts/          발행된 포스트 (baekjoon, programmers, leetcode, codeforces, contest)
 _drafts/         작성 중인 포스트
 _tabs/           About, Archives, Categories, Tags 페이지
 _data/          사이트 데이터 (연락처, 공유 링크)

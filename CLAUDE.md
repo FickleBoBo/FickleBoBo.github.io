@@ -12,6 +12,7 @@ Chirpy 테마 Jekyll 블로그. PS 문제풀이 포스트를 `.claude/skills/`�
 
 - 로컬 실행: `bundle exec jekyll serve -l`(초안 포함 `--drafts`), http://127.0.0.1:4000
 - 포스트 린트: `python3 .claude/skills/_shared/lint_post.py <포스트 경로>`(이슈가 있으면 종료 코드 1, 결과이지 실패가 아니다)
+- solved.ac 공식 API(v4): 백준 원문에 난이도·태그를 붙인다(`_shared/solvedac.py`). 앱 키는 셸 프로필의 환경변수 `SOLVEDAC_CLIENT_ID`·`SOLVEDAC_CLIENT_SECRET`으로만 두고 레포에 넣지 않는다. 없으면 `난이도: 미확인`으로 진행한다.
 - 포매팅: md·yaml은 Prettier, Python은 Ruff. 둘 다 CLI가 PATH에 없어 VS Code 확장 번들을 쓴다. Ruff는 기본값이라 긴 한글 줄(E501)과 `sys.path` 선삽입(E402)이 남는 것이 정상이다.
 
 ## 워크플로우

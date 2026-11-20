@@ -14,6 +14,7 @@
 
 from . import baekjoon, codeforces, leetcode, programmers
 
+# 순서는 사용자가 정한 표시·보고 순서(백준 → 프로그래머스 → 리트코드 → 코드포스)다. 바꾸지 않는다.
 JUDGES = (baekjoon, programmers, leetcode, codeforces)
 
 

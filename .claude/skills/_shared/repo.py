@@ -23,7 +23,8 @@ PREFIX_OF_PLATFORM = {v.lower(): k for k, v in PLATFORM_MAP.items()}
 
 # `_drafts/`·`_posts/` 아래 PS 플랫폼 서브폴더 이름. 스킬의 스캔 범위는 이것으로 한정
 # 한다(PS가 아닌 폴더·양식의 포스트는 자동으로 범위 밖).
-PLATFORM_DIRS = sorted(PREFIX_OF_PLATFORM)
+# 순서는 `JUDGES`(백준·프로그래머스·리트코드·코드포스)를 따른다 — 일괄 스캔·보고가 이 순서로 나온다
+PLATFORM_DIRS = [j.PLATFORM.lower() for j in JUDGES]
 
 # 파일명 금지 문자 -> 육안 구별 어려운 유니코드 대체
 # 주의: 이 치환은 파일명에만 적용. front matter의 title은 원문 그대로 씀.

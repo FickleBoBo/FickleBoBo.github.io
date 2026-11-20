@@ -43,7 +43,7 @@ tags:
   shortest path: { parents: [graph] }
   dijkstra: { parents: [shortest path] }
   bellman ford: { parents: [shortest path] }
-  floyd warshall: { parents: [shortest path] }
+  floyd warshall: { parents: [shortest path, dynamic programming] } # 다중부모
   spfa: { parents: [shortest path] }
   "0-1 bfs": { parents: [bfs, shortest path] } # 다중부모
   mst: { parents: [graph] }

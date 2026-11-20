@@ -11,6 +11,7 @@
   (3000+)의 "첫 글자 검정"은 미구현(이 핸들이 도달할 일이 수년간 없음).
 - **스켈레톤이 남기는 미완 표식**(`LIVE_CODE_PLACEHOLDER`·`RATING_PLACEHOLDER`)은
   `publish_contest.py`의 완료 게이트가 그대로 검사한다 — 문구를 바꾸면 게이트도 같은 상수를 쓴다.
+  라이브 코드는 PS 레포에 있으면 스캐폴드가 자리표시자 대신 넣고(`live_code`), 없는 문제만 표식이 남는다.
 """
 
 import re
@@ -206,7 +207,9 @@ def build_progress_table(by_index, problems, contest_id):
     return "\n".join(body)
 
 
-def build_problem_subsection(by_index, p, contest_id):
+def build_problem_subsection(by_index, p, contest_id, live_code=None):
+    """`live_code`: {index: 코드}. 그 문제의 코드가 있으면 자리표시자 대신 넣는다(없으면 자리표시자
+    유지 — 발행 게이트가 막아 준다). 코드에 ``` 가 있으면 펜스가 깨지므로 넣지 않는다."""
     idx, name = p["index"], p["name"]
     result = by_index[idx]["result"]
     head = f"### {idx}. {name}"
@@ -214,7 +217,10 @@ def build_problem_subsection(by_index, p, contest_id):
     if result == "미시도":
         return f"{head}\n\n대회 중 미시도."
 
-    parts = [head, "", "```c++", LIVE_CODE_PLACEHOLDER, "```"]
+    code = (live_code or {}).get(idx)
+    if code is None or "```" in code:
+        code = LIVE_CODE_PLACEHOLDER
+    parts = [head, "", "```c++", code, "```"]
     # AC·업솔빙은 어차피 나중에 풀이 포스트를 만들 것이므로 실재 여부를 안 따지고
     # 무조건 링크를 단다(대회 직후엔 아직 _drafts/에도 없는 게 정상). 미해결은
     # 포스트가 생길 보장이 없으니 실재할 때만(has_solution_post) 예외적으로 단다.
@@ -240,6 +246,7 @@ def build_body(
     penalty,
     rank_count,
     mine,
+    live_code=None,
 ):
     preamble = "\n".join(
         [
@@ -252,7 +259,10 @@ def build_body(
         build_overview(contest, problems, start_kst, participation),
         build_result(by_index, problems, penalty, rank_count, mine),
         build_progress_table(by_index, problems, contest_id),
-        *[build_problem_subsection(by_index, p, contest_id) for p in problems],
+        *[
+            build_problem_subsection(by_index, p, contest_id, live_code)
+            for p in problems
+        ],
         "## 총평",
     ]
     return "\n\n".join([preamble] + [f"---\n\n{s}" for s in sections] + ["---"])

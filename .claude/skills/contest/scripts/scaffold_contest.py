@@ -34,6 +34,7 @@ from contest_common import (
     CONTEST_DRAFTS_DIR,
     CONTEST_POSTS_DIR,
     find_posts_by_slug,
+    load_live_code,
     parse_contest_id,
 )
 from post_text import front_matter_block
@@ -137,7 +138,7 @@ def card_only(contest_id):
     return posts[0]
 
 
-def print_summary(contest_id, data, assets_dir, card):
+def print_summary(contest_id, data, assets_dir, card, live_code):
     """stderr 요약 — 눈 대조용(순위·레이팅은 CF 페이지끼리도 다르므로)."""
     by_index, mine = data["by_index"], data["mine"]
     ac = [i for i, v in by_index.items() if v["result"] == "AC"]
@@ -157,6 +158,14 @@ def print_summary(contest_id, data, assets_dir, card):
         )
     else:
         out("  ratingChanges에 핸들 없음 — 순위·레이팅 placeholder로 남김")
+    placed = [p["index"] for p in data["problems"] if p["index"] in live_code]
+    out(f"  라이브 코드 삽입: {', '.join(placed) or '없음'}")
+    for p in data["problems"]:
+        idx = p["index"]
+        if idx in live_code and by_index[idx]["result"] == "미시도":
+            out(
+                f"  ⚠ {idx}는 제출이 없어 미시도인데 live 코드가 있음 — 본문엔 넣지 않았음"
+            )
     out(f"  ⚠ 발행 전 /contest/{contest_id}/standings 페이지에서 페널티·순위 눈 대조")
     out(f"  레이팅 그래프 자리: {assets_dir}/rating-graph.png")
     if card:
@@ -197,6 +206,7 @@ def scaffold(contest_id, force):
         build_description(data["problems"], data["by_index"], data["mine"]),
         has_card=bool(card),
     )
+    live_code = load_live_code(contest_id)
     body = build_body(
         contest,
         contest_id,
@@ -207,13 +217,14 @@ def scaffold(contest_id, force):
         data["penalty"],
         data["rank_count"],
         data["mine"],
+        live_code,
     )
 
     os.makedirs(CONTEST_DRAFTS_DIR, exist_ok=True)
     with open(target, "w", encoding="utf-8") as f:
         f.write(f"{front_matter}\n\n{body}\n")
 
-    print_summary(contest_id, data, assets_dir, card)
+    print_summary(contest_id, data, assets_dir, card, live_code)
     return target
 
 

@@ -6,7 +6,7 @@ PS 레포 양쪽에 같은 메시지(`feat: [Contest] {CF API 대회명} 후기`
 - 완료 게이트는 `## 1. 아이디어` 대신 스캐폴드가 남기는 미완 표식과 `## 총평`을 본다
   (`not_ready_reason`). 서술의 질은 사람 몫이라 검사하지 않는다.
 - PS 레포 소스가 1:N이다. 대회날 `day_XX`에 문제별로 생긴 `live_{contestId}{index}` 폴더 전부를
-  커밋한다. 패턴(`_live_folder_re`)은 실제 관측된 레이아웃만 매칭하므로 폴더 구조가 바뀌면 손볼 것.
+  커밋한다. 탐색은 `contest_common.discover_live_folders`(스캐폴드와 공유)다.
 - 폴더를 하나도 못 찾으면 블로그 레포를 건드리기 전에 에러로 끝낸다.
 
 사용법:
@@ -26,18 +26,14 @@ sys.path.insert(
 from contest_common import (
     CONTEST_DRAFTS_DIR,
     CONTEST_POSTS_DIR,
+    discover_live_folders,
     find_posts_by_slug,
     parse_contest_id,
 )
 from git_ops import move_and_commit
 from post_text import extract_title, read_front_matter
 from recap_body import LIVE_CODE_PLACEHOLDER, RATING_PLACEHOLDER
-from repo import PS_REPO, REPO_ROOT
-
-
-def _live_folder_re(contest_id):
-    """live_{contestId}{index}[...] — index는 알파벳 한 글자로 시작(live_22590 같은 다른 대회 오매칭 방지)."""
-    return re.compile(rf"^live_{re.escape(contest_id)}[A-Za-z]\w*$")
+from repo import REPO_ROOT
 
 
 def resolve_draft(arg):
@@ -59,27 +55,6 @@ def resolve_draft(arg):
     if len(matches) > 1:
         raise ValueError(f"slug={slug} 후기가 여러 개: {matches}")
     return matches[0]
-
-
-def discover_live_folders(contest_id):
-    """PS 레포에서 그 대회의 live_{contestId}{index} 폴더 전부(경로순)."""
-    if not os.path.isdir(PS_REPO):
-        raise ValueError(f"PS 레포가 없음: {PS_REPO}")
-    pat = _live_folder_re(contest_id)
-    found = []
-    for year_month in sorted(os.listdir(PS_REPO)):
-        src = os.path.join(PS_REPO, year_month, "src")
-        if not os.path.isdir(src):
-            continue
-        for day in sorted(os.listdir(src)):
-            day_dir = os.path.join(src, day)
-            if not os.path.isdir(day_dir):
-                continue
-            for entry in sorted(os.listdir(day_dir)):
-                full = os.path.join(day_dir, entry)
-                if pat.match(entry) and os.path.isdir(full):
-                    found.append(full)
-    return found
 
 
 def not_ready_reason(text, slug):

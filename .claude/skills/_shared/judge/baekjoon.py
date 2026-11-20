@@ -2,12 +2,17 @@
 
 원문은 라이브 페이지가 먼저이고, 페이지를 못 읽을 때(사이트 중단·차단)만 iCloud 크롤링 미러 JSON으로
 떨어진다. 미러는 재오픈 이전 스냅샷이라 새 문제·정정된 지문은 라이브만 정확하다.
+
+원문에는 solved.ac 공식 API로 읽은 `- 난이도: ... / 태그: ...` 줄이 `- 확보:` 줄 뒤에 붙는다
+(`solvedac.py`, 키 환경변수 필요). 못 읽으면 `미확인` 줄이 붙고 원문 확보는 계속된다.
 """
 
 import html
 import json
 import os
 import re
+
+import solvedac
 
 from . import net
 from .html_text import html_to_text
@@ -92,6 +97,21 @@ def statement(url):
     if not m:
         raise ValueError(f"URL에서 문제 번호를 못 찾음: {url[:80]}")
     number = m.group(1)
+    return _with_difficulty(number, _statement_body(number))
+
+
+def _with_difficulty(number, text):
+    """`- 확보:` 줄 바로 뒤에 solved.ac 난이도·태그 줄을 넣는다(없으면 맨 앞 헤더 뒤)."""
+    line = solvedac.difficulty_line(number)
+    if "미확인" in line:
+        print(f"  ⚠ {line}")
+    lines = text.split("\n")
+    at = next((i for i, ln in enumerate(lines) if ln.startswith("- 확보:")), 0)
+    lines.insert(at + 1, line)
+    return "\n".join(lines)
+
+
+def _statement_body(number):
     try:
         text = _live_statement(number, f"https://www.acmicpc.net/problem/{number}")
         text = text.replace("[이미지: /", "[이미지: https://www.acmicpc.net/")

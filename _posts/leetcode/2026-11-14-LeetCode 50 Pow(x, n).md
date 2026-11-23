@@ -41,7 +41,6 @@ class Solution {
             a *= a;
             n >>= 1;
         }
-
         return res;
     }
 }
@@ -62,7 +61,6 @@ class Solution {
             a *= a;
             n >>= 1;
         }
-
         return res;
     }
 
@@ -87,7 +85,6 @@ class Solution:
                 res *= a
             a *= a
             n >>= 1
-
         return res
 
     def myPow(self, x: float, n: int) -> float:

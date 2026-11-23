@@ -32,10 +32,8 @@ class Solution {
 
     static int binarySearch(int[] arr, int target) {
         int lo = 0, hi = arr.length - 1;
-
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
-
             if (arr[mid] < target) {
                 lo = mid + 1;
             } else if (arr[mid] > target) {
@@ -44,7 +42,6 @@ class Solution {
                 return mid;
             }
         }
-
         return -1;
     }
 }
@@ -58,10 +55,8 @@ class Solution {
    public:
     int bin_search(vector<int>& v, int target) {
         int lo = 0, hi = v.size() - 1;
-
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
-
             if (v[mid] < target) {
                 lo = mid + 1;
             } else if (v[mid] > target) {
@@ -70,7 +65,6 @@ class Solution {
                 return mid;
             }
         }
-
         return -1;
     }
 
@@ -84,17 +78,14 @@ class Solution {
 class Solution:
     def binary_search(self, nums, target):
         lo, hi = 0, len(nums) - 1
-
         while lo <= hi:
             mid = lo + (hi - lo) // 2
-
             if nums[mid] < target:
                 lo = mid + 1
             elif nums[mid] > target:
                 hi = mid - 1
             else:
                 return mid
-
         return -1
 
     def search(self, nums: list[int], target: int) -> int:

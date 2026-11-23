@@ -154,6 +154,7 @@ tags:
   bit manipulation: { parents: [] }
   bitmask: { parents: [bit manipulation] }
   backtracking: { parents: [] }
+  recursion: { parents: [] }
   meet in the middle: { parents: [] }
   brute force: { parents: [] }
   greedy: { parents: [] }

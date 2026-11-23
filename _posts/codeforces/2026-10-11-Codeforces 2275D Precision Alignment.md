@@ -45,7 +45,6 @@ long long upper_bound_param(int n, long long k, vector<long long>& sum, vector<l
     long long hi = lo + k + 1;
     while (lo < hi) {
         long long mid = lo + (hi - lo) / 2;
-
         long long need = 0;
         for (int i = 0; i < n && need <= k; i++) {
             if (sum[i] < mid) need += cost[i] + (mid - sum[i]);

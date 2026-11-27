@@ -28,13 +28,13 @@ $x$의 $n$제곱을 구하는 문제로, $n$이 최대 약 21억이라 $n$번 �
 class Solution {
     public double myPow(double x, int n) {
         if (n >= 0) {
-            return binpow(x, n);
+            return binPow(x, n);
         } else {
-            return 1 / binpow(x, -(long) n);
+            return 1 / binPow(x, -(long) n);
         }
     }
 
-    static double binpow(double a, long n) {
+    static double binPow(double a, long n) {
         double res = 1;
         while (n > 0) {
             if ((n & 1) > 0) res *= a;
@@ -54,7 +54,7 @@ using namespace std;
 
 class Solution {
    public:
-    double binpow(double a, long long n) {
+    double binPow(double a, long long n) {
         double res = 1;
         while (n > 0) {
             if (n & 1) res *= a;
@@ -66,9 +66,9 @@ class Solution {
 
     double myPow(double x, int n) {
         if (n >= 0) {
-            return binpow(x, n);
+            return binPow(x, n);
         } else {
-            return 1 / binpow(x, -1LL * n);
+            return 1 / binPow(x, -1LL * n);
         }
     }
 };
@@ -78,7 +78,7 @@ class Solution {
 
 ```python
 class Solution:
-    def binpow(self, a, n):
+    def bin_pow(self, a, n):
         res = 1
         while n > 0:
             if n & 1:
@@ -89,9 +89,9 @@ class Solution:
 
     def myPow(self, x: float, n: int) -> float:
         if n >= 0:
-            return self.binpow(x, n)
+            return self.bin_pow(x, n)
         else:
-            return 1 / self.binpow(x, -n)
+            return 1 / self.bin_pow(x, -n)
 ```
 
 ---

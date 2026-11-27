@@ -59,7 +59,7 @@ using namespace std;
 
 class Solution {
    public:
-    int rob_range(vector<int>& nums, int l, int r) {
+    int robRange(vector<int>& nums, int l, int r) {
         int n = nums.size();
         vector<int> dp(1 + n);
 
@@ -73,8 +73,8 @@ class Solution {
         int n = nums.size();
         if (n == 1) return nums[0];
 
-        int case1 = rob_range(nums, 1, n - 1);
-        int case2 = rob_range(nums, 2, n);
+        int case1 = robRange(nums, 1, n - 1);
+        int case2 = robRange(nums, 2, n);
         return max(case1, case2);
     }
 };

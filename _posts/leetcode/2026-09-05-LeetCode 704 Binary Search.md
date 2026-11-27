@@ -53,7 +53,7 @@ using namespace std;
 
 class Solution {
    public:
-    int bin_search(vector<int>& v, int target) {
+    int binarySearch(vector<int>& v, int target) {
         int lo = 0, hi = v.size() - 1;
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
@@ -69,7 +69,7 @@ class Solution {
     }
 
     int search(vector<int>& nums, int target) {
-        return bin_search(nums, target);
+        return binarySearch(nums, target);
     }
 };
 ```

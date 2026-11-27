@@ -133,18 +133,18 @@ class Solution {
         vector<vector<int>> buckets(1 + len);
         for (auto [x, c] : cnt) buckets[c].push_back(x);
 
-        vector<int> res;
+        vector<int> ans;
         for (int i = len; i > 0; i--) {
-            res.insert(res.end(), buckets[i].begin(), buckets[i].end());
+            ans.insert(ans.end(), buckets[i].begin(), buckets[i].end());
         }
-        res.resize(k);
+        ans.resize(k);
 
-        return res;
+        return ans;
     }
 };
 ```
 
-큰 횟수의 버킷부터 `res`에 이어 붙인 뒤 `resize(k)`로 앞의 `k`개만 남겼다.
+큰 횟수의 버킷부터 `ans`에 이어 붙인 뒤 `resize(k)`로 앞의 `k`개만 남겼다.
 
 ```python
 from collections import Counter

@@ -40,7 +40,7 @@ using namespace std;
 
 const long long INF = 1'000'000'000'000'000'000;
 
-long long upper_bound_param(int n, long long k, vector<long long>& sum, vector<long long>& cost) {
+long long upperBound(int n, long long k, vector<long long>& sum, vector<long long>& cost) {
     long long lo = *min_element(sum.begin(), sum.end());
     long long hi = lo + k + 1;
     while (lo < hi) {
@@ -78,7 +78,7 @@ void solve() {
         }
     }
 
-    cout << upper_bound_param(n, k, sum, cost) - 1 << '\n';
+    cout << upperBound(n, k, sum, cost) - 1 << '\n';
 }
 
 int main() {

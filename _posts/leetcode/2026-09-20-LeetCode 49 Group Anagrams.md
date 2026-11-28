@@ -31,13 +31,13 @@ class Solution {
     public List<List<String>> groupAnagrams(String[] strs) {
         Map<String, List<String>> map = new HashMap<>();
         for (String s : strs) {
-            map.computeIfAbsent(sort(s), k -> new ArrayList<>()).add(s);
+            map.computeIfAbsent(sortChars(s), k -> new ArrayList<>()).add(s);
         }
 
         return new ArrayList<>(map.values());
     }
 
-    static String sort(String s) {
+    static String sortChars(String s) {
         char[] arr = s.toCharArray();
         Arrays.sort(arr);
         return new String(arr);

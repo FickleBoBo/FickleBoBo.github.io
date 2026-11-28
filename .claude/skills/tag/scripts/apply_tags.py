@@ -1,9 +1,9 @@
 """
 `apply_tags.py <드래프트 .md> <leaf 태그> [<leaf 태그> ...]` — 확정된 leaf 태그를 드래프트 front matter의
-`tags:` 줄에 쓴다. 결정론적이고 LLM 판단 없음.
+`tags` 항목에 쓴다. 결정론적이고 LLM 판단 없음.
 
 leaf를 고르는 일은 `RULES.md`대로 에이전트 몫이고, 이 스크립트는 확정 뒤의 "조상 펼치기 → 정규 순서
-정렬 → `tags:` 줄 치환"만 한다(조상을 손으로 펼치다 빠뜨리는 실수 방지). 펼치기·정렬 규칙은
+정렬 → `tags` 치환"만 한다(조상을 손으로 펼치다 빠뜨리는 실수 방지). 펼치기·정렬 규칙은
 `_shared/tag_vocab.py`의 `canonical_tags`다. 어휘집에 없는 태그와, 판정 근거인 `## 1. 아이디어`가 비어
 있는 드래프트는 거부한다. 종료 코드: 적용하면 0, 거부되거나 에러면 1.
 """
@@ -22,7 +22,7 @@ from tag_vocab import canonical_tags
 
 
 def apply_tags(draft_path, leaf_tags):
-    """`tags:` 줄을 바꿔 쓰고 `기존 → 신규` 한 줄을 돌려준다."""
+    """`tags` 항목을 바꿔 쓰고 `기존 → 신규` 한 줄을 돌려준다."""
     with open(draft_path, encoding="utf-8") as f:
         text = f.read()
     if not idea_is_filled(text):

@@ -24,7 +24,7 @@ description: _drafts/의 PS 포스트에 태그를 판정해 추천하고, 확�
 
    `python3 ${CLAUDE_SKILL_DIR}/scripts/apply_tags.py <포스트 .md 경로> <leaf 태그> [<leaf 태그> ...]`
 
-   어휘집에 없는 태그는 거부되고, `tags:` 한 줄만 바뀐다.
+   어휘집에 없는 태그는 거부되고, `tags` 항목만 바뀐다(80자를 넘으면 Prettier가 두는 모양의 여러 줄).
 
 6. 적용 뒤 `python3 ${CLAUDE_SKILL_DIR}/../_shared/lint_post.py <포스트>`로 태그 이슈가 없는지 확인한다.
 

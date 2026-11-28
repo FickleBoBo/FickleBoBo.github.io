@@ -71,15 +71,9 @@ import sys
 input = sys.stdin.readline
 
 t = int(input())
-
-out = []
 for _ in range(t):
     x, y = map(int, input().split())
-    out.append(x + y)
-
-print("\n".join(map(str, out)))
+    print(x + y)
 ```
-
-`join`은 문자열만 이을 수 있어 `map(str, ...)`로 합을 문자열로 바꿨다.
 
 ---

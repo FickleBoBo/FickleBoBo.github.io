@@ -36,25 +36,37 @@ def yaml_scalar_value(front_matter_text, field):
     return raw
 
 
-_TAGS_LINE_RE = re.compile(r"^tags:[ \t]*\[(.*)\][ \t]*$", re.MULTILINE)
+# `tags: [...]` 배열. 80자를 넘으면 Prettier가 여러 줄로 나누므로 줄바꿈을 허용한다.
+_TAGS_RE = re.compile(r"^tags:\s*\[([^\]]*)\][ \t]*$", re.MULTILINE)
+_PRINT_WIDTH = 80  # Prettier 기본값
 
 
 def read_tags(front_matter_text):
-    """front matter의 `tags: ["a", "b"]` 한 줄 배열을 리스트로. 그 형태의 줄이 없으면 None."""
-    m = _TAGS_LINE_RE.search(front_matter_text)
+    """front matter의 `tags: ["a", "b"]` 배열(한 줄·여러 줄)을 리스트로. 그 형태가 없으면 None."""
+    m = _TAGS_RE.search(front_matter_text)
     if not m:
         return None
     return [t.strip().strip('"') for t in m.group(1).split(",") if t.strip()]
 
 
+def _format_tags(tags):
+    """Prettier가 두는 모양 그대로: 한 줄, 안 되면 다음 줄에 배열, 그것도 넘으면 태그마다 한 줄."""
+    array = json.dumps(tags, ensure_ascii=False)
+    if len(f"tags: {array}") <= _PRINT_WIDTH:
+        return f"tags: {array}"
+    if len(f"  {array}") <= _PRINT_WIDTH:
+        return f"tags:\n  {array}"
+    items = "".join(f"    {json.dumps(t, ensure_ascii=False)},\n" for t in tags)
+    return f"tags:\n  [\n{items}  ]"
+
+
 def replace_tags(post_text, tags):
-    """`tags:` 줄만 `tags` 배열로 바꾼 본문. 그 형태의 줄이 front matter에 없으면 ValueError."""
-    m = _TAGS_LINE_RE.search(front_matter_block(post_text))
+    """`tags` 항목만 새 배열로 바꾼 본문. front matter에 `tags: [...]`가 없으면 ValueError."""
+    m = _TAGS_RE.search(front_matter_block(post_text))
     if not m:
-        raise ValueError("front matter 안에서 `tags: [...]` 줄을 못 찾음")
+        raise ValueError("front matter 안에서 `tags: [...]`를 못 찾음")
     start = len("---\n") + m.start()  # front_matter_block은 여는 `---\n` 뒤부터다
-    new_line = "tags: " + json.dumps(tags, ensure_ascii=False)
-    return post_text[:start] + new_line + post_text[start + len(m.group(0)) :]
+    return post_text[:start] + _format_tags(tags) + post_text[start + len(m.group(0)) :]
 
 
 def read_front_matter(post_text):

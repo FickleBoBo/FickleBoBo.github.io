@@ -35,20 +35,20 @@ public class Main {
 
         int t = Integer.parseInt(br.readLine());
         while (t-- > 0) {
-            int ysum = 0;
-            int ksum = 0;
+            int ySum = 0;
+            int kSum = 0;
 
             for (int i = 0; i < 9; i++) {
                 StringTokenizer st = new StringTokenizer(br.readLine());
                 int y = Integer.parseInt(st.nextToken());
                 int k = Integer.parseInt(st.nextToken());
-                ysum += y;
-                ksum += k;
+                ySum += y;
+                kSum += k;
             }
 
-            if (ysum > ksum) {
+            if (ySum > kSum) {
                 bw.write("Yonsei\n");
-            } else if (ysum < ksum) {
+            } else if (ySum < kSum) {
                 bw.write("Korea\n");
             } else {
                 bw.write("Draw\n");
@@ -72,19 +72,19 @@ int main() {
     cin >> t;
 
     while (t--) {
-        int ysum = 0;
-        int ksum = 0;
+        int ySum = 0;
+        int kSum = 0;
 
         for (int i = 0; i < 9; i++) {
             int y, k;
             cin >> y >> k;
-            ysum += y;
-            ksum += k;
+            ySum += y;
+            kSum += k;
         }
 
-        if (ysum > ksum) {
+        if (ySum > kSum) {
             cout << "Yonsei\n";
-        } else if (ysum < ksum) {
+        } else if (ySum < kSum) {
             cout << "Korea\n";
         } else {
             cout << "Draw\n";
@@ -100,15 +100,15 @@ input = sys.stdin.readline
 
 t = int(input())
 for _ in range(t):
-    ysum, ksum = 0, 0
+    y_sum, k_sum = 0, 0
     for _ in range(9):
         y, k = map(int, input().split())
-        ysum += y
-        ksum += k
+        y_sum += y
+        k_sum += k
 
-    if ysum > ksum:
+    if y_sum > k_sum:
         print("Yonsei")
-    elif ysum < ksum:
+    elif y_sum < k_sum:
         print("Korea")
     else:
         print("Draw")
